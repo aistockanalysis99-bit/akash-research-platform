@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { ChevronDown, ChevronRight, Play, Save } from "lucide-react";
 import { api } from "@/lib/api";
@@ -122,6 +122,7 @@ const GROUPS: Group[] = [
 // ─── Page ────────────────────────────────────────────────────────────────────
 export default function BacktestPage() {
   const nav = useNavigate();
+  const qc = useQueryClient();
   const universes = useQuery({ queryKey: ["universes"], queryFn: api.universes });
   const presets   = useQuery({ queryKey: ["params"],    queryFn: api.params });
 
@@ -151,6 +152,9 @@ export default function BacktestPage() {
     setParams((p) => ({ ...p, [key]: val }));
   }
 
+  const [savePrompt, setSavePrompt] = useState(false);
+  const [saveName, setSaveName] = useState("");
+
   const run = useMutation({
     mutationFn: () => {
       if (!start || !end) throw new Error("Start and end dates are required");
@@ -165,6 +169,15 @@ export default function BacktestPage() {
       });
     },
     onSuccess: (r) => nav(`/runs/${r.run_id}`),
+  });
+
+  const savePreset = useMutation({
+    mutationFn: () => api.paramSave(saveName.trim(), params as Record<string, unknown>),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["params"] });
+      setSavePrompt(false);
+      setSaveName("");
+    },
   });
 
   return (
@@ -214,11 +227,40 @@ export default function BacktestPage() {
             ))}
           </div>
           <div className="flex-1" />
+          <Button variant="outline" onClick={() => setSavePrompt((v) => !v)} className="h-9">
+            <Save className="h-4 w-4" /> Save preset
+          </Button>
           <Button onClick={() => run.mutate()} disabled={run.isPending} className="h-9">
             <Play className="h-4 w-4" />
             {run.isPending ? "Launching…" : "Run backtest"}
           </Button>
         </div>
+
+        {/* Inline save prompt */}
+        {savePrompt && (
+          <div className="flex items-center gap-2 mt-3 pt-3 border-t border-line/50">
+            <span className="text-xs text-gray-400">Preset name:</span>
+            <input
+              className="bg-bg-soft border border-line rounded-lg px-3 py-1.5 text-sm w-48 focus:border-brand/50 outline-none"
+              placeholder="e.g. Conservative 5y"
+              value={saveName}
+              onChange={(e) => setSaveName(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && saveName.trim() && savePreset.mutate()}
+              autoFocus
+            />
+            <Button
+              onClick={() => savePreset.mutate()}
+              disabled={!saveName.trim() || savePreset.isPending}
+              className="h-8"
+            >
+              {savePreset.isPending ? "Saving…" : "Save"}
+            </Button>
+            <button onClick={() => setSavePrompt(false)} className="text-xs text-gray-500 hover:text-neg">cancel</button>
+            {savePreset.isSuccess && <span className="text-xs text-pos">Saved ✓</span>}
+            {savePreset.error && <span className="text-xs text-neg">{(savePreset.error as Error).message}</span>}
+          </div>
+        )}
+
         {run.error && <ErrorBox error={run.error} />}
       </Card>
 

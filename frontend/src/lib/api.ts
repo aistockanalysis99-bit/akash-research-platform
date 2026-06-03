@@ -198,4 +198,7 @@ export const api = {
   params: () => get<{ name: string; params: Record<string, unknown> }[]>("/params"),
   paramGet: (name: string) =>
     get<{ name: string; params: Record<string, unknown> }>(`/params/${name}`),
+  paramSave: (name: string, params: Record<string, unknown>) =>
+    post<{ name: string; params: Record<string, unknown> }>("/params/save", { name, params }),
+  paramDelete: (name: string) => del<unknown>(`/params/${name}`),
 };
