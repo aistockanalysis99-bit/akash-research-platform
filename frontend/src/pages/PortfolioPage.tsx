@@ -470,15 +470,20 @@ function ResetModal({
           />
         </label>
         <label className="block mb-4">
-          <span className="text-xs uppercase text-gray-500 mb-1 block">
-            Type RESET to confirm
+          <span className="text-xs text-gray-500 mb-2 block">
+            Type <span className="font-mono font-bold text-neg">RESET</span> in the box below to confirm
           </span>
           <input
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
-            placeholder="RESET"
-            className="w-full bg-bg-soft border border-line rounded-lg px-3 py-2 text-sm font-mono focus:border-neg/50 outline-none"
+            placeholder="Type RESET here"
+            autoComplete="off"
+            spellCheck={false}
+            className="w-full bg-bg-soft border border-line rounded-lg px-3 py-2.5 text-sm font-mono tracking-widest focus:border-neg/50 outline-none placeholder:text-gray-600 placeholder:tracking-normal"
           />
+          {confirm.length > 0 && confirm.trim().toUpperCase() !== "RESET" && (
+            <p className="text-xs text-neg mt-1">Must be exactly: RESET</p>
+          )}
         </label>
         {reset.error && <div className="text-sm text-neg mb-3">{(reset.error as Error).message}</div>}
         <div className="flex items-center justify-end gap-2">
@@ -486,7 +491,7 @@ function ResetModal({
           <Button
             variant="danger"
             onClick={() => reset.mutate()}
-            disabled={reset.isPending || confirm.trim().toUpperCase() !== "RESET" || capital <= 0}
+            disabled={reset.isPending || confirm.trim().toUpperCase() !== "RESET"}
           >
             {reset.isPending ? "Resetting…" : "Wipe & reset"}
           </Button>
