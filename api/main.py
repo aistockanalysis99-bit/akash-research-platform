@@ -761,8 +761,8 @@ async def portfolio_quote(symbol: str) -> dict[str, Any]:
 
 @app.post("/portfolio/reset")
 async def portfolio_reset(payload: dict[str, Any] | None = None) -> dict[str, Any]:
-    """Wipe ALL paper positions + equity history and (optionally) set the
-    starting capital. Use before importing a real account for a clean slate.
+    """Wipe ALL positions + equity history and set the cash balance.
+    Use before importing a real account for a clean slate.
     """
     payload = payload or {}
     from engine.db.schema import get_connection
@@ -775,18 +775,31 @@ async def portfolio_reset(payload: dict[str, Any] | None = None) -> dict[str, An
     finally:
         conn.close()
 
-    new_cap = payload.get("initial_capital")
-    if new_cap is not None:
+    # Accept `cash` (new model) or legacy `initial_capital` as the cash seed.
+    cash = payload.get("cash", payload.get("initial_capital"))
+    if cash is not None:
         try:
-            live_settings.set_many({"virtual_initial_capital": float(new_cap)})
+            live_settings.set_cash_balance(float(cash))
         except Exception as e:  # noqa: BLE001
-            raise HTTPException(400, f"bad initial_capital: {e}")
+            raise HTTPException(400, f"bad cash value: {e}")
 
     return {
         "reset": True,
         "positions_cleared": int(n_pos),
-        "initial_capital": live_settings.get_initial_capital(),
+        "cash": live_settings.get_cash_balance(),
     }
+
+
+@app.post("/portfolio/cash")
+async def portfolio_set_cash(payload: dict[str, Any]) -> dict[str, Any]:
+    """Set the editable cash balance without touching positions."""
+    if "cash" not in payload:
+        raise HTTPException(400, "cash required")
+    try:
+        live_settings.set_cash_balance(float(payload["cash"]))
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(400, f"bad cash value: {e}")
+    return {"cash": live_settings.get_cash_balance()}
 
 
 @app.post("/portfolio/import")

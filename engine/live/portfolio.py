@@ -88,7 +88,13 @@ class VirtualPortfolio:
         return dict(row) if row else None
 
     def equity_snapshot(self) -> dict[str, float]:
-        """Compute current equity, cash, exposure from open + closed positions."""
+        """Real-account model (no fixed capital ceiling, no gross cap):
+
+            account value = cash balance + market value of holdings
+
+        Cash is an editable balance (buys deduct, sells add; may go negative).
+        Cost basis / unrealized / realized are reporting lines.
+        """
         closed = self.conn.execute(
             "SELECT COALESCE(SUM(final_pnl_usd), 0.0) AS total FROM virtual_positions "
             "WHERE status='closed'"
@@ -102,6 +108,10 @@ class VirtualPortfolio:
             "AS total FROM virtual_positions "
             "WHERE status='open' AND current_price IS NOT NULL"
         ).fetchone()
+        open_cost = self.conn.execute(
+            "SELECT COALESCE(SUM(units * entry_price * COALESCE(multiplier, 1)), 0.0) "
+            "AS total FROM virtual_positions WHERE status='open'"
+        ).fetchone()
         open_count = self.conn.execute(
             "SELECT COUNT(*) AS n FROM virtual_positions WHERE status='open'"
         ).fetchone()
@@ -109,20 +119,24 @@ class VirtualPortfolio:
         realized = float(closed["total"] or 0.0)
         unrealized = float(open_unrealized["total"] or 0.0)
         mv = float(open_market_value["total"] or 0.0)
-        initial_capital = live_settings.get_initial_capital()
-        equity = initial_capital + realized + unrealized
-        cash = equity - mv
-        gross_exposure_pct = (mv / equity * 100.0) if equity > 0 else 0.0
+        cost_basis = float(open_cost["total"] or 0.0)
+        cash = live_settings.get_cash_balance()
+        equity = cash + mv
+        invested_pct = (mv / equity * 100.0) if equity > 0 else 0.0
+        total_return_pct = (unrealized / cost_basis * 100.0) if cost_basis > 0 else 0.0
 
         return {
-            "initial_capital": initial_capital,
-            "equity": equity,
-            "realized_pnl": realized,
-            "unrealized_pnl": unrealized,
-            "open_market_value": mv,
+            "equity": equity,                 # account value = cash + holdings
             "cash": cash,
-            "gross_exposure_pct": gross_exposure_pct,
+            "open_market_value": mv,
+            "cost_basis": cost_basis,
+            "unrealized_pnl": unrealized,
+            "realized_pnl": realized,
+            "total_return_pct": total_return_pct,
+            "gross_exposure_pct": invested_pct,
             "open_positions": int(open_count["n"] or 0),
+            # legacy key (some callers read it); no longer a ceiling
+            "initial_capital": cost_basis,
         }
 
     # ------------------------------------------------------------------ #
@@ -349,6 +363,7 @@ class VirtualPortfolio:
              pnl_usd, pnl_pct, datetime.utcnow().isoformat(), position_id),
         )
         self.conn.commit()
+        live_settings.set_cash_balance(live_settings.get_cash_balance() - usd_amount)
         log.info("Added $%.0f to #%d %s: %.4f → %.4f units, avg cost $%.2f",
                  usd_amount, position_id, pos["symbol"], old_units, new_units, new_entry)
         return True
@@ -411,6 +426,11 @@ class VirtualPortfolio:
             (remaining, price, rem_pnl, rem_pnl_pct, now_iso, position_id),
         )
         self.conn.commit()
+        # Partial-sale proceeds flow back to cash.
+        mult = float(pos.get("multiplier") or (100 if pos.get("instrument_type") == "option" else 1))
+        live_settings.set_cash_balance(
+            live_settings.get_cash_balance() + price * sell_units * mult
+        )
         log.info("Trimmed %d%% of #%d %s: sold %.4f units, %.4f remain (realized $%.0f)",
                  int(fraction * 100), position_id, pos["symbol"], sell_units, remaining, realized)
         return True
@@ -673,6 +693,8 @@ class VirtualPortfolio:
             ),
         )
         self.conn.commit()
+        # A new purchase spends cash (may go negative — no limit enforced).
+        live_settings.set_cash_balance(live_settings.get_cash_balance() - usd_amount)
         pos_id = cur.lastrowid
         log.info("Manual buy #%d: %s %.4f units @ $%.2f ($%.0f)",
                  pos_id, symbol, units, current_price, usd_amount)
@@ -705,6 +727,9 @@ class VirtualPortfolio:
             ),
         )
         self.conn.commit()
+        # Sale proceeds flow back into the cash balance (units × exit × mult).
+        proceeds = exit_price * float(pos["units"]) * mult
+        live_settings.set_cash_balance(live_settings.get_cash_balance() + proceeds)
         log.info(
             "Closed paper position #%d: %s exit $%.2f, P&L $%.2f (%.2f%%), reason=%s",
             pos["id"], pos["symbol"], exit_price, final_pnl_usd, final_pnl_pct, exit_reason,

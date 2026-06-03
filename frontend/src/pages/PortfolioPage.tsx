@@ -37,6 +37,7 @@ export default function PortfolioPage() {
   const [buyOpen, setBuyOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
+  const [cashOpen, setCashOpen] = useState(false);
   const [detailId, setDetailId] = useState<number | null>(null);
 
   const invalidate = () => {
@@ -64,8 +65,9 @@ export default function PortfolioPage() {
   const prevMV = totalMV - dayChangeUsd;
   const dayChangePct = prevMV > 0 ? (dayChangeUsd / prevMV) * 100 : 0;
 
-  const totalPnl = s ? s.realized_pnl + s.unrealized_pnl : 0;
-  const totalPct = s && s.initial_capital ? (totalPnl / s.initial_capital) * 100 : 0;
+  // Total return = unrealized + realized; % vs cost basis (from backend).
+  const totalPnl = s ? s.unrealized_pnl + s.realized_pnl : 0;
+  const totalPct = s?.total_return_pct ?? 0;
 
   return (
     <div>
@@ -100,10 +102,11 @@ export default function PortfolioPage() {
         <Card className="mb-5">
           <div className="flex flex-wrap items-end gap-x-10 gap-y-4">
             <div>
-              <div className="text-xs uppercase tracking-wide text-gray-500">Total Value</div>
+              <div className="text-xs uppercase tracking-wide text-gray-500">Account Value</div>
               <div className="text-4xl font-extrabold text-white stat-num mt-1">
                 {fmtUsd(s.equity)}
               </div>
+              <div className="text-xs text-gray-500 mt-0.5">cash + holdings</div>
             </div>
             <div>
               <div className="text-xs uppercase tracking-wide text-gray-500">Today</div>
@@ -120,12 +123,20 @@ export default function PortfolioPage() {
               </div>
             </div>
             <div className="ml-auto text-right">
-              <div className="text-xs uppercase tracking-wide text-gray-500">Cash · Holdings</div>
-              <div className="text-sm text-gray-300 mt-2 stat-num">
-                {fmtUsd(Math.max(0, s.cash))} · {fmtUsd(totalMV)}
+              <div className="text-xs uppercase tracking-wide text-gray-500">
+                Cash{" "}
+                <button
+                  onClick={() => setCashOpen(true)}
+                  className="text-brand hover:text-brand-glow normal-case ml-1"
+                >
+                  edit
+                </button>
               </div>
-              <div className="text-xs text-gray-500 mt-0.5">
-                {s.open_positions} positions · {s.gross_exposure_pct.toFixed(0)}% invested
+              <div className={cn("text-lg font-bold stat-num mt-1", s.cash < 0 ? "text-neg" : "text-gray-200")}>
+                {fmtUsdSigned(s.cash)}
+              </div>
+              <div className="text-xs text-gray-500 mt-1">
+                Invested {fmtUsd(s.cost_basis)} · {s.open_positions} positions
               </div>
             </div>
           </div>
@@ -305,8 +316,15 @@ export default function PortfolioPage() {
       {importOpen && <AddPositionsModal onClose={() => setImportOpen(false)} onDone={invalidate} />}
       {resetOpen && (
         <ResetModal
-          currentCapital={s?.initial_capital ?? 2000000}
+          currentCash={s?.cash ?? 0}
           onClose={() => setResetOpen(false)}
+          onDone={invalidate}
+        />
+      )}
+      {cashOpen && (
+        <CashModal
+          currentCash={s?.cash ?? 0}
+          onClose={() => setCashOpen(false)}
           onDone={invalidate}
         />
       )}
@@ -367,16 +385,63 @@ function BuyModal({ onClose, onDone }: { onClose: () => void; onDone: () => void
   );
 }
 
-function ResetModal({
-  currentCapital,
+function CashModal({
+  currentCash,
   onClose,
   onDone,
 }: {
-  currentCapital: number;
+  currentCash: number;
   onClose: () => void;
   onDone: () => void;
 }) {
-  const [capital, setCapital] = useState(currentCapital);
+  const [cash, setCash] = useState(currentCash);
+  const save = useMutation({
+    mutationFn: () => api.portfolioSetCash(cash),
+    onSuccess: () => {
+      onDone();
+      onClose();
+    },
+  });
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={onClose}>
+      <div className="card p-6 w-[400px]" onClick={(e) => e.stopPropagation()}>
+        <h3 className="text-lg font-bold text-white mb-1">Set cash balance</h3>
+        <p className="text-xs text-gray-400 mb-4">
+          Your un-invested cash. Account value = cash + holdings. Buys reduce it,
+          sells add to it. Can be negative (margin) — no limit.
+        </p>
+        <label className="block mb-4">
+          <span className="text-xs uppercase text-gray-500 mb-1 block">Cash (USD)</span>
+          <input
+            type="number"
+            value={cash}
+            step={1000}
+            onChange={(e) => setCash(Number(e.target.value))}
+            className="w-full bg-bg-soft border border-line rounded-lg px-3 py-2 text-sm stat-num focus:border-brand/50 outline-none"
+          />
+        </label>
+        {save.error && <div className="text-sm text-neg mb-3">{(save.error as Error).message}</div>}
+        <div className="flex items-center justify-end gap-2">
+          <Button variant="ghost" onClick={onClose}>Cancel</Button>
+          <Button onClick={() => save.mutate()} disabled={save.isPending}>
+            {save.isPending ? "Saving…" : "Save cash"}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ResetModal({
+  currentCash,
+  onClose,
+  onDone,
+}: {
+  currentCash: number;
+  onClose: () => void;
+  onDone: () => void;
+}) {
+  const [capital, setCapital] = useState(currentCash);
   const [confirm, setConfirm] = useState("");
   const reset = useMutation({
     mutationFn: () => api.portfolioReset(capital),
@@ -388,18 +453,18 @@ function ResetModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={onClose}>
       <div className="card p-6 w-[440px]" onClick={(e) => e.stopPropagation()}>
-        <h3 className="text-lg font-bold text-neg mb-1">Reset paper account</h3>
+        <h3 className="text-lg font-bold text-neg mb-1">Reset account</h3>
         <p className="text-xs text-gray-400 mb-4">
-          Permanently clears <b>all</b> positions (open + closed) and the value history,
-          then sets your starting capital. Use this before importing your real
+          Permanently clears <b>all</b> positions (open + closed) and value history,
+          then sets your starting cash balance. Use this before importing your real
           holdings for a clean slate. This cannot be undone.
         </p>
         <label className="block mb-3">
-          <span className="text-xs uppercase text-gray-500 mb-1 block">Starting capital (USD)</span>
+          <span className="text-xs uppercase text-gray-500 mb-1 block">Starting cash (USD)</span>
           <input
             type="number"
             value={capital}
-            step={10000}
+            step={1000}
             onChange={(e) => setCapital(Number(e.target.value))}
             className="w-full bg-bg-soft border border-line rounded-lg px-3 py-2 text-sm stat-num focus:border-brand/50 outline-none"
           />

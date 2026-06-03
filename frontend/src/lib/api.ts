@@ -89,11 +89,13 @@ export const api = {
     get<{ symbol: string; name?: string; sector?: string; price: number }>(
       `/portfolio/quote/${symbol}`
     ),
-  portfolioReset: (initial_capital?: number) =>
-    post<{ reset: boolean; positions_cleared: number; initial_capital: number }>(
+  portfolioReset: (cash?: number) =>
+    post<{ reset: boolean; positions_cleared: number; cash: number }>(
       "/portfolio/reset",
-      initial_capital != null ? { initial_capital } : {}
+      cash != null ? { cash } : {}
     ),
+  portfolioSetCash: (cash: number) =>
+    post<{ cash: number }>("/portfolio/cash", { cash }),
   portfolioImport: (
     positions: {
       symbol: string;

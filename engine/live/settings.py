@@ -97,6 +97,17 @@ def get_initial_capital() -> float:
                        VIRTUAL_INITIAL_CAPITAL, 10_000.0, 1_000_000_000.0)
 
 
+def get_cash_balance() -> float:
+    """Editable cash balance (un-invested funds). Default 0. Can go negative
+    (margin-style) — no limit enforced."""
+    return _get_float("virtual_cash_balance", 0.0,
+                       -1_000_000_000.0, 1_000_000_000.0)
+
+
+def set_cash_balance(value: float) -> None:
+    set_many({"virtual_cash_balance": float(value)})
+
+
 def get_risk_pct() -> float:
     return _get_float("virtual_risk_pct",
                        VIRTUAL_RISK_PCT, 0.001, 0.10)
@@ -183,6 +194,7 @@ def get_all() -> dict[str, Any]:
 SETTABLE_KEYS = {
     # portfolio
     "virtual_initial_capital",
+    "virtual_cash_balance",
     "virtual_risk_pct",
     "virtual_stop_pct",
     "virtual_trail_pct",

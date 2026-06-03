@@ -5,14 +5,16 @@ export interface Health {
 }
 
 export interface PortfolioSnapshot {
-  equity: number;
-  cash: number;
-  initial_capital: number;
+  equity: number; // account value = cash + holdings
+  cash: number; // editable balance
+  open_market_value: number; // holdings at market
+  cost_basis: number; // holdings at cost
   realized_pnl: number;
   unrealized_pnl: number;
-  open_market_value: number;
-  gross_exposure_pct: number;
+  total_return_pct: number;
+  gross_exposure_pct: number; // % invested
   open_positions: number;
+  initial_capital?: number; // legacy
 }
 
 export interface Position {
