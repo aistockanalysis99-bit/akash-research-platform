@@ -571,10 +571,19 @@ async def ai_get_scorecards(symbol: str, date_iso: str) -> list[dict[str, Any]]:
 
     pm = raw.get("pm") or {}
     if pm:
-        # audit_note is the PM's own concise 2-sentence verdict log.
         pm_summary = pm.get("audit_note") or pm.get("exit_thesis") or ""
-        add("pm", "👔", "Portfolio Manager",
-            "decision", pm.get("decision"), pm_summary, "pm")
+        cards.append({
+            "name": "pm",
+            "emoji": "👔",
+            "label": "Portfolio Manager",
+            "score_label": "decision",
+            "score_value": pm.get("decision"),
+            "summary": pm_summary.strip(),
+            "stage": "pm",
+            # Expose the telegram messages so the frontend can show them.
+            "telegram_message": (pm.get("telegram_message") or "").strip(),
+            "telegram_portfolio_message": (pm.get("telegram_portfolio_message") or "").strip(),
+        })
 
     return cards
 

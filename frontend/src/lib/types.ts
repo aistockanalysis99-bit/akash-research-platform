@@ -82,6 +82,9 @@ export interface Scorecard {
   score_value: number | string | null;
   summary: string;
   stage: string;
+  // PM-only extras
+  telegram_message?: string;
+  telegram_portfolio_message?: string;
 }
 
 export interface DecisionRow {
