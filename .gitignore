@@ -1,0 +1,45 @@
+# Secrets — never commit. Use .env.example as the template.
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+env/
+
+# Data and runs (runtime state — lives on the server's persistent disk)
+data_cache/
+runs.sqlite
+runs.sqlite-journal
+runs.sqlite-wal
+runs.sqlite-shm
+logs/
+ai_research/
+# Per-stock dossiers are runtime-generated; keep only the template
+watchlist/*.md
+!watchlist/_template.md
+
+# Frontend build output + deps
+frontend/dist/
+frontend/node_modules/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Screenshots dir is tracked, contents are not
+docs/screenshots/*.png
+!docs/screenshots/.gitkeep

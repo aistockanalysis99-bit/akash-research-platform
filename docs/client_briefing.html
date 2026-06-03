@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Portfolio Manager — Client Briefing</title>
+  <style>
+    :root {
+      --blue:    #2E75B6;
+      --blue-dk: #1F4E79;
+      --blue-lt: #D5E8F0;
+      --green:   #00B050;
+      --amber:   #F4A800;
+      --red:     #C00000;
+      --bg:      #0D1117;
+      --bg2:     #161B22;
+      --bg3:     #21262D;
+      --border:  #30363D;
+      --text:    #E6EDF3;
+      --muted:   #8B949E;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, #0D1117 0%, #1A2A4A 60%, #0D1117 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 80px 40px 60px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(46,117,182,.18) 0%, transparent 70%);
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(46,117,182,.2);
+      border: 1px solid var(--blue);
+      color: #7EC8E3;
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 6px 18px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.4rem);
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -1px;
+      margin-bottom: 16px;
+      position: relative;
+    }
+    .hero h1 span { color: var(--blue); }
+    .hero .subtitle {
+      font-size: 1.15rem;
+      color: var(--muted);
+      max-width: 640px;
+      margin: 0 auto 40px;
+    }
+    .hero-stats {
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      flex-wrap: wrap;
+      position: relative;
+    }
+    .hero-stat { text-align: center; }
+    .hero-stat .num {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--blue);
+    }
+    .hero-stat .lbl {
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* ── LAYOUT ── */
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+    section { padding: 64px 0; border-bottom: 1px solid var(--border); }
+    section:last-of-type { border-bottom: none; }
+
+    .section-label {
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 12px;
+    }
+    h2 {
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 16px;
+    }
+    h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    p { color: var(--muted); margin-bottom: 12px; }
+    p strong { color: var(--text); }
+
+    /* ── CARDS ── */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+      margin-top: 32px;
+    }
+    .card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      transition: border-color .2s;
+    }
+    .card:hover { border-color: var(--blue); }
+    .card-icon {
+      font-size: 1.8rem;
+      margin-bottom: 14px;
+    }
+    .card h3 { font-size: 1rem; margin-bottom: 6px; color: #fff; }
+    .card p { font-size: .88rem; margin: 0; }
+
+    /* ── PHASES ── */
+    .phases {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 32px;
+    }
+    .phase {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .phase::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+    }
+    .phase-1::after { background: var(--green); }
+    .phase-2::after { background: var(--blue); }
+    .phase-3::after { background: var(--amber); }
+    .phase-4::after { background: #9B59B6; }
+
+    .phase-num {
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .phase-1 .phase-num { color: var(--green); }
+    .phase-2 .phase-num { color: var(--blue); }
+    .phase-3 .phase-num { color: var(--amber); }
+    .phase-4 .phase-num { color: #9B59B6; }
+
+    .phase h3 { color: #fff; font-size: 1rem; margin-bottom: 10px; }
+    .phase ul { padding-left: 16px; }
+    .phase ul li { font-size: .84rem; color: var(--muted); margin-bottom: 4px; }
+    .phase .status {
+      display: inline-block;
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-top: 14px;
+    }
+    .status-done    { background: rgba(0,176,80,.15); color: var(--green); border: 1px solid rgba(0,176,80,.3); }
+    .status-planned { background: rgba(46,117,182,.15); color: #7EC8E3; border: 1px solid rgba(46,117,182,.3); }
+    .status-new     { background: rgba(244,168,0,.12); color: var(--amber); border: 1px solid rgba(244,168,0,.3); }
+
+    /* ── ARCHITECTURE DIAGRAM ── */
+    .arch {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px 32px;
+      margin-top: 32px;
+      overflow-x: auto;
+    }
+    .arch-flow {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      min-width: 600px;
+    }
+    .arch-row {
+      display: flex;
+      align-items: stretch;
+      gap: 12px;
+    }
+    .arch-box {
+      flex: 1;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 18px;
+      text-align: center;
+    }
+    .arch-box.highlight {
+      border-color: var(--blue);
+      background: rgba(46,117,182,.08);
+    }
+    .arch-box.ai-box {
+      border-color: var(--amber);
+      background: rgba(244,168,0,.06);
+    }
+    .arch-box.green-box {
+      border-color: var(--green);
+      background: rgba(0,176,80,.06);
+    }
+    .arch-box .box-title {
+      font-size: .78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+    .arch-box.highlight .box-title { color: var(--blue); }
+    .arch-box.ai-box .box-title { color: var(--amber); }
+    .arch-box.green-box .box-title { color: var(--green); }
+    .arch-box .box-title-plain { color: var(--muted); }
+    .arch-box p { font-size: .78rem; margin: 0; color: var(--muted); }
+    .arch-arrow {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 8px 0;
+      color: var(--muted);
+      font-size: 1.2rem;
+    }
+    .arch-connector {
+      display: flex;
+      justify-content: space-around;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .arch-branch {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      gap: 8px;
+    }
+
+    /* ── AGENTS ── */
+    .agents-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+    .agent-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+    }
+    .agent-card .agent-icon { font-size: 1.5rem; margin-bottom: 8px; }
+    .agent-card h4 { font-size: .88rem; font-weight: 700; color: #fff; margin-bottom: 4px; }
+    .agent-card .agent-role {
+      font-size: .72rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--blue);
+      margin-bottom: 8px;
+    }
+    .agent-card p { font-size: .8rem; margin: 0; }
+
+    /* ── TELEGRAM PREVIEW ── */
+    .tg-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 32px;
+    }
+    .tg-phone {
+      background: #17212B;
+      border-radius: 16px;
+      padding: 20px;
+      border: 1px solid #2B3945;
+    }
+    .tg-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid #2B3945;
+      margin-bottom: 16px;
+    }
+    .tg-avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #2E75B6, #1F4E79);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+    .tg-name { font-size: .88rem; font-weight: 700; color: #fff; }
+    .tg-sub { font-size: .72rem; color: #5B9BD5; }
+    .tg-bubble {
+      background: #2B3945;
+      border-radius: 12px 12px 12px 2px;
+      padding: 14px 16px;
+      font-size: .82rem;
+      line-height: 1.6;
+      margin-bottom: 8px;
+    }
+    .tg-bubble .tg-time { font-size: .68rem; color: #7B9BB2; text-align: right; margin-top: 6px; }
+    .tg-bubble .green  { color: #00B050; font-weight: 700; }
+    .tg-bubble .red    { color: #FF6B6B; font-weight: 700; }
+    .tg-bubble .amber  { color: #F4A800; font-weight: 700; }
+    .tg-bubble .blue   { color: #7EC8E3; }
+    .tg-bubble .bold   { color: #fff; font-weight: 700; }
+    .tg-bubble code {
+      background: rgba(255,255,255,.07);
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-family: 'Consolas', monospace;
+      font-size: .78rem;
+    }
+
+    /* ── TIMELINE ── */
+    .timeline {
+      position: relative;
+      padding-left: 32px;
+      margin-top: 32px;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 10px; top: 0; bottom: 0;
+      width: 2px;
+      background: var(--border);
+    }
+    .tl-item {
+      position: relative;
+      margin-bottom: 32px;
+    }
+    .tl-item::before {
+      content: '';
+      position: absolute;
+      left: -28px; top: 6px;
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      border: 2px solid var(--blue);
+      background: var(--bg);
+    }
+    .tl-item.done::before { background: var(--green); border-color: var(--green); }
+    .tl-dur {
+      font-size: .72rem;
+      color: var(--blue);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+    .tl-item.done .tl-dur { color: var(--green); }
+    .tl-item h3 { font-size: .95rem; color: #fff; margin-bottom: 6px; }
+    .tl-item p { font-size: .83rem; margin: 0; }
+
+    /* ── COST TABLE ── */
+    .cost-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 28px;
+      font-size: .88rem;
+    }
+    .cost-table th {
+      background: var(--bg3);
+      color: var(--muted);
+      font-size: .75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .cost-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
+    .cost-table tr:last-child td { border-bottom: none; font-weight: 700; color: #fff; }
+    .cost-table tr:hover td { background: var(--bg2); }
+    .tag-cheap  { background: rgba(0,176,80,.15); color: var(--green); font-size: .7rem; padding: 2px 8px; border-radius: 20px; }
+    .tag-mid    { background: rgba(46,117,182,.15); color: #7EC8E3; font-size: .7rem; padding: 2px 8px; border-radius: 20px; }
+
+    /* ── STACK ── */
+    .stack-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      margin-top: 28px;
+    }
+    .stack-item {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+    }
+    .stack-item .stack-layer {
+      font-size: .68rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--blue);
+      margin-bottom: 4px;
+    }
+    .stack-item .stack-tech { font-size: .9rem; font-weight: 700; color: #fff; margin-bottom: 4px; }
+    .stack-item p { font-size: .75rem; margin: 0; }
+
+    /* ── CTA ── */
+    .cta {
+      background: linear-gradient(135deg, rgba(46,117,182,.15) 0%, rgba(31,78,121,.1) 100%);
+      border: 1px solid rgba(46,117,182,.3);
+      border-radius: 16px;
+      padding: 48px 40px;
+      text-align: center;
+      margin-top: 32px;
+    }
+    .cta h2 { margin-bottom: 12px; }
+    .cta p { max-width: 560px; margin: 0 auto 28px; }
+    .cta-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+    .btn-primary {
+      background: var(--blue);
+      color: #fff;
+      padding: 12px 28px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: .9rem;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .btn-primary:hover { background: #3A8FD4; }
+    .btn-outline {
+      background: transparent;
+      color: var(--text);
+      padding: 12px 28px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: .9rem;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: border-color .2s;
+    }
+    .btn-outline:hover { border-color: var(--blue); color: #7EC8E3; }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 32px 24px;
+      text-align: center;
+      border-top: 1px solid var(--border);
+    }
+    footer p { font-size: .78rem; color: var(--muted); margin: 0; }
+
+    /* ── BADGE ROW ── */
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: .78rem;
+      color: var(--muted);
+    }
+    .badge span { color: var(--text); font-weight: 600; }
+
+    /* ── TWO COL ── */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      margin-top: 32px;
+    }
+    @media (max-width: 640px) {
+      .two-col { grid-template-columns: 1fr; }
+      .hero { padding: 48px 20px 40px; }
+      .hero-stats { gap: 28px; }
+      .cta { padding: 32px 20px; }
+    }
+
+    .divider-line {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+
+    .highlight-box {
+      background: rgba(46,117,182,.08);
+      border: 1px solid rgba(46,117,182,.25);
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin: 24px 0;
+    }
+    .highlight-box p { color: var(--text); margin: 0; font-size: .9rem; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════ HERO ══ -->
+<div class="hero">
+  <div class="container">
+    <div class="hero-badge">Client Briefing — Confidential</div>
+    <h1>AI <span>Portfolio Manager</span><br/>System Design</h1>
+    <p class="subtitle">
+      A quantitative momentum strategy powered by a multi-agent AI decision layer —
+      intelligent entries, active position management, and full portfolio oversight.
+    </p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="num">100</div>
+        <div class="lbl">Stocks Monitored</div>
+      </div>
+      <div class="hero-stat">
+        <div class="num">4</div>
+        <div class="lbl">AI Agent Roles</div>
+      </div>
+      <div class="hero-stat">
+        <div class="num">2×</div>
+        <div class="lbl">Daily AI Reviews</div>
+      </div>
+      <div class="hero-stat">
+        <div class="num">$20–30</div>
+        <div class="lbl">AI Cost / Month</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════════════ EXECUTIVE SUMMARY ══ -->
+<section>
+  <div class="container">
+    <div class="section-label">Overview</div>
+    <h2>What We Are Building</h2>
+    <p>
+      A complete <strong>AI-driven portfolio management system</strong> that combines a
+      battle-tested quantitative momentum strategy with a layer of intelligent AI agents —
+      inspired by how real hedge funds operate, but built for a fraction of the cost.
+    </p>
+    <p>
+      The system scans the S&P 100 every evening, identifies high-probability momentum
+      breakouts, submits them to an AI review panel, and manages a virtual portfolio of
+      up to 20 positions with daily monitoring, exit logic, and full reasoning transparency.
+    </p>
+
+    <div class="highlight-box">
+      <p>
+        💡 <strong>Key Principle:</strong> The quantitative engine finds the signals.
+        The AI decides which ones to take, how big, and when to exit — considering the
+        full portfolio, market regime, news, and fundamentals at every step.
+      </p>
+    </div>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-icon">📊</div>
+        <h3>Quantitative Foundation</h3>
+        <p>Vol-normalized multi-horizon momentum across 1, 3, 6, and 12-month returns. Rules-based, backtested, zero look-ahead bias.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🤖</div>
+        <h3>AI Verification Layer</h3>
+        <p>Multi-agent panel reviews every signal: analyst, bull/bear debate, risk manager, and portfolio manager — before any position is taken.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🗂️</div>
+        <h3>Active Portfolio Management</h3>
+        <p>Every morning, AI reviews all open positions. Exits flagged when thesis breaks. Portfolio-level decisions on concentration and exposure.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📱</div>
+        <h3>Telegram Communication</h3>
+        <p>Every decision — entry, hold, exit, rejection — delivered with full AI reasoning. Morning briefings and evening signal alerts.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ PHASES ══ -->
+<section>
+  <div class="container">
+    <div class="section-label">Build Plan</div>
+    <h2>Four Phases to Full System</h2>
+    <p>Each phase delivers a working product. Each builds on the last without touching what already works.</p>
+
+    <div class="phases">
+      <div class="phase phase-1">
+        <div class="phase-num">Phase 1</div>
+        <h3>Research Platform</h3>
+        <ul>
+          <li>Full event-driven backtest engine</li>
+          <li>S&P 100 momentum strategy</li>
+          <li>Interactive web dashboard</li>
+          <li>SQLite run history + charts</li>
+          <li>57 tests passing</li>
+        </ul>
+        <span class="status status-done">✓ Complete</span>
+      </div>
+
+      <div class="phase phase-2">
+        <div class="phase-num">Phase 2</div>
+        <h3>Live Signal Delivery</h3>
+        <ul>
+          <li>Daily FMP data refresh</li>
+          <li>Live momentum signal runner</li>
+          <li>Telegram bot integration</li>
+          <li>APScheduler (16:30 ET daily)</li>
+          <li>Virtual portfolio database</li>
+        </ul>
+        <span class="status status-planned">→ Next</span>
+      </div>
+
+      <div class="phase phase-3">
+        <div class="phase-num">Phase 3</div>
+        <h3>AI Agent Layer</h3>
+        <ul>
+          <li>Analyst agent (news + fundamentals)</li>
+          <li>Bull / Bear debate agents</li>
+          <li>Risk management agent</li>
+          <li>Portfolio Manager (approve/reject)</li>
+          <li>Morning position review</li>
+        </ul>
+        <span class="status status-new">Planned</span>
+      </div>
+
+      <div class="phase phase-4">
+        <div class="phase-num">Phase 4</div>
+        <h3>Live Dashboard</h3>
+        <ul>
+          <li>Virtual portfolio tracker</li>
+          <li>AI decision log with reasoning</li>
+          <li>Signal history + AI accuracy</li>
+          <li>Daily briefing view</li>
+          <li>Performance attribution</li>
+        </ul>
+        <span class="status status-new">Planned</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════ ARCHITECTURE ══ -->
+<section>
+  <div class="container">
+    <div class="section-label">System Architecture</div>
+    <h2>How It All Connects</h2>
+    <p>Every component reuses the same core engine. No duplication. Easy to extend.</p>
+
+    <div class="arch">
+      <div class="arch-flow">
+
+        <!-- Row 1: Data -->
+        <div class="arch-row">
+          <div class="arch-box highlight">
+            <div class="box-title">Data Layer</div>
+            <p>FMP API → Parquet Cache<br/>S&amp;P 100 · Daily EOD · 5 Years</p>
+          </div>
+          <div class="arch-box highlight">
+            <div class="box-title">Momentum Engine</div>
+            <p>Vol-normalized signals<br/>EMA trend · ATR · Breakout filter</p>
+          </div>
+          <div class="arch-box highlight">
+            <div class="box-title">Virtual Portfolio DB</div>
+            <p>Open positions · P&amp;L<br/>Decision log · Signal history</p>
+          </div>
+        </div>
+
+        <div class="arch-arrow">↓ signals + portfolio state ↓</div>
+
+        <!-- Row 2: AI -->
+        <div class="arch-row">
+          <div class="arch-box ai-box" style="flex: 3;">
+            <div class="box-title">AI Agent Layer — Evening (16:30 ET)</div>
+            <p style="margin-top:8px;">
+              📊 <strong style="color:#fff">Analyst</strong> — fundamentals + news snapshot &nbsp;|&nbsp;
+              🐂 <strong style="color:#fff">Bull Agent</strong> — strongest case for entry &nbsp;|&nbsp;
+              🐻 <strong style="color:#fff">Bear Agent</strong> — risks and counter-thesis &nbsp;|&nbsp;
+              🔐 <strong style="color:#fff">Portfolio Manager</strong> — APPROVE / REJECT / RESIZE
+            </p>
+          </div>
+        </div>
+        <div class="arch-row" style="margin-top:12px;">
+          <div class="arch-box ai-box" style="flex:3;">
+            <div class="box-title">AI Agent Layer — Morning (08:00 ET)</div>
+            <p style="margin-top:8px;">
+              Batch reviews all open positions at once &nbsp;|&nbsp;
+              🟢 HOLD &nbsp;·&nbsp; 👀 WATCH &nbsp;·&nbsp; 🚪 EXIT &nbsp;|&nbsp;
+              Portfolio-level: sector concentration, exposure, regime
+            </p>
+          </div>
+        </div>
+
+        <div class="arch-arrow">↓ decisions + reasoning ↓</div>
+
+        <!-- Row 3: Outputs -->
+        <div class="arch-row">
+          <div class="arch-box green-box">
+            <div class="box-title">Telegram Bot</div>
+            <p>Morning briefing<br/>Entry signals<br/>Exit alerts</p>
+          </div>
+          <div class="arch-box green-box">
+            <div class="box-title">Virtual Portfolio</div>
+            <p>Auto-updated on<br/>every AI decision<br/>Simulated P&amp;L</p>
+          </div>
+          <div class="arch-box green-box">
+            <div class="box-title">Live Dashboard</div>
+            <p>Portfolio view<br/>AI decision log<br/>Performance stats</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════ AI AGENTS ══ -->
+<section>
+  <div class="container">
+    <div class="section-label">AI Layer</div>
+    <h2>The AI Agent Team</h2>
+    <p>
+      Inspired by the <strong>TradingAgents</strong> open-source framework — adapted to work
+      with our momentum signal engine rather than generating signals from scratch.
+      Every entry decision goes through the full panel.
+    </p>
+
+    <div class="agents-grid">
+      <div class="agent-card">
+        <div class="agent-icon">📰</div>
+        <h4>Analyst Agent</h4>
+        <div class="agent-role">Information Gathering</div>
+        <p>Pulls latest news, earnings dates, revenue trends, and analyst ratings. Produces a structured market context brief for the symbol.</p>
+      </div>
+      <div class="agent-card">
+        <div class="agent-icon">🐂</div>
+        <h4>Bull Researcher</h4>
+        <div class="agent-role">Long Thesis</div>
+        <p>Reads the analyst brief and builds the strongest possible case for taking the trade. Identifies catalysts and tailwinds.</p>
+      </div>
+      <div class="agent-card">
+        <div class="agent-icon">🐻</div>
+        <h4>Bear Researcher</h4>
+        <div class="agent-role">Counter-Thesis</div>
+        <p>Builds the opposing view — risks, overvaluation concerns, macro headwinds, regulatory risks. Forces the system to see both sides.</p>
+      </div>
+      <div class="agent-card">
+        <div class="agent-icon">⚖️</div>
+        <h4>Risk Manager</h4>
+        <div class="agent-role">Portfolio Safety</div>
+        <p>Checks position sizing, portfolio exposure, sector concentration, correlation with existing positions. Flags if risk limits are near.</p>
+      </div>
+      <div class="agent-card">
+        <div class="agent-icon">🏦</div>
+        <h4>Portfolio Manager</h4>
+        <div class="agent-role">Final Decision</div>
+        <p>Reads all agent outputs + full portfolio context. Makes the final call: <strong>APPROVE</strong>, <strong>REJECT</strong>, or <strong>RESIZE</strong> with written reasoning.</p>
+      </div>
+      <div class="agent-card">
+        <div class="agent-icon">🌅</div>
+        <h4>Morning Reviewer</h4>
+        <div class="agent-role">Daily Monitoring</div>
+        <p>Reviews all open positions daily at 08:00 ET. Checks if original thesis still holds. Flags exits before they become losses.</p>
+      </div>
+    </div>
+
+    <div class="highlight-box" style="margin-top:28px;">
+      <p>
+        🔑 <strong>Key difference from TradingAgents:</strong> Their agents generate signals from scratch.
+        Ours only act on signals the quantitative engine has already approved — adding judgment on top of math,
+        not replacing it.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════ TELEGRAM PREVIEW ══ -->
+<section>
+  <div class="container">
+    <div class="section-label">Communication</div>
+    <h2>Telegram Alerts — What You'll Receive</h2>
+    <p>Every decision communicated in plain English with full AI reasoning. Two sessions daily.</p>
+
+    <div class="tg-container">
+      <!-- Morning -->
+      <div class="tg-phone">
+        <div class="tg-header">
+          <div class="tg-avatar">📊</div>
+          <div>
+            <div class="tg-name">AI Portfolio Manager</div>
+            <div class="tg-sub">Morning Briefing · 08:00 ET</div>
+          </div>
+        </div>
+        <div class="tg-bubble">
+          🌅 <span class="bold">MORNING REVIEW — May 10, 2026</span><br/>
+          Portfolio: <span class="green">$103,240 (+3.24%)</span><br/>
+          Positions: 14 open · 68% exposure<br/><br/>
+          ✅ <span class="bold">HOLD (12)</span><br/>
+          <span class="blue">NVDA, MSFT, AAPL, AMZN...</span><br/>
+          All theses intact. Momentum stable.<br/><br/>
+          👀 <span class="bold">WATCH (1) — GOOGL</span><br/>
+          Momentum score slipped to 0.19.<br/>
+          Stop at <code>$168.40</code>. No catalyst.<br/><br/>
+          🚪 <span class="bold">EXIT (1) — META</span><br/>
+          EU regulatory filing flagged. Thesis<br/>
+          broken. Exit recommended at open.<br/>
+          <div class="tg-time">08:02 AM ✓✓</div>
+        </div>
+      </div>
+
+      <!-- Entry Signal -->
+      <div class="tg-phone">
+        <div class="tg-header">
+          <div class="tg-avatar">📈</div>
+          <div>
+            <div class="tg-name">AI Portfolio Manager</div>
+            <div class="tg-sub">Evening Signal · 16:45 ET</div>
+          </div>
+        </div>
+        <div class="tg-bubble">
+          📈 <span class="green bold">NEW SIGNAL — NVDA</span><br/>
+          Score: <code>0.73</code> · Close: <code>$891.20</code><br/>
+          Entry: ~<code>$891</code> · Stop: <code>$864.50</code><br/>
+          Risk per unit: <code>$2,670</code><br/><br/>
+          📊 <span class="bold">Analyst:</span><br/>
+          <span class="green">Bull:</span> GPU demand from AI data centers<br/>
+          accelerating. Strong institutional flow.<br/>
+          <span class="red">Bear:</span> 35x fwd P/E. Guidance risk.<br/><br/>
+          🧠 <span class="bold">Portfolio Manager: APPROVED</span><br/>
+          Tech at 23% (under 30% cap). Strong<br/>
+          momentum, fits vol target. Size: 1 unit.<br/><br/>
+          💼 Position #15 opened.<br/>
+          New exposure: <span class="amber">72.3%</span>
+          <div class="tg-time">16:47 PM ✓✓</div>
+        </div>
+      </div>
+
+      <!-- Rejection -->
+      <div class="tg-phone">
+        <div class="tg-header">
+          <div class="tg-avatar">🔐</div>
+          <div>
+            <div class="tg-name">AI Portfolio Manager</div>
+            <div class="tg-sub">Signal Rejected · 16:52 ET</div>
+          </div>
+        </div>
+        <div class="tg-bubble">
+          ❌ <span class="red bold">REJECTED — META</span><br/>
+          Score: <code>0.41</code> · Marginal breakout<br/><br/>
+          🧠 <span class="bold">PM Reasoning:</span><br/>
+          Already 3 tech positions (NVDA, MSFT,<br/>
+          AAPL). Adding META would push tech<br/>
+          concentration to 38% — above our 30%<br/>
+          sector cap.<br/><br/>
+          Additionally: EU antitrust ruling<br/>
+          expected this week. Asymmetric<br/>
+          downside risk not justified by<br/>
+          momentum score of 0.41.<br/><br/>
+          <span class="amber">Signal logged. Watching for next cycle.</span>
+          <div class="tg-time">16:52 PM ✓✓</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ COST & MODELS ══ -->
+<section>
+  <div class="container">
+    <div class="section-label">Economics</div>
+    <h2>AI Cost Design — Under $30/Month</h2>
+    <p>
+      The system uses a <strong>tiered multi-provider model</strong> — the cheapest AI that
+      can handle each task, with more capable (and expensive) models reserved for complex decisions only.
+    </p>
+
+    <table class="cost-table">
+      <thead>
+        <tr>
+          <th>Task</th>
+          <th>AI Model</th>
+          <th>Calls/Month</th>
+          <th>Est. Cost</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Morning portfolio review (all positions in 1 call)</td>
+          <td>Gemini 2.0 Flash <span class="tag-cheap">Free tier</span></td>
+          <td>22</td>
+          <td>$0</td>
+        </tr>
+        <tr>
+          <td>Signal analyst brief (news + fundamentals)</td>
+          <td>Gemini 2.0 Flash <span class="tag-cheap">Free tier</span></td>
+          <td>~110</td>
+          <td>$0–$1</td>
+        </tr>
+        <tr>
+          <td>Bull / Bear debate per signal</td>
+          <td>DeepSeek V3 <span class="tag-cheap">$0.27/M</span></td>
+          <td>~110</td>
+          <td>$1–$3</td>
+        </tr>
+        <tr>
+          <td>Portfolio Manager final decision</td>
+          <td>Claude Haiku / DeepSeek <span class="tag-mid">$1/M</span></td>
+          <td>~132</td>
+          <td>$3–$8</td>
+        </tr>
+        <tr>
+          <td>Weekly portfolio strategy review</td>
+          <td>Claude Sonnet / Gemini Pro <span class="tag-mid">rare use</span></td>
+          <td>4</td>
+          <td>$1–$3</td>
+        </tr>
+        <tr>
+          <td><strong>Total estimated monthly AI cost</strong></td>
+          <td></td>
+          <td><strong>~270 calls</strong></td>
+          <td><strong>$5–$15</strong></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p style="margin-top:16px; font-size:.82rem;">
+      * Gemini 2.0 Flash free tier: 1,500 requests/day. We use ~12/day. Cost = $0 until 10× current volume.
+      DeepSeek V3 and Qwen 2.5 (Chinese providers) offer high reasoning quality at very low cost.
+    </p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ TECH STACK ══ -->
+<section>
+  <div class="container">
+    <div class="section-label">Technology</div>
+    <h2>Technology Stack</h2>
+    <p>No new frameworks introduced unnecessarily. Everything extends the existing platform.</p>
+
+    <div class="stack-grid">
+      <div class="stack-item">
+        <div class="stack-layer">Signal Engine</div>
+        <div class="stack-tech">Python / Pandas</div>
+        <p>Existing momentum engine. Shared by backtest and live runner.</p>
+      </div>
+      <div class="stack-item">
+        <div class="stack-layer">AI Orchestration</div>
+        <div class="stack-tech">LangGraph</div>
+        <p>Agent flow control. Chains analyst → debate → PM cleanly.</p>
+      </div>
+      <div class="stack-item">
+        <div class="stack-layer">AI Models</div>
+        <div class="stack-tech">Multi-provider</div>
+        <p>Gemini Flash · DeepSeek V3 · Claude Haiku. Swap freely.</p>
+      </div>
+      <div class="stack-item">
+        <div class="stack-layer">Market Data</div>
+        <div class="stack-tech">FMP API</div>
+        <p>OHLCV · Fundamentals · News. Same API already in use.</p>
+      </div>
+      <div class="stack-item">
+        <div class="stack-layer">Database</div>
+        <div class="stack-tech">SQLite</div>
+        <p>New tables: virtual_positions, ai_decisions, signal_history.</p>
+      </div>
+      <div class="stack-item">
+        <div class="stack-layer">Scheduler</div>
+        <div class="stack-tech">APScheduler</div>
+        <p>08:00 morning review. 16:30 signal scan. Runs alongside web app.</p>
+      </div>
+      <div class="stack-item">
+        <div class="stack-layer">Messaging</div>
+        <div class="stack-tech">Telegram Bot</div>
+        <p>All AI decisions delivered with reasoning. No app install needed.</p>
+      </div>
+      <div class="stack-item">
+        <div class="stack-layer">Dashboard</div>
+        <div class="stack-tech">NiceGUI</div>
+        <p>New pages added to existing web UI. Same framework, zero migration.</p>
+      </div>
+    </div>
+
+    <div class="badge-row">
+      <div class="badge">🔒 <span>No broker API needed in Phase 3</span></div>
+      <div class="badge">📦 <span>No new server required</span></div>
+      <div class="badge">🔄 <span>Same DB, new tables only</span></div>
+      <div class="badge">📱 <span>Telegram — works on any device</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ TIMELINE ══ -->
+<section>
+  <div class="container">
+    <div class="section-label">Delivery</div>
+    <h2>Build Timeline</h2>
+    <p>Each milestone is a working, usable product — not just a code checkpoint.</p>
+
+    <div class="timeline">
+      <div class="tl-item done">
+        <div class="tl-dur">✓ Complete</div>
+        <h3>Phase 1 — Research Platform</h3>
+        <p>Full backtester, interactive dashboard, S&P 100 data, 57 tests passing. Deployed locally.</p>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dur">~2–3 days</div>
+        <h3>Phase 2A — Live Signal Runner + Telegram</h3>
+        <p>Daily momentum scan at 16:30 ET. Signals delivered to Telegram. Virtual portfolio database created. No AI yet — pure quant signals.</p>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dur">~2 days</div>
+        <h3>Phase 2B — Virtual Dashboard</h3>
+        <p>New dashboard page: virtual portfolio view, open positions, simulated P&L, signal history table.</p>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dur">~3–4 days</div>
+        <h3>Phase 3A — AI Signal Review Agents</h3>
+        <p>Analyst + Bull/Bear + Portfolio Manager agents wired up. Every evening signal goes through AI review before Telegram delivery. APPROVE / REJECT / RESIZE.</p>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dur">~2 days</div>
+        <h3>Phase 3B — Morning Position Monitoring</h3>
+        <p>AI batch-reviews all open positions at 08:00 ET. EXIT flags sent via Telegram. Dashboard updated with morning review results.</p>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dur">~2 days</div>
+        <h3>Phase 4 — Dashboard Polish + AI Accuracy Tracking</h3>
+        <p>AI decision log with full reasoning history. Signal vs. outcome tracking. AI win rate by sector. Weekly portfolio review summary page.</p>
+      </div>
+    </div>
+
+    <div class="highlight-box">
+      <p>
+        📅 <strong>Total estimated development: 11–13 working days.</strong>
+        Each phase ships independently — you start getting value from Phase 2A
+        before Phase 3 is even built.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ DAILY SCHEDULE ══ -->
+<section>
+  <div class="container">
+    <div class="section-label">Operations</div>
+    <h2>What Happens Every Trading Day</h2>
+    <p>Fully automated. No manual intervention required.</p>
+
+    <div class="two-col">
+      <div>
+        <h3 style="color:var(--blue); margin-bottom:16px;">🌅 Morning Session (08:00–08:30 ET)</h3>
+        <div class="card" style="margin-bottom:12px;">
+          <h3>08:00 — FMP Data Pull</h3>
+          <p>Incremental refresh of latest prices for all 100 stocks and open positions.</p>
+        </div>
+        <div class="card" style="margin-bottom:12px;">
+          <h3>08:10 — AI Portfolio Review</h3>
+          <p>Single batch call reviews all open positions. HOLD / WATCH / EXIT per position.</p>
+        </div>
+        <div class="card">
+          <h3>08:25 — Telegram Briefing</h3>
+          <p>Morning summary: portfolio P&L, any exits flagged, positions to watch today.</p>
+        </div>
+      </div>
+      <div>
+        <h3 style="color:var(--amber); margin-bottom:16px;">🌆 Evening Session (16:30–17:00 ET)</h3>
+        <div class="card" style="margin-bottom:12px;">
+          <h3>16:30 — EOD Data + Signal Scan</h3>
+          <p>Momentum engine runs on today's close. Identifies breakout candidates.</p>
+        </div>
+        <div class="card" style="margin-bottom:12px;">
+          <h3>16:35 — AI Agent Review</h3>
+          <p>Each candidate: analyst brief → bull/bear → portfolio manager decision.</p>
+        </div>
+        <div class="card">
+          <h3>16:50 — Telegram Signals</h3>
+          <p>Approved entries delivered with AI reasoning. Virtual portfolio updated.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ CTA ══ -->
+<section style="border:none;">
+  <div class="container">
+    <div class="cta">
+      <div class="section-label" style="margin-bottom:16px;">Next Steps</div>
+      <h2>Ready to Start Building</h2>
+      <p>
+        Phase 1 is complete and running. Phase 2 can begin immediately.
+        The full system — AI agents, virtual portfolio, live dashboard — is
+        11–13 days of focused development.
+      </p>
+      <div class="cta-buttons">
+        <a class="btn-primary" href="#">Start Phase 2 →</a>
+        <a class="btn-outline" href="#">Review Architecture</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>AI Portfolio Manager · Confidential Client Briefing · May 2026 · Built on the Akash Research Platform</p>
+</footer>
+
+</body>
+</html>

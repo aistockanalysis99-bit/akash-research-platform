@@ -1,0 +1,45 @@
+# Render Blueprint — backend (FastAPI). Create via "New + → Blueprint" from the repo.
+# NOTE: a paid plan (Starter) is REQUIRED — the scheduler needs an always-on
+# instance, and the persistent disk (for SQLite + artifacts) is paid-only.
+services:
+  - type: web
+    name: akash-backend
+    runtime: python
+    plan: starter
+    region: oregon
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    disk:
+      name: akash-data
+      mountPath: /var/data
+      sizeGB: 5
+    envVars:
+      # Storage → persistent disk
+      - key: DB_PATH
+        value: /var/data/runs.sqlite
+      - key: DATA_CACHE_DIR
+        value: /var/data/data_cache
+      - key: AI_RESEARCH_DIR
+        value: /var/data/ai_research
+      - key: WATCHLIST_PROFILE_DIR
+        value: /var/data/watchlist
+      - key: LOG_DIR
+        value: /var/data/logs
+      - key: ENABLE_SCHEDULER
+        value: "true"
+      - key: SCHEDULER_TIMEZONE
+        value: America/New_York
+      # Secrets — set these in the Render dashboard (sync:false = not in repo)
+      - key: FMP_API_KEY
+        sync: false
+      - key: UW_API_KEY
+        sync: false
+      - key: GOOGLE_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_CHAT_ID
+        sync: false
