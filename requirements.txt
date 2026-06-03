@@ -1,18 +1,19 @@
-# Akash Research Platform — backend dependencies (Render web service)
-fastapi==0.111.0
-uvicorn[standard]==0.30.1
-starlette==0.37.2
+# Akash Research Platform — backend dependencies (Render web service).
+# Version FLOORS (not exact pins) so pip resolves a mutually-compatible set.
+# google-genai is the strictest consumer (needs httpx>=0.28.1, pydantic>=2.9).
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
 httpx>=0.28.1,<1.0
-pydantic==2.7.1
-pandas==2.3.3
-numpy==2.4.2
-pyarrow==24.0.0
-tenacity==9.1.4
-APScheduler==3.11.2
-python-dotenv==1.0.1
-PyYAML==6.0.3
-google-genai==2.6.0
-anthropic==0.84.0
-requests==2.32.5
+pydantic>=2.9.0,<3.0
+pandas>=2.2.0,<3.0
+numpy>=1.26.0,<3.0
+pyarrow>=15.0.0
+tenacity>=8.2.0
+APScheduler>=3.10.0
+python-dotenv>=1.0.0
+PyYAML>=6.0
+google-genai>=2.6.0
+anthropic>=0.40.0
+requests>=2.32.0
 # zoneinfo data for APScheduler timezones on Linux
-tzdata==2024.1
+tzdata>=2024.1
