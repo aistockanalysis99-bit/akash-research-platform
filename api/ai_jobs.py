@@ -191,26 +191,11 @@ class AIJobManager:
                         "size_pct": pm.recommended_size_pct,
                     }
 
-            # Auto-create paper position from APPROVE/RESIZE verdicts.
-            # Non-fatal — analysis stays "complete" even if this step fails.
-            if pm is not None and pm.decision in ("APPROVE", "RESIZE"):
-                try:
-                    price = asyncio.run(fetch_latest_close(symbol))
-                    if price is None or price <= 0:
-                        log.warning("auto-create skipped for %s: no price", symbol)
-                    else:
-                        portfolio = VirtualPortfolio()
-                        pos_id = portfolio.create_from_pm_decision(
-                            symbol, state["signal_date"], pm, price,
-                        )
-                        portfolio.close_conn()
-                        if pos_id:
-                            with self._lock:
-                                self._jobs[job_id]["paper_position_id"] = pos_id
-                except Exception as e:  # noqa: BLE001
-                    log.exception("paper position auto-create failed: %s", e)
+            # Auto-create is intentionally disabled.
+            # The AI reports the verdict via Telegram; the user decides whether
+            # to add the stock to the portfolio manually (Add positions flow).
 
-            # Persist final state once everything (including auto-create) is done
+            # Persist final state
             with self._lock:
                 final_state = dict(self._jobs[job_id])
             self._persist_job(final_state)
