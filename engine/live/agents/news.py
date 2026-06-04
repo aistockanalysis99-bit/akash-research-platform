@@ -35,6 +35,9 @@ class NewsAgent(Agent):
         # M19 — analyst grades with firm hit-rate scores attached
         grades_annotated = ctx.get("grades_annotated") or ctx.get("grades") or []
 
+        from ..pipeline import quant_signal_block
+        signal_block = quant_signal_block(state)
+
         return template.format(
             symbol=state["symbol"],
             as_of_date=state["signal_date"],
@@ -45,6 +48,7 @@ class NewsAgent(Agent):
             insider_trades_json=_dump(_project_insider(ctx.get("insider_trades") or [])),
             short_interest_json=_dump(ctx.get("uw_short_interest") or {}),
             stock_profile_block=profile_block,
+            quant_signal_block=signal_block,
         )
 
     def render(self, output: NewsReport) -> str:

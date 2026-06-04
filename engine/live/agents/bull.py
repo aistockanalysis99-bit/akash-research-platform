@@ -39,6 +39,8 @@ class BullAgent(Agent):
         opts = state.get("options_structure")
         macro = state.get("macro_regime")
         sig = state.get("signal_input")
+        from ..pipeline import quant_signal_block
+        signal_block = quant_signal_block(state)
         ctx = state.get("context", {}) or {}
         pricing = ctx.get("pricing_context") or {}
 
@@ -59,6 +61,7 @@ class BullAgent(Agent):
             pricing_context_json=_json.dumps(pricing, indent=2, default=str),
             current_price=pricing.get("current_price") or "unknown",
             stock_profile_block=profile_block,
+            quant_signal_block=signal_block,
         )
 
     def render(self, output: BullCase) -> str:

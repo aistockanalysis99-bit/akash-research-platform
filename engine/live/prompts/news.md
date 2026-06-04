@@ -16,6 +16,11 @@ your training cutoff:
 - If you cannot find data on something specific (e.g. no recent earnings
   surprises in the array), say "not in provided data," do NOT fabricate.
 
+
+## Signal origin
+
+{quant_signal_block}
+
 ---
 
 ## Per-stock dossier (M17)

@@ -10,6 +10,11 @@ the Bear will attack).
 You are NOT trying to be balanced. The Bear Researcher will be balanced for
 you. Your job is to make the case AS STRONG AS HONESTLY POSSIBLE.
 
+
+## Signal origin
+
+{quant_signal_block}
+
 ---
 
 ## Context

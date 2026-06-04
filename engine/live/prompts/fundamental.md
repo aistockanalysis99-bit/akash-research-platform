@@ -41,6 +41,11 @@ properties of the underlying holdings, not the ETF itself). For ETFs:
 - Do not give an ETF a 1/10 just because EPS data is missing — that is
   the wrong rubric. Score based on what's appropriate for the asset.
 
+
+## Signal origin
+
+{quant_signal_block}
+
 ---
 
 ## Context

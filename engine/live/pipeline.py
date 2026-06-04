@@ -296,6 +296,43 @@ async def _safe_history(fmp: FMPClient, sym: str) -> list[dict]:
 # --------------------------------------------------------------------------- #
 
 
+def quant_signal_block(state: SignalState) -> str:
+    """Return a short text block describing the quant signal origin of this job.
+
+    Injected into every agent prompt so all 11 agents know whether this came
+    from the systematic strategy (and its score/rank) or was triggered manually.
+    """
+    sig: Optional[SignalInput] = state.get("signal_input")  # type: ignore
+    src = state.get("source", "manual")
+
+    if src == "manual":
+        return (
+            "**Signal origin: MANUAL** — this analysis was triggered manually "
+            "by the portfolio manager, not by the systematic strategy."
+        )
+    if src == "quant" and sig and sig.quant_score is not None:
+        rank_txt = f"Rank #{state['context'].get('quant_rank', '?')} in universe · " \
+                   if state.get("context", {}).get("quant_rank") else ""
+        breakout = "breakout confirmed (YES)" if sig.breakout_ok else "no breakout yet"
+        trend = "trend filter passed (YES)" if sig.trend_ok else "trend filter marginal"
+        return (
+            f"**Signal origin: QUANT STRATEGY** — the systematic momentum model "
+            f"flagged {state['symbol']} as a top candidate today.\n"
+            f"- Momentum score: **{sig.quant_score:.3f}** (threshold 0.25 to qualify)\n"
+            f"- Technicals: {breakout}, {trend}\n"
+            f"- This score is one of the highest in the S&P 100 universe today.\n"
+            f"Use this to weight your conviction: a high quant score means "
+            f"price momentum and trend are objectively strong — this is not "
+            f"a speculative or contra-trend idea."
+        )
+    if src == "quant":
+        return (
+            "**Signal origin: QUANT STRATEGY** — the systematic momentum model "
+            "flagged this stock. Momentum and trend filters were satisfied."
+        )
+    return f"**Signal origin: {src}**"
+
+
 def _render_signal_md(state: SignalState) -> str:
     sym = state["symbol"]
     src = state["source"]
@@ -359,16 +396,40 @@ async def run_full_pipeline(
             except Exception:  # noqa: BLE001 — progress must never break pipeline
                 pass
 
-    # 0. State + input signal
+    # 0. State + input signal.
+    # If notes carries a quant payload (from the evening scheduler), parse it
+    # into structured fields so every agent can see the signal context.
+    quant_score: Optional[float] = None
+    quant_rank: Optional[int] = None
+    trend_ok: Optional[bool] = None
+    breakout_ok: Optional[bool] = None
+    if notes and source == "quant":
+        import re as _re
+        m = _re.search(r"score\s+([\d.]+)", notes, _re.I)
+        if m:
+            quant_score = float(m.group(1))
+        m = _re.search(r"rank\s+(\d+)", notes, _re.I)
+        if m:
+            quant_rank = int(m.group(1))
+        breakout_ok = "breakout=Y" in (notes or "")
+        trend_ok = "trend=Y" in (notes or "")
+
     state = new_signal_state(symbol, today, source)
     state["signal_input"] = SignalInput(
         symbol=symbol,
         source=source,  # type: ignore[arg-type]
         signal_date=today,
         notes=notes,
+        quant_score=quant_score,
+        trend_ok=trend_ok,
+        breakout_ok=breakout_ok,
     )
+    # Store quant_rank in context so quant_signal_block() can reference it
+    state.setdefault("context", {})["quant_rank"] = quant_rank
     fs.write_markdown(symbol, today, "signal", _render_signal_md(state))
-    _step("init", f"state ready for {symbol} ({source})")
+    _step("init", f"state ready for {symbol} ({source})"
+          + (f" [quant rank={quant_rank} score={quant_score:.3f} breakout={'Y' if breakout_ok else 'N'}]"
+             if quant_score is not None else ""))
 
     # 1. Pre-fetch FMP bundle + portfolio snapshot + macro overlay
     _step("prefetch", "fetching FMP data + portfolio snapshot...")

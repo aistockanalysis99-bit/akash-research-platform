@@ -70,6 +70,9 @@ class FundamentalAgent(Agent):
             ctx.get("earnings_dynamics") or {}
         )
 
+        from ..pipeline import quant_signal_block
+        signal_block = quant_signal_block(state)
+
         return template.format(
             symbol=state["symbol"],
             as_of_date=state["signal_date"],
@@ -85,6 +88,7 @@ class FundamentalAgent(Agent):
             earnings_dynamics_block=earnings_dynamics_block,
             peer_metrics_json=_dump(peer_metrics),
             stock_profile_block=profile_block,
+            quant_signal_block=signal_block,
         )
 
     # ----------------------------------------------------------------------- #

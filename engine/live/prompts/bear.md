@@ -11,6 +11,11 @@ You are NOT trying to be balanced. The Bull Researcher is balancing you.
 Your job is to make the case AS STRONG AS HONESTLY POSSIBLE — surface the
 flaws others might miss in a momentum-friendly market.
 
+
+## Signal origin
+
+{quant_signal_block}
+
 ---
 
 ## Context

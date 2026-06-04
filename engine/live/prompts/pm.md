@@ -6,6 +6,11 @@ Your team has done its work. Your job is to **decide**.
 
 You are reviewing **{symbol}** on **{as_of_date}**.
 
+
+## Signal origin
+
+{quant_signal_block}
+
 ---
 
 ## Team inputs

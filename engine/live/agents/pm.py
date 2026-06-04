@@ -69,6 +69,9 @@ class PMAgent(Agent):
             symbol=state["symbol"], limit=10,
         )
 
+        from ..pipeline import quant_signal_block
+        signal_block = quant_signal_block(state)
+
         # Per-stock profile injection (M17) — primes PM with stock-specific
         # red lines, pm_notes, historical lessons, all the dossier knowledge.
         stock_profile = ctx.get("stock_profile")
@@ -104,6 +107,7 @@ class PMAgent(Agent):
             current_price=pricing.get("current_price") or "unknown",
             lessons_block=lessons_block,
             profile_block=profile_block,
+            quant_signal_block=signal_block,
         )
 
     def render(self, output: PMDecision) -> str:
