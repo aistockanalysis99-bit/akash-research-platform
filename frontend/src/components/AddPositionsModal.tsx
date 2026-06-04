@@ -6,6 +6,10 @@ import { Button, ErrorBox } from "@/components/ui";
 import { cn, fmtUsd } from "@/lib/utils";
 
 // ── Popular tickers for autocomplete suggestions ─────────────────────────────
+// Shared field styles — one source of truth so every input looks identical
+const field = "w-full bg-bg-soft border border-line rounded-xl px-3 py-3.5 text-base font-semibold stat-num text-center focus:border-brand/50 outline-none transition-colors";
+const lbl   = "text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2 block";
+
 const POPULAR = [
   "AAPL","MSFT","NVDA","GOOGL","AMZN","META","TSLA","AMD","INTC","AVGO",
   "MU","ORCL","NOW","PLTR","CRWV","WMT","CCJ","GLD","CEG","SOXX",
@@ -164,11 +168,15 @@ export default function AddPositionsModal({ onClose, onDone }: { onClose: () => 
                     if (e.key === "Enter" && row.symbol) fetchPrice(row.key, row.symbol);
                     if (e.key === "Tab" && suggestions.length) { e.preventDefault(); pickSuggestion(suggestions[0]); }
                   }}
-                  placeholder="e.g. NVDA"
+                  placeholder="NVDA"
+                  autoComplete="off"
                   className={cn(
-                    "w-full bg-bg-soft border rounded-xl px-4 py-3 text-2xl font-bold font-mono uppercase",
-                    "focus:border-brand/60 outline-none transition-colors",
-                    row.symbol && !row.livePrice && !row.fetching ? "border-line" : "border-line",
+                    "w-full bg-bg-soft border rounded-xl px-4 py-3.5 text-2xl font-bold font-mono uppercase",
+                    "outline-none transition-colors placeholder:text-gray-600 placeholder:font-normal",
+                    row.livePrice ? "border-brand/50" :
+                    row.fetching  ? "border-brand/30" :
+                    row.symbol    ? "border-line" :
+                                    "border-line focus:border-brand/40",
                   )}
                 />
                 {/* Suggestions dropdown */}
@@ -206,23 +214,23 @@ export default function AddPositionsModal({ onClose, onDone }: { onClose: () => 
                 </div>
               </div>
 
-              {/* Three fields in a row */}
+              {/* Three fields — identical height & style */}
               <div className="grid grid-cols-3 gap-3 mb-5">
+                {/* Shares */}
                 <div>
-                  <label className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2 block">
-                    Shares
-                  </label>
+                  <label className={lbl}>Shares</label>
                   <input
                     type="number"
                     value={row.shares}
                     onChange={e => upd(row.key, { shares: e.target.value })}
                     placeholder="0"
                     min={0}
-                    className="w-full bg-bg-soft border border-line rounded-xl px-3 py-3 text-lg font-bold stat-num text-center focus:border-brand/60 outline-none"
+                    className={field}
                   />
                 </div>
+                {/* Entry price */}
                 <div>
-                  <label className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2 block">
+                  <label className={lbl}>
                     Entry price
                     {row.livePrice && (
                       <span className="normal-case font-normal text-gray-500 ml-1">
@@ -234,21 +242,20 @@ export default function AddPositionsModal({ onClose, onDone }: { onClose: () => 
                     type="number"
                     value={row.entryPrice}
                     onChange={e => upd(row.key, { entryPrice: e.target.value })}
-                    placeholder={row.livePrice ? fmtUsd(row.livePrice, 2) : "0.00"}
+                    placeholder={row.livePrice ? row.livePrice.toFixed(2) : "0.00"}
                     step={0.01}
                     min={0}
-                    className="w-full bg-bg-soft border border-line rounded-xl px-3 py-3 text-lg font-bold stat-num text-center focus:border-brand/60 outline-none"
+                    className={field}
                   />
                 </div>
+                {/* Entry date */}
                 <div>
-                  <label className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2 block">
-                    Entry date
-                  </label>
+                  <label className={lbl}>Entry date</label>
                   <input
                     type="date"
                     value={row.entryDate}
                     onChange={e => upd(row.key, { entryDate: e.target.value })}
-                    className="w-full bg-bg-soft border border-line rounded-xl px-3 py-3 text-sm focus:border-brand/60 outline-none"
+                    className={field}
                   />
                 </div>
               </div>
