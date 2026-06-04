@@ -52,17 +52,21 @@ Tech is leading while most other sectors are flat or down.
 Portfolio: 21 positions · $2.1M · +$2,140 today
 Exits today: None
 
-Top movers:
-↑ AMD +1.1% — strong pre-market momentum
+Top movers (since your entry):
+↑ AMD +1.1% — strong since entry
 ↑ MU +0.8%
-↓ NVDA -1.0% — broad semi rotation, thesis intact
+↓ NVDA -1.0% — down since entry, thesis still intact
 
 Watch today:
 NVDA — if it breaks below $210 on volume, thesis is weakening.
 
 Rules:
+- The % moves come from current_pnl_pct in the position data — this is
+  the move SINCE THE USER'S ENTRY, not today's intraday move. Always
+  label the "Top movers" section as "since your entry" so the client
+  is not confused thinking these are today's market moves.
 - If no exits, write "Exits today: None"
-- If all positions flat, skip "Top movers" section
+- If all positions are effectively flat (all < 0.1% move), skip "Top movers"
 - The whole message must fit in 20 lines maximum
 - Every number must come from the source material above — do not invent
 - Do NOT use markdown bold (**), headers (#), or bullet points (-)
