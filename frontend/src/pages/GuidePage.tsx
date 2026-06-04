@@ -16,6 +16,7 @@ import {
   Building2,
   Layers,
   Globe,
+  FileDown,
 } from "lucide-react";
 import { Card } from "@/components/ui";
 import { cn } from "@/lib/utils";
@@ -217,6 +218,21 @@ export default function GuidePage() {
         <p className="text-xs text-gray-500 mt-4 text-center">
           You get: <span className="text-gray-300">what it is, why it's interesting, what could go wrong, and exactly what to do.</span>
         </p>
+
+        {/* Downloadable PDF callout */}
+        <div className="mt-5 flex gap-3 items-start rounded-xl border border-brand/30 bg-brand/[0.05] p-4">
+          <FileDown className="h-5 w-5 text-brand shrink-0 mt-0.5" />
+          <div>
+            <div className="text-sm font-semibold text-white">Download a full PDF report</div>
+            <p className="text-sm text-gray-400 mt-1 leading-relaxed">
+              Open any stock under <span className="text-gray-200">AI Analysis → Decisions</span> and
+              click <span className="text-brand font-medium">Download PDF</span>. You get a clean
+              one-page research report — the price chart with target and stop levels, all the analyst
+              scores, the plain-English verdict, and the bull-vs-bear case — ready to save, print, or
+              share. Perfect for keeping a record or reviewing a decision later.
+            </p>
+          </div>
+        </div>
       </Section>
 
       {/* ── You control vs automatic ───────────────────────── */}

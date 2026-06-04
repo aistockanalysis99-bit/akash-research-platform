@@ -8,6 +8,27 @@ import Markdown from "@/components/Markdown";
 import { cn, decisionColor } from "@/lib/utils";
 import type { DecisionPdfData } from "@/components/DecisionPdf";
 
+// Strip emoji / symbols Helvetica can't render, and normalize the unicode
+// minus so the PDF text stays clean.
+function cleanForPdf(s?: string): string {
+  return (s || "")
+    .replace(
+      /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}\u{FE00}-\u{FE0F}\u{20E3}]/gu,
+      ""
+    )
+    .replace(/−/g, "-") // unicode minus → hyphen
+    .replace(/^[ \t]+/gm, "") // drop leading space left by a removed emoji
+    .trim();
+}
+
+// Pull the client-facing verdict (BUY / WATCH / AVOID …) from the first line
+// of the PM message, e.g. "🟢 MRVL — BUY" → "BUY".
+function parseVerdict(msg?: string): string | undefined {
+  const first = (msg || "").split("\n")[0];
+  const m = first.match(/[—–-]\s*([A-Za-z]+)/);
+  return m ? m[1].toUpperCase() : undefined;
+}
+
 // Best-effort parse of price levels from the plain-English PM message.
 function parseLevels(text: string, fallbackCurrent?: number) {
   const t = text || "";
@@ -107,7 +128,7 @@ export default function DecisionDetailPage() {
         date,
         name: quote?.name,
         sector: quote?.sector,
-        decision,
+        decision: parseVerdict(stockViewMsg) || decision,
         conviction,
         currentPrice: levels.current,
         target: levels.target,
@@ -122,8 +143,8 @@ export default function DecisionDetailPage() {
           { label: "Macro risk", value: macro?.score_value ?? null, kind: "low" },
           { label: "Dealer", value: opts?.score_value ?? null, kind: "text" },
         ],
-        stockView: stockViewMsg,
-        portFit: portFitMsg,
+        stockView: cleanForPdf(stockViewMsg),
+        portFit: cleanForPdf(portFitMsg),
         bull: { conv: bull?.score_value, summary: bull?.summary },
         bear: { conv: bear?.score_value, summary: bear?.summary },
         judge: { winner: judge?.score_value ? String(judge.score_value) : undefined, summary: judge?.summary },
