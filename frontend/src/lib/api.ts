@@ -154,6 +154,19 @@ export const api = {
   schedulerStatus: () => get<SchedulerStatus>("/scheduler/status"),
   schedulerStart: () => post<unknown>("/scheduler/start"),
   schedulerStop: () => post<unknown>("/scheduler/stop"),
+  schedulerQuantScan: () =>
+    post<
+      {
+        symbol: string;
+        score: number;
+        rank: number;
+        trend_ok: boolean;
+        breakout_ok: boolean;
+        current_price: number;
+        atr: number;
+        as_of_date: string;
+      }[]
+    >("/scheduler/quant-scan"),
   schedulerRunMorning: () => post<unknown>("/scheduler/run/morning"),
   schedulerRunEvening: () => post<unknown>("/scheduler/run/evening"),
   schedulerRunWeekly: () => post<unknown>("/scheduler/run/weekly"),
