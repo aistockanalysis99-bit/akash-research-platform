@@ -42,23 +42,23 @@ Produce a `MorningBriefing`. The `telegram_message` field must follow this
 **exact template** — fill in the bracketed parts with real data. Keep each
 section on its own line(s), separated by a blank line.
 
-```
-🌅 Morning · {DATE}
+Example output (fill in with real data — do NOT copy these fake numbers):
 
-Market: {ONE WORD — Bullish / Bearish / Choppy / Risk-off} · {confidence}/10
-{One plain sentence on what the market is doing today. e.g. "Tech is leading, most other sectors flat."}
+🌅 Morning · Jun 4, 2026
 
-Portfolio: {N} positions · {total value} · {+/- total P&L today}
-Exits today: {None OR list each: SYMBOL — reason (P&L)}
+Market: Choppy · 7/10
+Tech is leading while most other sectors are flat or down.
+
+Portfolio: 21 positions · $2.1M · +$2,140 today
+Exits today: None
 
 Top movers:
-↑ {SYMBOL} +X% — one plain reason
-↑ {SYMBOL} +X%
-↓ {SYMBOL} -X% — one plain reason  (only if meaningful, skip if all flat)
+↑ AMD +1.1% — strong pre-market momentum
+↑ MU +0.8%
+↓ NVDA -1.0% — broad semi rotation, thesis intact
 
 Watch today:
-{One specific thing to watch. What stock or event, and why it matters.}
-```
+NVDA — if it breaks below $210 on volume, thesis is weakening.
 
 Rules:
 - If no exits, write "Exits today: None"
