@@ -16,11 +16,14 @@ import RunDetailPage from "./pages/RunDetailPage";
 import ComparePage from "./pages/ComparePage";
 import DataPage from "./pages/DataPage";
 import ParamsPage from "./pages/ParamsPage";
+import GuidePage from "./pages/GuidePage";
 
 export default function App() {
   return (
     <Routes>
       <Route element={<Layout />}>
+        {/* Guide (cross-cutting) */}
+        <Route path="/guide" element={<GuidePage />} />
         {/* Portfolio section */}
         <Route path="/" element={<PortfolioPage />} />
         <Route path="/watchlist" element={<WatchlistPage />} />
