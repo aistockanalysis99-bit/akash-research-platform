@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { Check, ChevronLeft, ChevronRight, Loader2, Search, X } from "lucide-react";
+import { Check, Loader2, Search, X } from "lucide-react";
 import { api } from "@/lib/api";
 import { Button, ErrorBox } from "@/components/ui";
 import { cn, fmtUsd } from "@/lib/utils";
@@ -39,7 +39,7 @@ function makeRow(symbol = "", shares = ""): Row {
 }
 
 export default function AddPositionsModal({ onClose, onDone }: { onClose: () => void; onDone: () => void }) {
-  const [rows, setRows]       = useState<Row[]>(SEED.map(s => makeRow(s.symbol, String(s.shares))));
+  const [rows, setRows]       = useState<Row[]>([makeRow()]);
   const [idx, setIdx]         = useState(0);
   const [result, setResult]   = useState<null | { added: number; total: number; results: any[] }>(null);
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -115,37 +115,14 @@ export default function AddPositionsModal({ onClose, onDone }: { onClose: () => 
         {/* Header */}
         <div className="flex items-center justify-between px-6 pt-5 pb-4">
           <div>
-            <h2 className="text-xl font-bold text-white">Add positions</h2>
+            <h2 className="text-xl font-bold text-white">Add to portfolio</h2>
             <p className="text-xs text-gray-500 mt-0.5">
-              {idx + 1} of {rows.length} &nbsp;·&nbsp;
-              {valid.length} filled &nbsp;·&nbsp; {fmtUsd(totalCost)} cost basis
+              Enter one stock at a time
             </p>
           </div>
           <button onClick={onClose} className="text-gray-500 hover:text-white p-1">
             <X className="h-5 w-5" />
           </button>
-        </div>
-
-        {/* Progress dots */}
-        <div className="px-6 pb-4 flex flex-wrap gap-1.5">
-          {rows.map((r, i) => {
-            const isValid = r.symbol.trim() && Number(r.shares) > 0 && Number(r.entryPrice) > 0;
-            return (
-              <button
-                key={r.key}
-                onClick={() => setIdx(i)}
-                title={r.symbol}
-                className={cn(
-                  "w-8 h-7 rounded-md text-[11px] font-mono font-semibold border transition-all",
-                  i === idx        ? "bg-brand text-bg border-brand scale-110" :
-                  isValid          ? "bg-pos/20 text-pos border-pos/30" :
-                  "bg-bg-hover text-gray-500 border-line hover:border-gray-500"
-                )}
-              >
-                {r.symbol.slice(0, 2) || String(i + 1)}
-              </button>
-            );
-          })}
         </div>
 
         <div className="border-t border-line" />
@@ -308,38 +285,20 @@ export default function AddPositionsModal({ onClose, onDone }: { onClose: () => 
               )}
             </div>
 
-            {/* Footer nav */}
-            <div className="border-t border-line px-6 py-4 flex items-center gap-3">
-              <button
-                onClick={() => setIdx(i => Math.max(0, i - 1))}
-                disabled={idx === 0}
-                className="p-2 rounded-lg border border-line text-gray-400 hover:text-white hover:border-gray-500 disabled:opacity-30 transition-colors"
-              >
-                <ChevronLeft className="h-5 w-5" />
+            {/* Footer */}
+            <div className="border-t border-line px-6 py-4 flex items-center justify-between gap-3">
+              <button onClick={onClose} className="text-sm text-gray-400 hover:text-white">
+                Cancel
               </button>
-
-              <div className="flex-1 text-center text-xs text-gray-500">
-                {valid.length} ready · {fmtUsd(totalCost)}
-              </div>
-
-              {idx < rows.length - 1 ? (
-                <button
-                  onClick={() => setIdx(i => Math.min(rows.length - 1, i + 1))}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-brand text-bg rounded-xl font-semibold text-sm hover:bg-brand-glow transition-colors"
-                >
-                  Next <ChevronRight className="h-4 w-4" />
-                </button>
-              ) : (
-                <button
-                  onClick={() => submit.mutate()}
-                  disabled={submit.isPending || valid.length === 0}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-brand text-bg rounded-xl font-semibold text-sm hover:bg-brand-glow disabled:opacity-50 transition-colors"
-                >
-                  {submit.isPending
-                    ? <><Loader2 className="h-4 w-4 animate-spin" />Adding…</>
-                    : <><Check className="h-4 w-4" />Add {valid.length} positions</>}
-                </button>
-              )}
+              <button
+                onClick={() => submit.mutate()}
+                disabled={submit.isPending || valid.length === 0}
+                className="flex items-center gap-2 px-6 py-2.5 bg-brand text-bg rounded-xl font-semibold text-sm hover:bg-brand-glow disabled:opacity-50 transition-colors"
+              >
+                {submit.isPending
+                  ? <><Loader2 className="h-4 w-4 animate-spin" />Adding…</>
+                  : <><Check className="h-4 w-4" />Add to portfolio</>}
+              </button>
             </div>
             {submit.error && <div className="px-6 pb-4"><ErrorBox error={submit.error} /></div>}
           </>
