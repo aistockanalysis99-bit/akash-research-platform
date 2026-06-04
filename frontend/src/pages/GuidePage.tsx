@@ -60,32 +60,8 @@ export default function GuidePage() {
         </div>
       </Section>
 
-      {/* ── Why it exists ──────────────────────────────────── */}
-      <Section n="2" title="Why it helps you">
-        <p className="text-sm text-gray-400 mb-4">
-          Most investors lose money for three reasons. The system is built to protect you from each.
-        </p>
-        <div className="grid sm:grid-cols-3 gap-3">
-          <ProblemCard
-            problem="Emotion"
-            desc="Buying out of excitement, selling out of fear."
-            fix="Every decision follows the same disciplined process. No mood swings."
-          />
-          <ProblemCard
-            problem="One-sided thinking"
-            desc="Falling in love with a stock and ignoring the risks."
-            fix="A Bull and a Bear argue against each other. You always see both sides."
-          />
-          <ProblemCard
-            problem="No time"
-            desc="You run a business — you can't read 10 earnings reports a night."
-            fix="It reads everything for you and summarizes in 30 seconds."
-          />
-        </div>
-      </Section>
-
       {/* ── The three parts ────────────────────────────────── */}
-      <Section n="3" title="The three parts of the platform">
+      <Section n="2" title="The three parts of the platform">
         <div className="space-y-3">
           <PartCard
             icon={<Briefcase className="h-5 w-5" />}
@@ -124,7 +100,7 @@ export default function GuidePage() {
       </Section>
 
       {/* ── The 11 analysts ────────────────────────────────── */}
-      <Section n="4" title="Meet the 11-analyst team">
+      <Section n="3" title="Meet the 11-analyst team">
         <p className="text-sm text-gray-400 mb-4">
           For every stock, these specialists work in parallel — then their findings feed a structured debate and a final decision.
         </p>
@@ -148,7 +124,7 @@ export default function GuidePage() {
       </Section>
 
       {/* ── The journey of a stock (funnel) ────────────────── */}
-      <Section n="5" title="How it all fits together">
+      <Section n="4" title="How it all fits together">
         <p className="text-sm text-gray-400 mb-5">
           A funnel that filters out noise at every step — from thousands of stocks down to one decision on your phone.
         </p>
@@ -189,7 +165,7 @@ export default function GuidePage() {
       </Section>
 
       {/* ── Daily rhythm ───────────────────────────────────── */}
-      <Section n="6" title="Your daily rhythm">
+      <Section n="5" title="Your daily rhythm">
         <p className="text-sm text-gray-400 mb-4">
           Everything runs automatically on a fixed schedule. You don't start anything — messages just arrive.
         </p>
@@ -216,7 +192,7 @@ export default function GuidePage() {
       </Section>
 
       {/* ── How to read a message ──────────────────────────── */}
-      <Section n="7" title="How to read what it sends you">
+      <Section n="6" title="How to read what it sends you">
         <p className="text-sm text-gray-400 mb-4">
           Every evening, for each stock, you get a message like this. No jargon — just what to do.
         </p>
@@ -244,7 +220,7 @@ export default function GuidePage() {
       </Section>
 
       {/* ── You control vs automatic ───────────────────────── */}
-      <Section n="8" title="What you control vs. what's automatic">
+      <Section n="7" title="What you control vs. what's automatic">
         <div className="grid sm:grid-cols-2 gap-3">
           <Card className="border-line/70">
             <div className="text-xs uppercase tracking-wide text-gray-500 mb-3">Runs automatically</div>
@@ -285,7 +261,7 @@ export default function GuidePage() {
       </Section>
 
       {/* ── How it makes you better ────────────────────────── */}
-      <Section n="9" title="How this makes you a better investor">
+      <Section n="8" title="How this makes you a better investor">
         <div className="space-y-2.5">
           {[
             ["Discipline replaces emotion", "The same rigorous process runs on every stock, every day — whether the market is euphoric or panicking."],
@@ -306,7 +282,7 @@ export default function GuidePage() {
       </Section>
 
       {/* ── Glossary ───────────────────────────────────────── */}
-      <Section n="10" title="Simple glossary">
+      <Section n="9" title="Simple glossary">
         <div className="grid sm:grid-cols-2 gap-x-6 gap-y-3">
           {[
             ["Momentum", "A stock whose price has been steadily climbing. The strategy favors winners that keep winning."],
@@ -347,18 +323,6 @@ function Section({ n, title, children }: { n: string; title: string; children: R
       </div>
       {children}
     </section>
-  );
-}
-
-function ProblemCard({ problem, desc, fix }: { problem: string; desc: string; fix: string }) {
-  return (
-    <Card className="flex flex-col">
-      <div className="text-sm font-bold text-neg">✗ {problem}</div>
-      <div className="text-xs text-gray-500 mt-1 mb-3">{desc}</div>
-      <div className="text-sm text-gray-300 mt-auto pt-3 border-t border-line/50">
-        <span className="text-pos font-semibold">✓ </span>{fix}
-      </div>
-    </Card>
   );
 }
 

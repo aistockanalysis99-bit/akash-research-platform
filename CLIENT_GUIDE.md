@@ -20,21 +20,7 @@ It does not gamble. It does not trade on its own. It is a **decision-support sys
 
 ---
 
-## 2. Why it exists — how it helps you
-
-Most investors lose money for three reasons:
-
-| The common mistake | How this system protects you |
-|---|---|
-| **Emotion** — buying out of excitement, selling out of fear | Every decision follows the same disciplined, repeatable process. No mood swings. |
-| **Only seeing one side** — falling in love with a stock and ignoring the risks | A "Bull" and a "Bear" *argue against each other* on every stock. You always see both sides. |
-| **No time / no expertise** — you run a business, you can't read 10 earnings reports a night | The system reads everything for you and summarizes it in 30 seconds of plain English. |
-
-The goal is simple: **fewer bad decisions, better timing, and a portfolio you actually understand.**
-
----
-
-## 3. The three parts of the platform
+## 2. The three parts of the platform
 
 The website has three sections at the top: **Portfolio**, **AI Analysis**, and **Backtesting**. Here is what each one is for.
 
@@ -97,7 +83,7 @@ Before trusting any stock-picking method with real money, you want proof it has 
 
 ---
 
-## 4. How it all fits together — the journey of a stock
+## 3. How it all fits together — the journey of a stock
 
 Here is the complete path, from "thousands of stocks" down to "a decision on your phone." Think of it as a **funnel** that filters out noise at every step:
 
@@ -135,7 +121,7 @@ Here is the complete path, from "thousands of stocks" down to "a decision on you
 
 ---
 
-## 5. Your daily rhythm
+## 4. Your daily rhythm
 
 The system runs on a fixed schedule automatically. You don't have to start anything — it just works, and messages arrive on Telegram.
 
@@ -149,7 +135,7 @@ You can also trigger any of these manually from the **Automation** page if you w
 
 ---
 
-## 6. How to read what the system sends you
+## 5. How to read what the system sends you
 
 Every evening, for each stock, you get a simple message like this:
 
@@ -171,7 +157,7 @@ You don't need to understand the math behind it. You get: **what it is, why it's
 
 ---
 
-## 7. What you control vs. what's automatic
+## 6. What you control vs. what's automatic
 
 This is important for your peace of mind.
 
@@ -187,7 +173,7 @@ This is important for your peace of mind.
 
 ---
 
-## 8. How this makes you a better investor
+## 7. How this makes you a better investor
 
 Beyond the daily convenience, here is the deeper value:
 
@@ -205,7 +191,7 @@ Beyond the daily convenience, here is the deeper value:
 
 ---
 
-## 9. Simple glossary
+## 8. Simple glossary
 
 A few words you'll see, in plain English:
 
