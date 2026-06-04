@@ -768,6 +768,27 @@ async def portfolio_quote(symbol: str) -> dict[str, Any]:
     return {"symbol": symbol, "name": name, "sector": sector, "price": float(price)}
 
 
+@app.get("/quote/{symbol}/bars")
+async def quote_bars(symbol: str, days: int = 130) -> list[dict[str, Any]]:
+    """Recent daily closes for any symbol — powers the decision PDF price chart."""
+    symbol = symbol.upper().strip()
+    if not symbol:
+        raise HTTPException(400, "symbol required")
+    from engine.data.fmp_client import FMPClient
+    try:
+        async with FMPClient() as fmp:
+            df = await fmp.fetch_daily(symbol)
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(404, f"no bars for {symbol}: {str(e)[:120]}")
+    if df is None or df.empty:
+        return []
+    df = df.tail(max(10, min(int(days), 400)))
+    return [
+        {"date": str(ts)[:10], "close": round(float(c), 2)}
+        for ts, c in zip(df["timestamp"], df["close"])
+    ]
+
+
 @app.post("/portfolio/reset")
 async def portfolio_reset(payload: dict[str, Any] | None = None) -> dict[str, Any]:
     """Wipe ALL positions + equity history and set the cash balance.

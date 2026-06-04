@@ -1,11 +1,35 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, ChevronDown, ChevronRight } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronRight, Download } from "lucide-react";
 import { api } from "@/lib/api";
-import { Badge, Card, ErrorBox, Loading } from "@/components/ui";
+import { Badge, Button, Card, ErrorBox, Loading, Spinner } from "@/components/ui";
 import Markdown from "@/components/Markdown";
-import { cn, decisionColor, fmtPct, fmtUsd, pnlColor } from "@/lib/utils";
+import { cn, decisionColor } from "@/lib/utils";
+import type { DecisionPdfData } from "@/components/DecisionPdf";
+
+// Best-effort parse of price levels from the plain-English PM message.
+function parseLevels(text: string, fallbackCurrent?: number) {
+  const t = text || "";
+  const num = (x?: string) => (x == null ? undefined : parseFloat(x.replace(/[,$\s]/g, "")));
+  const grab = (re: RegExp) => {
+    const m = t.match(re);
+    return m ? num(m[1]) : undefined;
+  };
+  const current =
+    fallbackCurrent ??
+    grab(/current price[^$\d]*\$?([\d,.]+)/i) ??
+    grab(/buy(?:\s+around|\s+at|\s+near)?[^$\d]*\$?([\d,.]+)/i);
+  const target = grab(/(?:6-?month\s+)?(?:upside\s+)?target[^$\d]*\$?([\d,.]+)/i);
+  const stop = grab(
+    /(?:cut losses(?:\s+at)?|sell to cut losses(?:\s+at)?|stop(?:\s+loss)?(?:\s+at)?)[^$\d]*\$?([\d,.]+)/i
+  );
+  const targetUpsidePct =
+    target && current && current > 0 ? ((target - current) / current) * 100 : undefined;
+  const stopPct =
+    stop && current && current > 0 ? ((stop - current) / current) * 100 : undefined;
+  return { current, target, targetUpsidePct, stop, stopPct };
+}
 
 // ─── Stage file ordering for full reports ────────────────────────────────────
 const REPORT_STAGES: { key: string; label: string; emoji: string }[] = [
@@ -63,18 +87,85 @@ export default function DecisionDetailPage() {
   const decision   = pm?.score_value as string | undefined;
   const conviction = bull ? (bull.score_value as number) : undefined;
 
-  // Parse target/stop from PM summary (they're in the telegram_message stored in the scorecard summary)
-  // We'll render the full messages from files["pm"]
+  const [building, setBuilding] = useState(false);
+
+  async function downloadPdf() {
+    setBuilding(true);
+    try {
+      // Code-split: only pull the heavy PDF lib + doc when the user asks for it.
+      const [{ pdf }, { default: DecisionPdf }] = await Promise.all([
+        import("@react-pdf/renderer"),
+        import("@/components/DecisionPdf"),
+      ]);
+      const [bars, quote] = await Promise.all([
+        api.quoteBars(symbol, 130).catch(() => []),
+        api.portfolioQuote(symbol).catch(() => null),
+      ]);
+      const levels = parseLevels(stockViewMsg, quote?.price);
+
+      const data: DecisionPdfData = {
+        symbol,
+        date,
+        name: quote?.name,
+        sector: quote?.sector,
+        decision,
+        conviction,
+        currentPrice: levels.current,
+        target: levels.target,
+        targetUpsidePct: levels.targetUpsidePct,
+        stop: levels.stop,
+        stopPct: levels.stopPct,
+        scores: [
+          { label: "Fundamental", value: fund?.score_value ?? null, kind: "high" },
+          { label: "News risk", value: news?.score_value ?? null, kind: "low" },
+          { label: "Technical", value: tech?.score_value ?? null, kind: "high" },
+          { label: "Smart money", value: instFlow?.score_value ?? null, kind: "high" },
+          { label: "Macro risk", value: macro?.score_value ?? null, kind: "low" },
+          { label: "Dealer", value: opts?.score_value ?? null, kind: "text" },
+        ],
+        stockView: stockViewMsg,
+        portFit: portFitMsg,
+        bull: { conv: bull?.score_value, summary: bull?.summary },
+        bear: { conv: bear?.score_value, summary: bear?.summary },
+        judge: { winner: judge?.score_value ? String(judge.score_value) : undefined, summary: judge?.summary },
+        risk: { verdict: risk?.score_value ? String(risk.score_value) : undefined, summary: risk?.summary },
+        pm: { summary: pm?.summary },
+        bars,
+        generatedAt: new Date().toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" }),
+      };
+
+      const blob = await pdf(<DecisionPdf data={data} />).toBlob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${symbol}_${date}_research.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error("PDF generation failed", e);
+      alert("Could not generate the PDF. Please try again.");
+    } finally {
+      setBuilding(false);
+    }
+  }
 
   return (
     <div className="max-w-5xl mx-auto">
-      {/* Back nav */}
-      <Link
-        to="/decisions"
-        className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-brand mb-4"
-      >
-        <ArrowLeft className="h-4 w-4" /> All decisions
-      </Link>
+      {/* Back nav + PDF download */}
+      <div className="flex items-center justify-between mb-4">
+        <Link
+          to="/decisions"
+          className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-brand"
+        >
+          <ArrowLeft className="h-4 w-4" /> All decisions
+        </Link>
+        <Button variant="outline" onClick={downloadPdf} disabled={building}>
+          {building ? <Spinner /> : <Download className="h-4 w-4" />}
+          {building ? "Building PDF…" : "Download PDF"}
+        </Button>
+      </div>
 
       {/* ── ZONE 1: Verdict hero ─────────────────────────────────────── */}
       <div className="flex items-start gap-4 mb-5">

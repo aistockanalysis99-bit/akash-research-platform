@@ -89,6 +89,8 @@ export const api = {
     get<{ symbol: string; name?: string; sector?: string; price: number }>(
       `/portfolio/quote/${symbol}`
     ),
+  quoteBars: (symbol: string, days = 130) =>
+    get<{ date: string; close: number }[]>(`/quote/${symbol}/bars?days=${days}`),
   portfolioReset: (cash?: number) =>
     post<{ reset: boolean; positions_cleared: number; cash: number }>(
       "/portfolio/reset",
