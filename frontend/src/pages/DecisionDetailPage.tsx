@@ -59,6 +59,7 @@ export default function DecisionDetailPage() {
     queryKey: ["scorecards", symbol, date],
     queryFn:  () => api.aiScorecards(symbol, date),
   });
+  const [building, setBuilding] = useState(false);
 
   if (files.isLoading || scorecards.isLoading) return <Loading />;
   if (files.error) return <ErrorBox error={files.error} />;
@@ -86,8 +87,6 @@ export default function DecisionDetailPage() {
 
   const decision   = pm?.score_value as string | undefined;
   const conviction = bull ? (bull.score_value as number) : undefined;
-
-  const [building, setBuilding] = useState(false);
 
   async function downloadPdf() {
     setBuilding(true);
