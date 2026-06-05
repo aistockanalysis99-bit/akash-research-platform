@@ -454,6 +454,36 @@ class VirtualPortfolio:
             n += 1
         return n
 
+    def reopen_position(self, position_id: int) -> bool:
+        """Undo a close: flip a closed position back to open and reverse the
+        sale proceeds that the close added to cash. Used to recover from an
+        erroneous/accidental close. Returns False if not a closed position."""
+        pos = self.get(position_id)
+        if pos is None or pos["status"] != "closed":
+            return False
+        mult = float(pos.get("multiplier") or (100 if (pos.get("instrument_type") == "option") else 1))
+        exit_price = float(pos.get("exit_price") or 0)
+        units = float(pos["units"])
+        # Reverse the proceeds _do_close credited to cash on the way out.
+        if exit_price > 0:
+            proceeds = exit_price * units * mult
+            live_settings.set_cash_balance(live_settings.get_cash_balance() - proceeds)
+        # stop_alerted_on=today so a still-breached position doesn't immediately
+        # re-fire an alert the moment it's reopened.
+        self.conn.execute(
+            """
+            UPDATE virtual_positions
+            SET status='open', exit_date=NULL, exit_price=NULL, exit_reason=NULL,
+                final_pnl_usd=NULL, final_pnl_pct=NULL, stop_alerted_on=?
+            WHERE id=?
+            """,
+            (date.today().isoformat(), position_id),
+        )
+        self.conn.commit()
+        log.info("Reopened position #%d: %s (reversed $%.2f proceeds)",
+                 position_id, pos["symbol"], exit_price * units * mult)
+        return True
+
     async def refresh_all(self, fmp: Optional[FMPClient] = None) -> dict[str, Any]:
         """Re-fetch latest price for all open positions, update P&L, check stops.
 
@@ -524,7 +554,7 @@ class VirtualPortfolio:
                 log.warning("UW unavailable for option marks: %s", e)
 
         refreshed = 0
-        closed_by_stop = 0
+        stop_alerts: list[dict] = []
         errors: list[str] = []
 
         for pos in positions:
@@ -574,13 +604,24 @@ class VirtualPortfolio:
             pnl_usd = (new_price - entry) * units * mult
             pnl_pct = (new_price / entry - 1) * 100.0
 
-            if new_price <= new_trail:
-                fresh = self.get(pos["id"])
-                if fresh is None or fresh["status"] != "open":
-                    continue
-                self._do_close(fresh, float(new_price), "stop_hit")
-                closed_by_stop += 1
-                continue
+            # Trailing-stop is NOTIFY-ONLY. The system never auto-closes a
+            # position — the client manages every exit manually. When price
+            # breaches the suggested stop we flag it and alert on Telegram once
+            # per breach event (cleared if it recovers, so a re-breach re-alerts).
+            breached = new_price <= new_trail
+            prev_alerted = pos.get("stop_alerted_on")
+            new_alerted = prev_alerted
+            if breached and not prev_alerted:
+                stop_alerts.append({
+                    "symbol": pos["symbol"],
+                    "price": new_price,
+                    "stop": new_trail,
+                    "pnl_pct": pnl_pct,
+                    "pnl_usd": pnl_usd,
+                })
+                new_alerted = date.today().isoformat()
+            elif not breached and prev_alerted:
+                new_alerted = None
 
             self.conn.execute(
                 """
@@ -588,14 +629,14 @@ class VirtualPortfolio:
                 SET current_price=?, high_water_mark=?, trailing_stop=?,
                     current_pnl_usd=?, current_pnl_pct=?,
                     prev_close=?, day_change_pct=?,
-                    last_updated=?, days_held=?
+                    last_updated=?, days_held=?, stop_alerted_on=?
                 WHERE id=?
                 """,
                 (
                     new_price, new_hwm, new_trail,
                     pnl_usd, pnl_pct,
                     prev_close, day_change_pct,
-                    datetime.utcnow().isoformat(), days_held,
+                    datetime.utcnow().isoformat(), days_held, new_alerted,
                     pos["id"],
                 ),
             )
@@ -604,11 +645,42 @@ class VirtualPortfolio:
         self.conn.commit()
         # Record a daily equity snapshot so the value-over-time chart has data.
         self.record_equity_snapshot()
+
+        # Notify (never close) on any newly-breached stops.
+        if stop_alerts:
+            await self._send_stop_alerts(stop_alerts)
+
         return {
             "refreshed": refreshed,
-            "closed_by_stop": closed_by_stop,
+            "closed_by_stop": 0,          # auto-close is permanently disabled
+            "stop_alerts": stop_alerts,
             "errors": errors,
         }
+
+    async def _send_stop_alerts(self, alerts: list[dict]) -> None:
+        """Telegram a plain-language alert for each position that just breached
+        its suggested stop. The system does NOT sell — the client decides."""
+        try:
+            from .telegram import telegram as _telegram
+            client = _telegram()
+            for a in alerts:
+                pnl = a.get("pnl_usd") or 0.0
+                pct = a.get("pnl_pct") or 0.0
+                msg = (
+                    f"⚠️ Heads up on {a['symbol']}\n\n"
+                    f"{a['symbol']} has dropped to ${a['price']:,.2f}, below its "
+                    f"suggested stop of ${a['stop']:,.2f}.\n"
+                    f"Position is {'down' if pnl < 0 else 'up'} "
+                    f"${abs(pnl):,.0f} ({pct:+.1f}%) since entry.\n\n"
+                    f"The system has NOT sold anything — this is just a heads-up. "
+                    f"You decide whether to hold or exit {a['symbol']} in your real account."
+                )
+                try:
+                    await client.send_message(msg, kind="stop_alert", symbol=a["symbol"])
+                except Exception as e:  # noqa: BLE001
+                    log.warning("stop alert send failed for %s: %s", a["symbol"], e)
+        except Exception as e:  # noqa: BLE001
+            log.warning("stop alert dispatch failed: %s", e)
 
     # ------------------------------------------------------------------ #
     # Equity history + manual entry (broker-style features)

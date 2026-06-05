@@ -214,6 +214,9 @@ _MIGRATIONS = [
     ("virtual_positions", "strike", "REAL"),
     ("virtual_positions", "expiry", "TEXT"),               # YYYY-MM-DD
     ("virtual_positions", "multiplier", "REAL DEFAULT 1"),
+    # Stop-alert de-dupe: the date we last notified that this position breached
+    # its trailing stop. The system NEVER auto-closes — it only notifies.
+    ("virtual_positions", "stop_alerted_on", "TEXT"),
 ]
 
 

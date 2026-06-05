@@ -686,6 +686,19 @@ async def portfolio_close(position_id: int, payload: dict[str, Any] | None = Non
     return {"closed": True, "position_id": position_id}
 
 
+@app.post("/portfolio/reopen/{position_id}")
+async def portfolio_reopen(position_id: int) -> dict[str, Any]:
+    """Undo a close — reopen a closed position and reverse its cash proceeds."""
+    p = VirtualPortfolio()
+    try:
+        ok = p.reopen_position(position_id)
+    finally:
+        p.close_conn()
+    if not ok:
+        raise HTTPException(404, "position not found or not closed")
+    return {"reopened": True, "position_id": position_id}
+
+
 @app.post("/portfolio/close-all")
 async def portfolio_close_all() -> dict[str, Any]:
     """Close every open position at current last-known price."""

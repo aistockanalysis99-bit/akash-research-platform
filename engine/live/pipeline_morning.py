@@ -139,36 +139,31 @@ async def run_morning_cycle(
             _step("exit_confirmer", "no exits flagged — skipping")
     state["exit_confirmations"] = confirmations
 
-    # 5. Execute confirmed exits in the portfolio
-    executed: list[dict[str, Any]] = []
+    # 5. Surface confirmed-exit suggestions — NEVER auto-close.
+    #    The client manages every exit manually; the system only notifies.
+    suggested_exits: list[dict[str, Any]] = []
     if confirmations:
-        portfolio = VirtualPortfolio()
-        try:
-            for symbol, conf in confirmations.items():
-                if conf.verdict != "CONFIRM_EXIT":
-                    continue
-                # Find the position id
-                pos = next((p for p in state["open_positions"]
-                            if p["symbol"] == symbol), None)
-                if pos is None:
-                    continue
-                ok = portfolio.manual_close(
-                    pos["id"], exit_reason="morning_review",
-                )
-                if ok:
-                    executed.append({
-                        "symbol": symbol,
-                        "position_id": pos["id"],
-                        "exit_reason": "morning_review",
-                        "urgency": conf.urgency,
-                    })
-        finally:
-            portfolio.close_conn()
-    state["executed_exits"] = executed
-    if executed:
-        _step("exits_executed",
-              f"closed {len(executed)} position(s): "
-              + ", ".join(e["symbol"] for e in executed))
+        for symbol, conf in confirmations.items():
+            if conf.verdict != "CONFIRM_EXIT":
+                continue
+            pos = next((p for p in state["open_positions"]
+                        if p["symbol"] == symbol), None)
+            if pos is None:
+                continue
+            suggested_exits.append({
+                "symbol": symbol,
+                "position_id": pos["id"],
+                "urgency": getattr(conf, "urgency", None),
+                "reason": getattr(conf, "exit_reasoning", "") or "",
+            })
+    # Auto-close is permanently disabled — nothing is ever executed automatically.
+    state["executed_exits"] = []
+    state["suggested_exits"] = suggested_exits
+    if suggested_exits:
+        _step("exit_suggestions",
+              f"{len(suggested_exits)} exit suggestion(s) — NOT executed, "
+              "client decides: " + ", ".join(e["symbol"] for e in suggested_exits))
+        await _notify_exit_suggestions(suggested_exits)
 
     # 6. Agent 13: Morning Briefing
     _step("morning_briefing", "writing daily client briefing",
@@ -230,6 +225,31 @@ async def _run_agent_with_morning_writes(
     new_state: MorningState = dict(state)  # type: ignore[assignment]
     new_state[slot] = result.instance  # type: ignore[literal-required]
     return new_state
+
+
+async def _notify_exit_suggestions(suggestions: list[dict[str, Any]]) -> None:
+    """Telegram a plain-language exit SUGGESTION per flagged position.
+    The system never sells — the client decides whether to act."""
+    try:
+        from .telegram import telegram as _telegram
+        client = _telegram()
+        for s in suggestions:
+            urg = (s.get("urgency") or "").replace("_", " ")
+            reason = (s.get("reason") or "").strip()
+            msg = (
+                f"⚠️ Exit suggestion: {s['symbol']}\n\n"
+                f"The system suggests you consider exiting {s['symbol']}"
+                + (f" ({urg})" if urg else "") + ".\n"
+                + (f"\nWhy: {reason}\n" if reason else "")
+                + "\nThe system has NOT sold anything — this is only a suggestion. "
+                f"You decide whether to exit {s['symbol']} in your real account."
+            )
+            try:
+                await client.send_message(msg, kind="exit_suggestion", symbol=s["symbol"])
+            except Exception as e:  # noqa: BLE001
+                log.warning("exit suggestion send failed for %s: %s", s["symbol"], e)
+    except Exception as e:  # noqa: BLE001
+        log.warning("exit suggestion dispatch failed: %s", e)
 
 
 async def _run_exit_confirmers(
