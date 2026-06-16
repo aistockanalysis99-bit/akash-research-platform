@@ -88,13 +88,14 @@ class GeminiClient:
     # Retry helper
     # ------------------------------------------------------------------ #
 
-    async def _call_with_backoff(self, prompt: str, cfg, max_retries: int = 3):
-        """Call generate_content with retries on transient 429/503 errors.
+    async def _call_with_backoff(self, prompt: str, cfg, max_retries: int = 6):
+        """Call generate_content with retries on transient errors.
 
-        Honors the `retryDelay` hint that Google sometimes returns. For
-        non-transient errors (400, 401, 402, 404) we fail fast — no point
-        retrying. Daily-quota 429s are still raised after retries exhaust;
-        the per-minute 429s should clear in ~60s.
+        Gemini's "503 UNAVAILABLE — model experiencing high demand" spikes are
+        temporary but can last longer than a couple of seconds, so we retry up
+        to `max_retries` times with a capped exponential backoff (~60s of total
+        coverage). Honors the server's `retryDelay` hint when present. For
+        non-transient errors (400, 401, 402, 404) we fail fast.
         """
         last_exc: Exception | None = None
         for attempt in range(max_retries):
@@ -105,12 +106,22 @@ class GeminiClient:
             except Exception as e:  # noqa: BLE001 — we filter by string
                 last_exc = e
                 msg = str(e)
-                transient = ("429" in msg or "RESOURCE_EXHAUSTED" in msg
-                             or "503" in msg or "UNAVAILABLE" in msg)
+                lower = msg.lower()
+                transient = (
+                    "429" in msg or "RESOURCE_EXHAUSTED" in msg
+                    or "500" in msg or "502" in msg or "503" in msg or "504" in msg
+                    or "UNAVAILABLE" in msg or "INTERNAL" in msg
+                    or "overloaded" in lower or "high demand" in lower
+                    or "try again" in lower
+                )
                 if not transient or attempt == max_retries - 1:
                     raise
-                # Server-suggested delay, if present; else jittered exponential.
-                wait = _parse_retry_delay(msg) or (2 ** attempt + random.uniform(0, 0.5))
+                # Server-suggested delay (capped), else jittered, capped exponential.
+                server = _parse_retry_delay(msg)
+                if server is not None:
+                    wait = min(server, 60.0)
+                else:
+                    wait = min(30.0, 2.0 * (2 ** attempt)) + random.uniform(0, 1.0)
                 log.warning(
                     "Gemini transient error (attempt %d/%d): %s — sleeping %.1fs",
                     attempt + 1, max_retries, msg[:120], wait,
@@ -133,11 +144,6 @@ def _parse_retry_delay(err_msg: str) -> float | None:
         return float(m.group(1))
     except ValueError:
         return None
-
-    @property
-    def last_response_text(self) -> str:
-        """Empty hook — kept for symmetry with the Claude client (later phase)."""
-        return ""
 
 
 def gemini_pro(temperature: float = 0.2) -> GeminiClient:

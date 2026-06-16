@@ -131,8 +131,12 @@ class ClaudeClient:
     # Retry helper
     # ------------------------------------------------------------------ #
 
-    async def _messages_create_with_backoff(self, max_retries: int = 3, **kwargs):
-        """Call Anthropic messages.create with retries on transient 429/529 errors."""
+    async def _messages_create_with_backoff(self, max_retries: int = 5, **kwargs):
+        """Call Anthropic messages.create with retries on transient errors.
+
+        Capped exponential backoff (~60s coverage) rides out overload/rate
+        spikes; non-transient errors (400/401/404) fail fast.
+        """
         last_exc: Exception | None = None
         for attempt in range(max_retries):
             try:
@@ -140,14 +144,16 @@ class ClaudeClient:
             except Exception as e:  # noqa: BLE001 — filter by string/type
                 last_exc = e
                 msg = str(e)
+                lower = msg.lower()
                 status = getattr(e, "status_code", None)
-                transient = (status in (429, 529, 503, 502)
+                transient = (status in (429, 529, 500, 502, 503, 504)
                              or "429" in msg or "529" in msg
-                             or "overloaded" in msg.lower()
-                             or "rate" in msg.lower())
+                             or "500" in msg or "502" in msg or "503" in msg or "504" in msg
+                             or "overloaded" in lower or "rate" in lower
+                             or "unavailable" in lower or "timeout" in lower)
                 if not transient or attempt == max_retries - 1:
                     raise
-                wait = 2 ** attempt + random.uniform(0, 0.5)
+                wait = min(30.0, 2.0 * (2 ** attempt)) + random.uniform(0, 1.0)
                 log.warning(
                     "Anthropic transient error (attempt %d/%d): %s — sleeping %.1fs",
                     attempt + 1, max_retries, msg[:120], wait,
