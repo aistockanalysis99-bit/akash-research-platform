@@ -69,6 +69,16 @@ async def run_morning_cycle(
     _step("init", f"snapshotting portfolio for {today}")
     portfolio = VirtualPortfolio()
     try:
+        # Refresh live prices FIRST so stop/exit evaluation uses today's prices,
+        # not a stale snapshot. (This also fires notify-only stop alerts.)
+        try:
+            _step("refresh", "refreshing live position prices...")
+            res = await portfolio.refresh_all()
+            _step("refresh",
+                  f"refreshed {res.get('refreshed', 0)} position(s), "
+                  f"{len(res.get('stop_alerts', []))} stop alert(s)")
+        except Exception as e:  # noqa: BLE001
+            _step("refresh", f"price refresh failed (using last-known): {e}")
         state["open_positions"] = portfolio.list_open()
         state["portfolio_snapshot"] = portfolio.equity_snapshot()
     finally:

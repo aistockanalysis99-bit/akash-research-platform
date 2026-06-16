@@ -33,12 +33,16 @@ export default function PortfolioPage() {
   const open = useQuery({ queryKey: ["open"], queryFn: api.portfolioOpen });
   const closed = useQuery({ queryKey: ["closed"], queryFn: () => api.portfolioClosed(50) });
   const history = useQuery({ queryKey: ["pfHistory"], queryFn: api.portfolioHistory });
+  const settings = useQuery({ queryKey: ["settings"], queryFn: api.getSettings });
 
   const [buyOpen, setBuyOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
   const [cashOpen, setCashOpen] = useState(false);
+  const [maxOpen, setMaxOpen] = useState(false);
   const [detailId, setDetailId] = useState<number | null>(null);
+
+  const maxPositions = Number(settings.data?.portfolio?.max_positions?.value ?? 30);
 
   const invalidate = () => {
     ["snap", "open", "closed", "pfHistory"].forEach((k) =>
@@ -183,7 +187,19 @@ export default function PortfolioPage() {
 
       {/* Holdings */}
       <div className="flex items-center justify-between mb-2">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400">Holdings</h2>
+        <div className="flex items-baseline gap-3">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400">Holdings</h2>
+          <button
+            onClick={() => setMaxOpen(true)}
+            title="Set the maximum number of stocks"
+            className={cn(
+              "text-xs font-mono hover:text-brand transition-colors",
+              positions.length >= maxPositions ? "text-warn" : "text-gray-500"
+            )}
+          >
+            {positions.length} / {maxPositions} max ✎
+          </button>
+        </div>
         {positions.length > 0 && (
           <button
             onClick={() => confirm("Sell ALL holdings at current price?") && closeAll.mutate()}
@@ -328,6 +344,14 @@ export default function PortfolioPage() {
           onDone={invalidate}
         />
       )}
+      {maxOpen && (
+        <MaxPositionsModal
+          current={maxPositions}
+          held={positions.length}
+          onClose={() => setMaxOpen(false)}
+          onDone={() => qc.invalidateQueries({ queryKey: ["settings"] })}
+        />
+      )}
       {detailId != null && (
         <PositionDrawer positionId={detailId} onClose={() => setDetailId(null)} onChanged={invalidate} />
       )}
@@ -425,6 +449,65 @@ function CashModal({
           <Button variant="ghost" onClick={onClose}>Cancel</Button>
           <Button onClick={() => save.mutate()} disabled={save.isPending}>
             {save.isPending ? "Saving…" : "Save cash"}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MaxPositionsModal({
+  current,
+  held,
+  onClose,
+  onDone,
+}: {
+  current: number;
+  held: number;
+  onClose: () => void;
+  onDone: () => void;
+}) {
+  const [max, setMax] = useState(current);
+  const save = useMutation({
+    mutationFn: () => api.updateSettings({ virtual_max_positions: Math.round(max) }),
+    onSuccess: () => {
+      onDone();
+      onClose();
+    },
+  });
+  const tooLow = max < held;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={onClose}>
+      <div className="card p-6 w-[400px]" onClick={(e) => e.stopPropagation()}>
+        <h3 className="text-lg font-bold text-white mb-1">Maximum stocks in portfolio</h3>
+        <p className="text-xs text-gray-400 mb-4">
+          The most distinct positions the portfolio will hold. Adding a stock beyond
+          this limit is blocked until you raise it or remove a position. You currently
+          hold <b className="text-gray-200">{held}</b>.
+        </p>
+        <label className="block mb-2">
+          <span className="text-xs uppercase text-gray-500 mb-1 block">Max positions</span>
+          <input
+            type="number"
+            value={max}
+            min={1}
+            max={200}
+            step={1}
+            onChange={(e) => setMax(Number(e.target.value))}
+            className="w-full bg-bg-soft border border-line rounded-lg px-3 py-2 text-sm stat-num focus:border-brand/50 outline-none"
+          />
+        </label>
+        {tooLow && (
+          <div className="text-xs text-warn mb-2">
+            Below your current {held} holdings — existing positions are kept, but you can't add
+            more until you're under the limit.
+          </div>
+        )}
+        {save.error && <div className="text-sm text-neg mb-3">{(save.error as Error).message}</div>}
+        <div className="flex items-center justify-end gap-2 mt-2">
+          <Button variant="ghost" onClick={onClose}>Cancel</Button>
+          <Button onClick={() => save.mutate()} disabled={save.isPending || max < 1}>
+            {save.isPending ? "Saving…" : "Save limit"}
           </Button>
         </div>
       </div>

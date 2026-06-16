@@ -741,6 +741,13 @@ async def portfolio_buy(payload: dict[str, Any]) -> dict[str, Any]:
 
     p = VirtualPortfolio()
     try:
+        max_pos = live_settings.get_max_positions()
+        if len(p.list_open()) >= max_pos and not p.has_open_for_symbol(symbol):
+            raise HTTPException(
+                400,
+                f"Portfolio is at its {max_pos}-position maximum. "
+                f"Raise the limit in Settings or remove a position first.",
+            )
         pos_id = p.create_manual(symbol, amount, price)
     finally:
         p.close_conn()
@@ -905,11 +912,18 @@ async def portfolio_import(payload: dict[str, Any]) -> dict[str, Any]:
     results: list[dict[str, Any]] = []
     p = VirtualPortfolio()
     try:
+        max_pos = live_settings.get_max_positions()
+        open_count = len(p.list_open())
         for idx, r in enumerate(rows):
             sym = str(r.get("symbol", "")).upper().strip()
             is_opt = (r.get("instrument_type") or "stock") == "option"
             label = sym
             try:
+                if open_count >= max_pos:
+                    results.append({"symbol": sym or "?", "status": "skipped",
+                                    "detail": f"portfolio at its {max_pos}-position max — "
+                                              "raise the limit in Settings"})
+                    continue
                 shares = float(r.get("shares", 0) or 0)
                 entry_price = float(r.get("entry_price", 0) or 0)
                 entry_date = r.get("entry_date") or None
@@ -943,6 +957,7 @@ async def portfolio_import(payload: dict[str, Any]) -> dict[str, Any]:
                     results.append({"symbol": label, "status": "skipped",
                                     "detail": "already held or invalid"})
                 else:
+                    open_count += 1
                     results.append({"symbol": label, "status": "added",
                                     "position_id": pos_id, "price": mark})
             except Exception as e:  # noqa: BLE001

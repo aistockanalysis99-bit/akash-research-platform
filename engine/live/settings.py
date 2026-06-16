@@ -128,6 +128,15 @@ def get_max_gross_pct() -> float:
                        VIRTUAL_MAX_GROSS_PCT, 0.10, 5.0)
 
 
+# Default cap on the number of distinct open positions in the portfolio.
+DEFAULT_MAX_POSITIONS = 30
+
+
+def get_max_positions() -> int:
+    """Maximum number of distinct open positions allowed in the portfolio."""
+    return _get_int("virtual_max_positions", DEFAULT_MAX_POSITIONS, 1, 200)
+
+
 # ---- Scheduler accessors ------------------------------------------------- #
 
 
@@ -177,6 +186,7 @@ def get_all() -> dict[str, Any]:
             "stop_pct":          {"value": get_stop_pct(),           "env_default": VIRTUAL_STOP_PCT},
             "trail_pct":         {"value": get_trail_pct(),          "env_default": VIRTUAL_TRAIL_PCT},
             "max_gross_pct":     {"value": get_max_gross_pct(),      "env_default": VIRTUAL_MAX_GROSS_PCT},
+            "max_positions":     {"value": get_max_positions(),      "env_default": DEFAULT_MAX_POSITIONS},
         },
         "scheduler": {
             "enabled":           {"value": get_scheduler_enabled(),  "env_default": ENABLE_SCHEDULER},
@@ -199,6 +209,7 @@ SETTABLE_KEYS = {
     "virtual_stop_pct",
     "virtual_trail_pct",
     "virtual_max_gross_pct",
+    "virtual_max_positions",
     # scheduler
     "enable_scheduler",
     "scheduler_timezone",

@@ -91,6 +91,15 @@ export const api = {
     ),
   quoteBars: (symbol: string, days = 130) =>
     get<{ date: string; close: number }[]>(`/quote/${symbol}/bars?days=${days}`),
+
+  // Settings (portfolio + scheduler)
+  getSettings: () =>
+    get<{
+      portfolio: Record<string, { value: number | string | boolean; env_default: unknown }>;
+      scheduler: Record<string, { value: number | string | boolean; env_default: unknown }>;
+    }>("/settings"),
+  updateSettings: (updates: Record<string, unknown>) =>
+    post<{ applied: string[]; rejected: string[]; snapshot: unknown }>("/settings", updates),
   portfolioReset: (cash?: number) =>
     post<{ reset: boolean; positions_cleared: number; cash: number }>(
       "/portfolio/reset",
