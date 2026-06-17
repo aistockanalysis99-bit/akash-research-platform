@@ -20,6 +20,7 @@ import logging
 from datetime import date as date_cls
 from typing import Any, Optional
 
+from .. import settings as live_settings
 from ..renderers.risk_manager import render as render_md
 from ..schemas import RiskManagerVerdict
 from .base import Agent
@@ -29,9 +30,10 @@ log = logging.getLogger(__name__)
 # Hard rule thresholds — fund constitution.
 MAX_SECTOR_PCT       = 30.0   # any single sector
 MAX_GROSS_EXP_PCT    = 200.0  # gross exposure cap
-MAX_POSITIONS        = 20
 EARNINGS_HARD_BLOCK  = 3      # days
 EARNINGS_REDUCE      = 7      # days
+# NOTE: the max-position cap is read live from settings (user-configurable in
+# the UI), not hardcoded — see live_settings.get_max_positions().
 
 
 class RiskManagerAgent(Agent):
@@ -59,6 +61,7 @@ class RiskManagerAgent(Agent):
 
         earnings_days = getattr(fundamental, "earnings_risk_days", None)
         n_positions = int(portfolio_snapshot.get("open_positions") or 0)
+        max_positions = live_settings.get_max_positions()
         gross_exp = float(portfolio_snapshot.get("gross_exposure_pct") or 0.0)
         sector_now_pct = float(sector_breakdown.get(sector) or 0.0)
 
@@ -77,11 +80,11 @@ class RiskManagerAgent(Agent):
             rules_triggered.append(f"earnings_in_{earnings_days}_days_reduce")
             det_size = min(det_size if det_size is not None else 100, 50)
 
-        # ---- Hard rule 3: Max positions ----
-        if n_positions >= MAX_POSITIONS:
+        # ---- Hard rule 3: Max positions (user-configurable) ----
+        if n_positions >= max_positions:
             rules_triggered.append("max_positions_reached")
             if det_block is None:
-                det_block = f"Already holding {n_positions}/{MAX_POSITIONS} positions."
+                det_block = f"Already holding {n_positions}/{max_positions} positions."
                 det_size = 0
 
         # ---- Hard rule 4: Gross exposure cap ----
