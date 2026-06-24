@@ -23,8 +23,11 @@ ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
 UW_API_KEY: str = os.getenv("UW_API_KEY", "")
 
 # Model Lab — OpenRouter gateway (one key → DeepSeek, GLM, Qwen, Claude…)
-# Used by the Compare Mode model-evaluation harness, not the live pipeline.
+# Used by the Compare Mode harness AND as an automatic fallback when the
+# primary Gemini API is overloaded (503), so analyses don't fail on a spike.
 OPENROUTER_API_KEY: str = os.getenv("OPENROUTER_API_KEY", "")
+OPENROUTER_FALLBACK_MODEL: str = os.getenv(
+    "OPENROUTER_FALLBACK_MODEL", "qwen/qwen3.7-plus")
 
 def _resolve_path(env_key: str, default_rel: str) -> Path:
     """Resolve a storage path from env.

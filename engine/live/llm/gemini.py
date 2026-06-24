@@ -12,6 +12,7 @@ Both use the same client class with a different default model.
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 import random
 import re
@@ -21,7 +22,7 @@ from google import genai
 from google.genai import types
 from pydantic import BaseModel
 
-from ...config import GOOGLE_API_KEY
+from ...config import GOOGLE_API_KEY, OPENROUTER_API_KEY, OPENROUTER_FALLBACK_MODEL
 
 log = logging.getLogger(__name__)
 
@@ -63,7 +64,11 @@ class GeminiClient:
             response_mime_type="application/json",
             response_schema=schema,
         )
-        response = await self._call_with_backoff(prompt, cfg)
+        try:
+            response = await self._call_with_backoff(prompt, cfg, max_retries=4)
+        except Exception as e:  # noqa: BLE001 — Gemini down/overloaded
+            log.warning("Gemini unavailable (%s) — trying OpenRouter fallback", str(e)[:120])
+            return await self._fallback_structured(prompt, schema)
 
         # google-genai sets response.parsed when the schema validates.
         parsed = getattr(response, "parsed", None)
@@ -81,8 +86,56 @@ class GeminiClient:
     async def invoke_text(self, prompt: str) -> str:
         """Plain text call — used as the fallback path."""
         cfg = types.GenerateContentConfig(temperature=self.temperature)
-        response = await self._call_with_backoff(prompt, cfg)
+        try:
+            response = await self._call_with_backoff(prompt, cfg, max_retries=4)
+        except Exception as e:  # noqa: BLE001
+            log.warning("Gemini unavailable (%s) — trying OpenRouter fallback (text)", str(e)[:120])
+            return await self._fallback_text(prompt)
         return response.text or ""
+
+    # ------------------------------------------------------------------ #
+    # OpenRouter fallback — used only when the primary Gemini API fails.
+    # ------------------------------------------------------------------ #
+
+    async def _fallback_structured(self, prompt: str, schema: Type[T]) -> T | None:
+        if not OPENROUTER_API_KEY:
+            log.warning("no OpenRouter key — cannot fall back; returning None")
+            return None
+        try:
+            from .openrouter import OpenRouterClient, extract_json
+            client = OpenRouterClient()
+            schema_json = json.dumps(schema.model_json_schema())
+            sys = ("You are a precise financial analyst. Return ONLY a JSON object "
+                   "that matches the given schema — no prose, no markdown fences.")
+            fp = f"{prompt}\n\nReturn ONLY valid JSON matching this schema:\n{schema_json}"
+            res = await client.complete(OPENROUTER_FALLBACK_MODEL, fp, system=sys, max_tokens=6000)
+            data = extract_json(res.get("text") or "")
+            if not data:
+                log.warning("fallback %s produced no JSON", OPENROUTER_FALLBACK_MODEL)
+                return None
+            try:
+                inst = schema.model_validate(data)
+                log.info("OpenRouter fallback (%s) succeeded for %s",
+                         OPENROUTER_FALLBACK_MODEL, schema.__name__)
+                return inst
+            except Exception as e:  # noqa: BLE001
+                log.warning("fallback JSON failed schema validation: %s", str(e)[:150])
+                return None
+        except Exception as e:  # noqa: BLE001
+            log.warning("OpenRouter fallback failed: %s", str(e)[:150])
+            return None
+
+    async def _fallback_text(self, prompt: str) -> str:
+        if not OPENROUTER_API_KEY:
+            return ""
+        try:
+            from .openrouter import OpenRouterClient
+            client = OpenRouterClient()
+            res = await client.complete(OPENROUTER_FALLBACK_MODEL, prompt, max_tokens=4000)
+            return res.get("text") or ""
+        except Exception as e:  # noqa: BLE001
+            log.warning("OpenRouter text fallback failed: %s", str(e)[:150])
+            return ""
 
     # ------------------------------------------------------------------ #
     # Retry helper
