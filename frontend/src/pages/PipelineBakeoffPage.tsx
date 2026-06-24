@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Layers, Play, Search } from "lucide-react";
 import { api } from "@/lib/api";
 import { Badge, Button, Card, ErrorBox, PageTitle, Spinner } from "@/components/ui";
@@ -28,6 +28,7 @@ function verdictCls(v?: string): string {
 }
 
 export default function PipelineBakeoffPage() {
+  const qc = useQueryClient();
   const [ticker, setTicker] = useState("");
   const [jobId, setJobId] = useState<string | null>(null);
 
@@ -46,7 +47,18 @@ export default function PipelineBakeoffPage() {
     },
   });
 
+  const history = useQuery({ queryKey: ["bakeoffHistory"], queryFn: api.compareHistory });
+  const scorecard = useQuery({ queryKey: ["bakeoffScorecard"], queryFn: api.compareScorecard });
+
   const data = job.data;
+
+  // When a run finishes, refresh the accumulated scorecard + history.
+  useEffect(() => {
+    if (data?.status === "complete") {
+      qc.invalidateQueries({ queryKey: ["bakeoffHistory"] });
+      qc.invalidateQueries({ queryKey: ["bakeoffScorecard"] });
+    }
+  }, [data?.status, qc]);
   const running = !!jobId && data?.status !== "complete" && data?.status !== "failed";
   const stacks = data?.stacks || [];
 
@@ -184,7 +196,7 @@ export default function PipelineBakeoffPage() {
         </>
       )}
 
-      {!jobId && !start.isPending && (
+      {!jobId && !start.isPending && (history.data?.length ?? 0) === 0 && (
         <Card className="text-center py-12 text-gray-500">
           <Layers className="h-8 w-8 mx-auto mb-2 text-gray-600" />
           <div className="text-gray-300 font-medium">Enter a ticker and run the bake-off</div>
@@ -192,6 +204,83 @@ export default function PipelineBakeoffPage() {
             Each model runs your complete 11-agent pipeline. You'll see every agent's output side by side.
           </div>
         </Card>
+      )}
+
+      {/* ── Scorecard (accumulated across all runs) ─────────── */}
+      {(scorecard.data?.runs_total ?? 0) > 0 && (
+        <div className="mt-8">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 mb-1">
+            Scorecard — across {scorecard.data!.runs_total} run(s)
+          </h2>
+          <p className="text-xs text-gray-500 mb-2">
+            How each model compares to Production over every stock you've tested.
+          </p>
+          <div className="overflow-x-auto rounded-lg border border-line">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="border-b border-line bg-bg-soft text-gray-400">
+                  <th className="text-left p-2 font-semibold">Model</th>
+                  <th className="text-center p-2 font-semibold">Runs</th>
+                  <th className="text-center p-2 font-semibold">Agree w/ Prod</th>
+                  <th className="text-center p-2 font-semibold">Avg conviction</th>
+                  <th className="text-center p-2 font-semibold">Valid output</th>
+                  <th className="text-center p-2 font-semibold">Avg cost</th>
+                  <th className="text-center p-2 font-semibold">Avg time</th>
+                </tr>
+              </thead>
+              <tbody>
+                {scorecard.data!.rows.map((r) => (
+                  <tr key={r.model} className={cn("border-b border-line/40",
+                    r.model === "Production" && "bg-brand/5")}>
+                    <td className="p-2 font-medium text-gray-200">{r.model}</td>
+                    <td className="p-2 text-center text-gray-400">{r.runs}</td>
+                    <td className={cn("p-2 text-center font-semibold",
+                      r.agreement_pct == null ? "text-gray-600"
+                        : r.agreement_pct >= 80 ? "text-pos"
+                        : r.agreement_pct >= 60 ? "text-warn" : "text-neg")}>
+                      {r.model === "Production" ? "—" : r.agreement_pct == null ? "—" : `${r.agreement_pct}%`}
+                    </td>
+                    <td className="p-2 text-center text-gray-300">{r.avg_conviction ?? "—"}</td>
+                    <td className={cn("p-2 text-center",
+                      (r.valid_pct ?? 0) >= 100 ? "text-pos" : "text-warn")}>
+                      {r.valid_pct == null ? "—" : `${r.valid_pct}%`}</td>
+                    <td className="p-2 text-center font-mono text-gray-400">
+                      {r.avg_cost ? `$${r.avg_cost.toFixed(3)}` : "—"}</td>
+                    <td className="p-2 text-center text-gray-400">{r.avg_secs ? `${r.avg_secs}s` : "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* ── History ─────────────────────────────────────────── */}
+      {(history.data?.length ?? 0) > 0 && (
+        <div className="mt-6">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400 mb-2">
+            History — click to reopen
+          </h2>
+          <Card className="p-0 overflow-hidden divide-y divide-line/50">
+            {history.data!.map((h) => (
+              <button
+                key={h.job_id}
+                onClick={() => setJobId(h.job_id)}
+                className={cn("w-full flex items-center gap-3 px-3 py-2 text-left text-sm hover:bg-bg-hover/50",
+                  jobId === h.job_id && "bg-bg-hover/40")}
+              >
+                <span className="font-mono font-bold w-16">{h.symbol}</span>
+                <span className="text-xs text-gray-500 w-28">{(h.created_at || "").slice(0, 16).replace("T", " ")}</span>
+                <span className="flex-1 text-xs text-gray-400 truncate">
+                  {h.verdicts.map((v) => `${v.name.split(" ")[0]}:${v.decision || "?"}`).join("  ·  ")}
+                </span>
+                <span className="text-xs font-mono text-gray-600">
+                  {h.total_cost_usd != null ? `$${h.total_cost_usd.toFixed(2)}` : ""}
+                </span>
+              </button>
+            ))}
+          </Card>
+        </div>
       )}
     </div>
   );

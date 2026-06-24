@@ -1299,6 +1299,20 @@ async def compare_full_start(payload: dict[str, Any]) -> dict[str, Any]:
     return {"job_id": start_bakeoff(symbol), "symbol": symbol}
 
 
+@app.get("/compare/history")
+async def compare_history(limit: int = 60) -> list[dict[str, Any]]:
+    """Past bake-off runs (persisted), newest first."""
+    from engine.live.bakeoff import list_bakeoffs
+    return list_bakeoffs(limit)
+
+
+@app.get("/compare/scorecard")
+async def compare_scorecard() -> dict[str, Any]:
+    """Aggregate model scorecard across all stored bake-off runs."""
+    from engine.live.bakeoff import compute_scorecard
+    return compute_scorecard()
+
+
 @app.get("/compare/full/{job_id}")
 async def compare_full_status(job_id: str) -> dict[str, Any]:
     from engine.live.bakeoff import get_job

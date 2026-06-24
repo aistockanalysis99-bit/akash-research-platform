@@ -127,6 +127,21 @@ export const api = {
         agents?: Record<string, { score?: number | string | null; summary?: string }>;
       }[];
     }>(`/compare/full/${jobId}`),
+  compareHistory: () =>
+    get<{
+      job_id: string; symbol: string; created_at: string; status: string;
+      total_cost_usd?: number;
+      verdicts: { name: string; decision?: string; conviction?: number }[];
+    }[]>("/compare/history"),
+  compareScorecard: () =>
+    get<{
+      runs_total: number;
+      rows: {
+        model: string; runs: number; agreement_pct?: number | null;
+        avg_conviction?: number | null; valid_pct?: number | null;
+        avg_cost?: number | null; avg_secs?: number | null;
+      }[];
+    }>("/compare/scorecard"),
 
   // Settings (portfolio + scheduler)
   getSettings: () =>

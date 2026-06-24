@@ -10,13 +10,168 @@ don't fire Telegram, don't build profiles, and write to an isolated namespace.
 """
 from __future__ import annotations
 
+import json
 import logging
 import threading
 import time
 import uuid
+from datetime import datetime
 from typing import Any, Optional
 
+from ..db.schema import get_connection
+
 log = logging.getLogger(__name__)
+
+
+# --------------------------------------------------------------------------- #
+# Persistence — bake-off runs survive restarts and feed the scorecard.
+# --------------------------------------------------------------------------- #
+
+def _ensure_table() -> None:
+    conn = get_connection()
+    try:
+        conn.execute(
+            """CREATE TABLE IF NOT EXISTS bakeoff_runs (
+                job_id TEXT PRIMARY KEY,
+                symbol TEXT,
+                created_at TEXT,
+                status TEXT,
+                total_cost_usd REAL,
+                results_json TEXT
+            )"""
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def _save_run(job: dict[str, Any]) -> None:
+    try:
+        _ensure_table()
+        conn = get_connection()
+        try:
+            conn.execute(
+                """INSERT OR REPLACE INTO bakeoff_runs
+                   (job_id, symbol, created_at, status, total_cost_usd, results_json)
+                   VALUES (?, ?, ?, ?, ?, ?)""",
+                (job["job_id"], job["symbol"],
+                 job.get("created_at") or datetime.utcnow().isoformat(),
+                 job.get("status"), job.get("total_cost_usd"),
+                 json.dumps(job.get("stacks") or [])),
+            )
+            conn.commit()
+        finally:
+            conn.close()
+    except Exception as e:  # noqa: BLE001 — persistence must never break a run
+        log.warning("bakeoff save failed: %s", e)
+
+
+def _load_run(job_id: str) -> Optional[dict[str, Any]]:
+    _ensure_table()
+    conn = get_connection()
+    try:
+        r = conn.execute(
+            "SELECT * FROM bakeoff_runs WHERE job_id=?", (job_id,)
+        ).fetchone()
+    finally:
+        conn.close()
+    if not r:
+        return None
+    return {
+        "job_id": r["job_id"], "symbol": r["symbol"], "status": r["status"],
+        "created_at": r["created_at"], "total_cost_usd": r["total_cost_usd"],
+        "stacks": json.loads(r["results_json"] or "[]"),
+    }
+
+
+def list_bakeoffs(limit: int = 60) -> list[dict[str, Any]]:
+    """Compact history: one row per past run with each stack's verdict."""
+    _ensure_table()
+    conn = get_connection()
+    try:
+        rows = conn.execute(
+            "SELECT job_id, symbol, created_at, status, total_cost_usd, results_json "
+            "FROM bakeoff_runs ORDER BY created_at DESC LIMIT ?", (limit,),
+        ).fetchall()
+    finally:
+        conn.close()
+    out = []
+    for r in rows:
+        stacks = json.loads(r["results_json"] or "[]")
+        out.append({
+            "job_id": r["job_id"], "symbol": r["symbol"],
+            "created_at": r["created_at"], "status": r["status"],
+            "total_cost_usd": r["total_cost_usd"],
+            "verdicts": [{"name": s.get("name"), "decision": s.get("decision"),
+                          "conviction": s.get("conviction")} for s in stacks],
+        })
+    return out
+
+
+def compute_scorecard() -> dict[str, Any]:
+    """Aggregate across all stored runs: per-model agreement vs Production,
+    avg conviction, valid-output %, avg cost, avg speed."""
+    _ensure_table()
+    conn = get_connection()
+    try:
+        rows = conn.execute(
+            "SELECT results_json FROM bakeoff_runs WHERE status='complete'"
+        ).fetchall()
+    finally:
+        conn.close()
+
+    agg: dict[str, dict[str, float]] = {}
+
+    def bucket(name: str) -> dict[str, float]:
+        return agg.setdefault(name, {
+            "runs": 0, "agree": 0, "compared": 0, "conv_sum": 0, "conv_n": 0,
+            "valid": 0, "valid_n": 0, "cost_sum": 0.0, "cost_n": 0,
+            "secs_sum": 0.0, "secs_n": 0,
+        })
+
+    n_runs = 0
+    for r in rows:
+        stacks = json.loads(r["results_json"] or "[]")
+        if not stacks:
+            continue
+        n_runs += 1
+        prod = next((s for s in stacks if s.get("model") == "production"), None)
+        prod_dec = (prod or {}).get("decision")
+        for s in stacks:
+            name = "Production" if s.get("model") == "production" else s.get("name")
+            b = bucket(name)
+            b["runs"] += 1
+            b["valid_n"] += 1
+            if s.get("ok"):
+                b["valid"] += 1
+                if s.get("conviction") is not None:
+                    b["conv_sum"] += s["conviction"]; b["conv_n"] += 1
+                if s.get("cost_usd"):
+                    b["cost_sum"] += s["cost_usd"]; b["cost_n"] += 1
+                if s.get("secs"):
+                    b["secs_sum"] += s["secs"]; b["secs_n"] += 1
+                if name != "Production" and prod_dec and s.get("decision"):
+                    b["compared"] += 1
+                    if s["decision"] == prod_dec:
+                        b["agree"] += 1
+
+    def pct(a, n): return round(a / n * 100) if n else None
+    def avg(a, n, d=1): return round(a / n, d) if n else None
+
+    out_rows = []
+    for name, b in agg.items():
+        out_rows.append({
+            "model": name,
+            "runs": b["runs"],
+            "agreement_pct": pct(b["agree"], b["compared"]),
+            "avg_conviction": avg(b["conv_sum"], b["conv_n"]),
+            "valid_pct": pct(b["valid"], b["valid_n"]),
+            "avg_cost": avg(b["cost_sum"], b["cost_n"], 3),
+            "avg_secs": avg(b["secs_sum"], b["secs_n"], 0),
+        })
+    # production first, then by agreement desc
+    out_rows.sort(key=lambda x: (x["model"] != "Production", -(x["agreement_pct"] or 0)))
+    return {"runs_total": n_runs, "rows": out_rows}
 
 # The stacks to compare. (display name, OpenRouter model id or None=production)
 STACKS: list[tuple[str, Optional[str]]] = [
@@ -111,6 +266,7 @@ async def _run_async(job_id: str, symbol: str) -> None:
         stacks=list(results),
         total_cost_usd=round(sum((r.get("cost_usd") or 0) for r in results), 4),
     )
+    _save_run(_jobs[job_id])   # persist so it survives restarts + feeds scorecard
 
 
 def _run_thread(job_id: str, symbol: str) -> None:
@@ -120,6 +276,7 @@ def _run_thread(job_id: str, symbol: str) -> None:
     except Exception as e:  # noqa: BLE001
         log.exception("bakeoff job failed")
         _jobs[job_id].update(status="failed", error=str(e)[:300])
+        _save_run(_jobs[job_id])
 
 
 def start_bakeoff(symbol: str) -> str:
@@ -128,10 +285,12 @@ def start_bakeoff(symbol: str) -> str:
     _jobs[job_id] = {
         "job_id": job_id, "symbol": symbol, "status": "running",
         "stacks": [], "models": [n for n, _ in STACKS],
+        "created_at": datetime.utcnow().isoformat(),
     }
     threading.Thread(target=_run_thread, args=(job_id, symbol), daemon=True).start()
     return job_id
 
 
 def get_job(job_id: str) -> Optional[dict[str, Any]]:
-    return _jobs.get(job_id)
+    # In-memory (running or recent) first; else load the persisted run.
+    return _jobs.get(job_id) or _load_run(job_id)
