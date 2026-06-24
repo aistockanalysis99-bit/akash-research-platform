@@ -173,14 +173,21 @@ def compute_scorecard() -> dict[str, Any]:
     out_rows.sort(key=lambda x: (x["model"] != "Production", -(x["agreement_pct"] or 0)))
     return {"runs_total": n_runs, "rows": out_rows}
 
-# The stacks to compare. (display name, OpenRouter model id or None=production)
-STACKS: list[tuple[str, Optional[str]]] = [
-    ("Production (Gemini + Claude)", None),
-    ("DeepSeek-R1", "deepseek/deepseek-r1"),
-    ("GLM-5.2", "z-ai/glm-5.2"),
-    ("Qwen 3.7 Plus", "qwen/qwen3.7-plus"),
-    ("Fugu Ultra", "sakana/fugu-ultra"),
+# The stacks available to compare. model=None means the production Gemini+Claude
+# stack. `default` controls whether it's pre-selected in the UI (Fugu Ultra is
+# off by default — it's the slowest + most expensive).
+STACKS: list[dict[str, Any]] = [
+    {"key": "production", "name": "Production (Gemini + Claude)", "model": None, "default": True},
+    {"key": "deepseek-r1", "name": "DeepSeek-R1", "model": "deepseek/deepseek-r1", "default": True},
+    {"key": "glm-5.2", "name": "GLM-5.2", "model": "z-ai/glm-5.2", "default": True},
+    {"key": "qwen-3.7", "name": "Qwen 3.7 Plus", "model": "qwen/qwen3.7-plus", "default": True},
+    {"key": "fugu-ultra", "name": "Fugu Ultra", "model": "sakana/fugu-ultra", "default": False},
 ]
+
+
+def list_stacks() -> list[dict[str, Any]]:
+    """The stacks the UI can offer as checkboxes (with default selection)."""
+    return [{"key": s["key"], "name": s["name"], "default": s["default"]} for s in STACKS]
 
 # In-memory job store (fine for a manual tool on a single instance).
 _jobs: dict[str, dict[str, Any]] = {}
@@ -241,7 +248,7 @@ def _summarize_stack(name: str, model: Optional[str], state: dict,
     }
 
 
-async def _run_async(job_id: str, symbol: str) -> None:
+async def _run_async(job_id: str, symbol: str, chosen: list[dict[str, Any]]) -> None:
     import asyncio
     from .pipeline import run_full_pipeline
 
@@ -260,7 +267,7 @@ async def _run_async(job_id: str, symbol: str) -> None:
                     "error": str(e)[:300], "cost_usd": round(sum(sink), 4),
                     "secs": round(time.monotonic() - t0, 0), "agents": {}}
 
-    results = await asyncio.gather(*[one(n, m) for n, m in STACKS])
+    results = await asyncio.gather(*[one(s["name"], s["model"]) for s in chosen])
     _jobs[job_id].update(
         status="complete",
         stacks=list(results),
@@ -269,25 +276,31 @@ async def _run_async(job_id: str, symbol: str) -> None:
     _save_run(_jobs[job_id])   # persist so it survives restarts + feeds scorecard
 
 
-def _run_thread(job_id: str, symbol: str) -> None:
+def _run_thread(job_id: str, symbol: str, chosen: list[dict[str, Any]]) -> None:
     import asyncio
     try:
-        asyncio.run(_run_async(job_id, symbol))
+        asyncio.run(_run_async(job_id, symbol, chosen))
     except Exception as e:  # noqa: BLE001
         log.exception("bakeoff job failed")
         _jobs[job_id].update(status="failed", error=str(e)[:300])
         _save_run(_jobs[job_id])
 
 
-def start_bakeoff(symbol: str) -> str:
+def start_bakeoff(symbol: str, model_keys: Optional[list[str]] = None) -> str:
     symbol = symbol.upper().strip()
+    if model_keys:
+        chosen = [s for s in STACKS if s["key"] in model_keys]
+    else:
+        chosen = [s for s in STACKS if s["default"]]
+    if not chosen:
+        chosen = [s for s in STACKS if s["default"]]
     job_id = uuid.uuid4().hex[:12]
     _jobs[job_id] = {
         "job_id": job_id, "symbol": symbol, "status": "running",
-        "stacks": [], "models": [n for n, _ in STACKS],
+        "stacks": [], "models": [s["name"] for s in chosen],
         "created_at": datetime.utcnow().isoformat(),
     }
-    threading.Thread(target=_run_thread, args=(job_id, symbol), daemon=True).start()
+    threading.Thread(target=_run_thread, args=(job_id, symbol, chosen), daemon=True).start()
     return job_id
 
 

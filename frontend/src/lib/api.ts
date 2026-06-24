@@ -111,8 +111,10 @@ export const api = {
     }>("/compare/run", { symbol, models }),
 
   // Full-pipeline bake-off (long-running job)
-  compareFullStart: (symbol: string) =>
-    post<{ job_id: string; symbol: string }>("/compare/full", { symbol }),
+  compareStacks: () =>
+    get<{ key: string; name: string; default: boolean }[]>("/compare/stacks"),
+  compareFullStart: (symbol: string, models: string[]) =>
+    post<{ job_id: string; symbol: string }>("/compare/full", { symbol, models }),
   compareFullStatus: (jobId: string) =>
     get<{
       job_id: string; symbol: string; status: string; error?: string;

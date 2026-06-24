@@ -32,8 +32,14 @@ export default function PipelineBakeoffPage() {
   const [ticker, setTicker] = useState("");
   const [jobId, setJobId] = useState<string | null>(null);
 
+  const stacksQ = useQuery({ queryKey: ["bakeoffStacks"], queryFn: api.compareStacks });
+  const availStacks = stacksQ.data || [];
+  const [picked, setPicked] = useState<Record<string, boolean>>({});
+  const isOn = (s: { key: string; default: boolean }) => picked[s.key] ?? s.default;
+  const selected = availStacks.filter(isOn).map((s) => s.key);
+
   const start = useMutation({
-    mutationFn: () => api.compareFullStart(ticker.trim().toUpperCase()),
+    mutationFn: () => api.compareFullStart(ticker.trim().toUpperCase(), selected),
     onSuccess: (r) => setJobId(r.job_id),
   });
 
@@ -83,11 +89,41 @@ export default function PipelineBakeoffPage() {
               className="w-full bg-bg-soft border border-line rounded-lg pl-9 pr-3 py-2 text-sm font-mono uppercase placeholder:font-sans placeholder:normal-case focus:border-brand/50 outline-none"
             />
           </div>
-          <Button onClick={() => start.mutate()} disabled={!ticker.trim() || running || start.isPending}>
+          <Button onClick={() => start.mutate()} disabled={!ticker.trim() || running || start.isPending || selected.length === 0}>
             {running || start.isPending ? <Spinner /> : <Play className="h-4 w-4" />}
             {running ? "Running…" : "Run bake-off"}
           </Button>
         </div>
+
+        {/* Model picker — choose which stacks to run */}
+        <div className="flex flex-wrap gap-2 mt-3">
+          {availStacks.map((s) => {
+            const on = isOn(s);
+            const costly = s.key === "fugu-ultra";
+            return (
+              <button
+                key={s.key}
+                onClick={() => setPicked((p) => ({ ...p, [s.key]: !on }))}
+                disabled={running}
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs transition-colors disabled:opacity-50",
+                  on ? "border-brand/50 bg-brand/10 text-brand" : "border-line text-gray-500 hover:text-gray-300"
+                )}
+                title={costly ? "Premium + slow — most expensive stack" : undefined}
+              >
+                <span className={cn("h-3.5 w-3.5 rounded-sm border flex items-center justify-center",
+                  on ? "border-brand bg-brand/20" : "border-gray-600")}>
+                  {on && "✓"}
+                </span>
+                {s.name.split(" (")[0]}
+                {costly && <span className="text-[10px] text-warn">$$</span>}
+              </button>
+            );
+          })}
+        </div>
+        {selected.length === 0 && (
+          <div className="text-xs text-warn mt-2">Select at least one model.</div>
+        )}
         {running && (
           <div className="text-xs text-gray-500 mt-3 animate-pulse">
             Running the full 11-agent pipeline on 4 model stacks for {data?.symbol}… this takes

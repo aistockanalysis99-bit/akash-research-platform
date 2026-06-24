@@ -1296,7 +1296,15 @@ async def compare_full_start(payload: dict[str, Any]) -> dict[str, Any]:
     if not OPENROUTER_API_KEY:
         raise HTTPException(400, "OPENROUTER_API_KEY not configured on the server")
     from engine.live.bakeoff import start_bakeoff
-    return {"job_id": start_bakeoff(symbol), "symbol": symbol}
+    model_keys = payload.get("models") or None
+    return {"job_id": start_bakeoff(symbol, model_keys), "symbol": symbol}
+
+
+@app.get("/compare/stacks")
+async def compare_stacks() -> list[dict[str, Any]]:
+    """Available pipeline-bake-off stacks + their default selection."""
+    from engine.live.bakeoff import list_stacks
+    return list_stacks()
 
 
 @app.get("/compare/history")
