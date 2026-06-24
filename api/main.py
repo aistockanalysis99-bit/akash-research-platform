@@ -1284,6 +1284,30 @@ async def compare_run(payload: dict[str, Any]) -> dict[str, Any]:
         raise HTTPException(500, f"compare failed: {str(e)[:200]}")
 
 
+@app.post("/compare/full")
+async def compare_full_start(payload: dict[str, Any]) -> dict[str, Any]:
+    """Start a full-pipeline bake-off: run the COMPLETE 11-agent pipeline on
+    each model stack (Production + DeepSeek + GLM + Qwen) for one stock.
+    Long-running — returns a job_id to poll."""
+    symbol = str(payload.get("symbol", "")).upper().strip()
+    if not symbol:
+        raise HTTPException(400, "symbol required")
+    from engine.config import OPENROUTER_API_KEY
+    if not OPENROUTER_API_KEY:
+        raise HTTPException(400, "OPENROUTER_API_KEY not configured on the server")
+    from engine.live.bakeoff import start_bakeoff
+    return {"job_id": start_bakeoff(symbol), "symbol": symbol}
+
+
+@app.get("/compare/full/{job_id}")
+async def compare_full_status(job_id: str) -> dict[str, Any]:
+    from engine.live.bakeoff import get_job
+    job = get_job(job_id)
+    if job is None:
+        raise HTTPException(404, "job not found")
+    return job
+
+
 # --------------- Telegram (Phase 4) ---------------
 
 

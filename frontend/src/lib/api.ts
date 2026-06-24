@@ -110,6 +110,24 @@ export const api = {
       }[];
     }>("/compare/run", { symbol, models }),
 
+  // Full-pipeline bake-off (long-running job)
+  compareFullStart: (symbol: string) =>
+    post<{ job_id: string; symbol: string }>("/compare/full", { symbol }),
+  compareFullStatus: (jobId: string) =>
+    get<{
+      job_id: string; symbol: string; status: string; error?: string;
+      models?: string[]; total_cost_usd?: number;
+      stacks: {
+        name: string; model: string; ok: boolean; error?: string | null;
+        cost_usd?: number; secs?: number;
+        decision?: string; conviction?: number; position_pct_of_fund?: number;
+        stop_price?: number; stop_pct?: number; sizing_rationale?: string;
+        stop_rationale?: string; telegram_message?: string;
+        telegram_portfolio_message?: string; exit_thesis?: string;
+        agents?: Record<string, { score?: number | string | null; summary?: string }>;
+      }[];
+    }>(`/compare/full/${jobId}`),
+
   // Settings (portfolio + scheduler)
   getSettings: () =>
     get<{

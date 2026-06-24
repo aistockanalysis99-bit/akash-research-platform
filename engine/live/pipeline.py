@@ -372,15 +372,41 @@ async def run_full_pipeline(
     source: str = "manual",
     notes: Optional[str] = None,
     progress: Optional[callable] = None,
+    model_override: Optional[str] = None,
+    test_mode: bool = False,
+    cost_sink: Optional[list] = None,
 ) -> SignalState:
-    """Run all 6 agents end-to-end for one ticker. Returns the final state.
+    """Run all 11 agents end-to-end for one ticker. Returns the final state.
 
-    `progress` is an optional callable: progress(stage_name: str, msg: str)
-    so callers (CLI, web UI) can stream stage transitions to the user.
+    `progress` is an optional callable: progress(stage_name: str, msg: str).
+
+    `model_override`: if set (an OpenRouter model id), EVERY agent runs on that
+    one model instead of Gemini+Claude — used by the full-pipeline bake-off.
+    `test_mode`: don't fire Telegram, don't build profiles, and write artifacts
+    to an isolated `_modeltest/` namespace so production decisions aren't touched.
+    `cost_sink`: optional list to accumulate per-call $ cost (OpenRouter only).
     """
     symbol = symbol.upper()
     today = date.today().isoformat()
-    fs = FileStore()
+    if test_mode:
+        from ..config import AI_RESEARCH_DIR
+        tag = (model_override or "production").replace("/", "_")
+        fs = FileStore(root=AI_RESEARCH_DIR / "_modeltest" / tag)
+    else:
+        fs = FileStore()
+
+    # Client factories: production (Gemini+Claude) or one OpenRouter model.
+    if model_override:
+        from .llm.openrouter_llm import OpenRouterLLM
+
+        def _flash():
+            return OpenRouterLLM(model_override, cost_sink=cost_sink)
+        _sonnet = _opus = _pro = _flash
+    else:
+        _flash = gemini_flash
+        _pro = gemini_pro
+        _sonnet = claude_sonnet
+        _opus = claude_opus
 
     def _step(name: str, msg: str, **extra) -> None:
         log.info("[pipeline:%s] %s", name, msg)
@@ -533,12 +559,12 @@ async def run_full_pipeline(
           model="gemini-2.5-flash", action="start",
           agents=["fundamental", "news", "technical", "institutional_flow",
                   "options_structure", "macro_regime"])
-    fund_agent = FundamentalAgent(gemini_flash(), fs)
-    news_agent = NewsAgent(gemini_flash(), fs)
-    tech_agent = TechnicalAgent(gemini_flash(), fs)
-    inst_agent = InstitutionalFlowAgent(gemini_flash(), fs)
-    opts_agent = OptionsStructureAgent(gemini_flash(), fs)
-    macro_agent = MacroRegimeAgent(gemini_flash(), fs)
+    fund_agent = FundamentalAgent(_flash(), fs)
+    news_agent = NewsAgent(_flash(), fs)
+    tech_agent = TechnicalAgent(_flash(), fs)
+    inst_agent = InstitutionalFlowAgent(_flash(), fs)
+    opts_agent = OptionsStructureAgent(_flash(), fs)
+    macro_agent = MacroRegimeAgent(_flash(), fs)
     (fund_state, news_state, tech_state, inst_state,
      opts_state, macro_state) = await asyncio.gather(
         fund_agent.run(state),
@@ -577,8 +603,8 @@ async def run_full_pipeline(
     _step("debate", "Bull + Bear (parallel, Claude Sonnet)",
           model="claude-sonnet-4-6", action="start",
           agents=["bull", "bear"])
-    bull_agent = BullAgent(claude_sonnet(), fs)
-    bear_agent = BearAgent(claude_sonnet(), fs)
+    bull_agent = BullAgent(_sonnet(), fs)
+    bear_agent = BearAgent(_sonnet(), fs)
     bull_state, bear_state = await asyncio.gather(
         bull_agent.run(state),
         bear_agent.run(state),
@@ -596,7 +622,7 @@ async def run_full_pipeline(
     # 3b. Debate Judge (M16) — scores Bull vs Bear so PM doesn't have to
     _step("judge", "Debate Judge scoring Bull vs Bear (Claude Sonnet)",
           model="claude-sonnet-4-6", action="start", agent="judge")
-    judge_agent = JudgeAgent(claude_sonnet(), fs)
+    judge_agent = JudgeAgent(_sonnet(), fs)
     state = await judge_agent.run(state)
     judge = state.get("judge")
     if judge:
@@ -610,7 +636,7 @@ async def run_full_pipeline(
     _step("risk_manager",
           "Risk Manager checking portfolio caps + soft concentration risk",
           model="claude-sonnet-4-6", action="start", agent="risk")
-    risk_agent = RiskManagerAgent(claude_sonnet(), fs)
+    risk_agent = RiskManagerAgent(_sonnet(), fs)
     state = await risk_agent.run(state)
     risk = state.get("risk")
     if risk:
@@ -625,7 +651,7 @@ async def run_full_pipeline(
     # 5. PM verdict (M16 — Claude Opus for fiduciary-grade reasoning)
     _step("pm", "Portfolio Manager deliberating (Claude Opus)",
           model="claude-opus-4-7", action="start", agent="pm")
-    pm_agent = PMAgent(claude_opus(), fs)
+    pm_agent = PMAgent(_opus(), fs)
     state = await pm_agent.run(state)
     pm = state["pm"]
     _step("pm",
@@ -637,7 +663,7 @@ async def run_full_pipeline(
     # 5. Summary rollup (Gemini Flash)
     _step("summary", "writing executive summary (Gemini Flash)",
           model="gemini-2.5-flash", action="start", agent="summary")
-    summary_agent = SummaryAgent(gemini_flash(), fs)
+    summary_agent = SummaryAgent(_flash(), fs)
     state = await summary_agent.run(state)
     _step("summary", "complete", action="complete")
 
@@ -654,7 +680,7 @@ async def run_full_pipeline(
         if should:
             refresh_reason = reason
 
-    if refresh_reason:
+    if refresh_reason and not test_mode:
         action_label = "build" if existing is None else "refresh"
         _step("profile_build",
               f"{action_label} triggered: {refresh_reason}",
@@ -700,7 +726,7 @@ async def run_full_pipeline(
     # REJECT/HOLD too: the user sees the thesis we wrote and why we didn't
     # execute. Skip only if both message fields are empty (nothing to say).
     pm = state.get("pm")
-    if pm is not None:
+    if pm is not None and not test_mode:
         stock_msg = (getattr(pm, "telegram_message", "") or "").strip()
         port_msg = (getattr(pm, "telegram_portfolio_message", "") or "").strip()
         if stock_msg or port_msg:

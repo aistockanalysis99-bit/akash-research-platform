@@ -18,6 +18,7 @@ import DataPage from "./pages/DataPage";
 import ParamsPage from "./pages/ParamsPage";
 import GuidePage from "./pages/GuidePage";
 import ModelLabPage from "./pages/ModelLabPage";
+import PipelineBakeoffPage from "./pages/PipelineBakeoffPage";
 
 export default function App() {
   return (
@@ -38,6 +39,7 @@ export default function App() {
         <Route path="/weekly" element={<WeeklyPage />} />
         <Route path="/memory" element={<MemoryPage />} />
         <Route path="/model-lab" element={<ModelLabPage />} />
+        <Route path="/pipeline-test" element={<PipelineBakeoffPage />} />
         {/* Backtesting section */}
         <Route path="/backtest" element={<BacktestPage />} />
         <Route path="/runs" element={<RunsPage />} />
