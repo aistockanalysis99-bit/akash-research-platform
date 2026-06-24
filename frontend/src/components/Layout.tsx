@@ -28,6 +28,7 @@ const SECTIONS: {
       { label: "Morning", to: "/morning" },
       { label: "Weekly", to: "/weekly" },
       { label: "Memory", to: "/memory" },
+      { label: "Model Lab", to: "/model-lab" },
     ],
   },
   {
@@ -50,7 +51,8 @@ function sectionForPath(path: string): string {
     path.startsWith("/decisions") ||
     path.startsWith("/morning") ||
     path.startsWith("/weekly") ||
-    path.startsWith("/memory")
+    path.startsWith("/memory") ||
+    path.startsWith("/model-lab")
   )
     return "AI Analysis";
   if (

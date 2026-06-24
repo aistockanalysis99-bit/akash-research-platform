@@ -22,6 +22,10 @@ ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
 # Phase 4 — Unusual Whales (institutional flow + dark pool + options flow)
 UW_API_KEY: str = os.getenv("UW_API_KEY", "")
 
+# Model Lab — OpenRouter gateway (one key → DeepSeek, GLM, Qwen, Claude…)
+# Used by the Compare Mode model-evaluation harness, not the live pipeline.
+OPENROUTER_API_KEY: str = os.getenv("OPENROUTER_API_KEY", "")
+
 def _resolve_path(env_key: str, default_rel: str) -> Path:
     """Resolve a storage path from env.
 

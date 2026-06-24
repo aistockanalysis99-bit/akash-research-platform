@@ -1253,6 +1253,37 @@ async def settings_update(payload: dict[str, Any]) -> dict[str, Any]:
     return result
 
 
+# --------------- Model Lab (Compare Mode) ---------------
+
+
+@app.get("/compare/models")
+async def compare_models() -> list[dict[str, Any]]:
+    """The models available to test in Compare Mode."""
+    from engine.live.compare import MODELS
+    return MODELS
+
+
+@app.post("/compare/run")
+async def compare_run(payload: dict[str, Any]) -> dict[str, Any]:
+    """Run the same stock analysis through several models, side by side.
+
+    Body: {symbol, models: [keys]}. Returns the shared data bundle + per-model
+    structured verdicts + cost/latency.
+    """
+    symbol = str(payload.get("symbol", "")).upper().strip()
+    if not symbol:
+        raise HTTPException(400, "symbol required")
+    model_keys = payload.get("models") or []
+    from engine.config import OPENROUTER_API_KEY
+    if not OPENROUTER_API_KEY:
+        raise HTTPException(400, "OPENROUTER_API_KEY not configured on the server")
+    from engine.live.compare import run_compare
+    try:
+        return await run_compare(symbol, model_keys)
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(500, f"compare failed: {str(e)[:200]}")
+
+
 # --------------- Telegram (Phase 4) ---------------
 
 

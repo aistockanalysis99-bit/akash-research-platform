@@ -92,6 +92,24 @@ export const api = {
   quoteBars: (symbol: string, days = 130) =>
     get<{ date: string; close: number }[]>(`/quote/${symbol}/bars?days=${days}`),
 
+  // Model Lab — Compare Mode
+  compareModels: () =>
+    get<{ key: string; id: string; name: string; tagline: string }[]>("/compare/models"),
+  compareRun: (symbol: string, models: string[]) =>
+    post<{
+      symbol: string;
+      company?: string;
+      bundle: Record<string, any>;
+      total_cost_usd: number;
+      results: {
+        key: string; model: string; tagline: string; ok: boolean;
+        cost_usd?: number; latency_s?: number; error?: string | null; valid_json?: boolean;
+        verdict?: string; conviction?: number; target_price?: number; stop_price?: number;
+        bull_points?: string[]; bear_points?: string[]; key_risk?: string; summary?: string;
+        raw_text?: string;
+      }[];
+    }>("/compare/run", { symbol, models }),
+
   // Settings (portfolio + scheduler)
   getSettings: () =>
     get<{

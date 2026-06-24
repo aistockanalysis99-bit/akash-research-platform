@@ -17,6 +17,7 @@ import ComparePage from "./pages/ComparePage";
 import DataPage from "./pages/DataPage";
 import ParamsPage from "./pages/ParamsPage";
 import GuidePage from "./pages/GuidePage";
+import ModelLabPage from "./pages/ModelLabPage";
 
 export default function App() {
   return (
@@ -36,6 +37,7 @@ export default function App() {
         <Route path="/morning" element={<MorningPage />} />
         <Route path="/weekly" element={<WeeklyPage />} />
         <Route path="/memory" element={<MemoryPage />} />
+        <Route path="/model-lab" element={<ModelLabPage />} />
         {/* Backtesting section */}
         <Route path="/backtest" element={<BacktestPage />} />
         <Route path="/runs" element={<RunsPage />} />
