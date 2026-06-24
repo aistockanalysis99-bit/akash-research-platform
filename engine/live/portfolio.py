@@ -454,6 +454,18 @@ class VirtualPortfolio:
             n += 1
         return n
 
+    def set_ai_stop(self, position_id: int, stop_price: float, rationale: Optional[str] = None) -> bool:
+        """Store an AI-managed stop for a position (used by breach alerts).
+        Notify-only — this never sells; it just sets the level we watch."""
+        if stop_price <= 0:
+            return False
+        self.conn.execute(
+            "UPDATE virtual_positions SET ai_stop_price=?, ai_stop_rationale=? WHERE id=?",
+            (float(stop_price), rationale, position_id),
+        )
+        self.conn.commit()
+        return True
+
     def reopen_position(self, position_id: int) -> bool:
         """Undo a close: flip a closed position back to open and reverse the
         sale proceeds that the close added to cash. Used to recover from an
@@ -597,10 +609,16 @@ class VirtualPortfolio:
                 day_change_pct = (new_price / prev_close - 1) * 100.0
 
             new_hwm = max(pos.get("high_water_mark") or entry, new_price)
-            new_trail = max(
-                float(pos["initial_stop"]),
-                new_hwm * (1 - live_settings.get_trail_pct()),
-            )
+            # AI-managed stop (per-stock, from the daily lifecycle review) takes
+            # precedence over the flat trailing stop when present.
+            ai_stop = pos.get("ai_stop_price")
+            if ai_stop and float(ai_stop) > 0:
+                new_trail = float(ai_stop)
+            else:
+                new_trail = max(
+                    float(pos["initial_stop"]),
+                    new_hwm * (1 - live_settings.get_trail_pct()),
+                )
             pnl_usd = (new_price - entry) * units * mult
             pnl_pct = (new_price / entry - 1) * 100.0
 

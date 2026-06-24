@@ -60,13 +60,25 @@ Score the BULL on each dimension, then score the BEAR on each dimension:
   Bull; tie if within 2 points.
 
 - **conviction_score** (1–10): the PM treats this as the final blended
-  conviction for the trade.
-  - If Bull won by >10 points (total margin): conviction 8–10
-  - If Bull won by 3–10: conviction 6–7
-  - If Bull won narrowly (1–2): conviction 5
-  - If Bear won narrowly: conviction 4
-  - If Bear won by 3–10: conviction 2–3
-  - If Bear won decisively: conviction 1
+  conviction. Score the **absolute strength of the BUY case** after the
+  debate — NOT merely the margin of victory. A strong, well-evidenced bull
+  thesis that clearly survives the bear deserves a high score even when the
+  bear lands real points (a good bear always does). Use the FULL range:
+  - **9–10**: exceptional — bull case is strong AND the bear's best point is
+    fully neutralized. Rare (e.g. accelerating fundamentals + a clear catalyst
+    + smart-money confirmation, bear reduced to valuation-only).
+  - **7–8**: strong buy — the bull clearly wins on the evidence; the bear has
+    a real but manageable concern. **This is the normal score for a good long.**
+    Do NOT shy away from 7–8 just because the bear made fair points.
+  - **5–6**: genuinely mixed — bull and bear roughly balanced, or a solid idea
+    carrying one serious open risk.
+  - **3–4**: bear wins — the case to avoid is stronger.
+  - **1–2**: bear wins decisively — clear avoid.
+
+  CALIBRATION NOTE: historically this system clustered at 5–6 and almost never
+  used 8–10 — that was **mis-calibration**, not caution. If the bull case is
+  genuinely strong and well-supported, score it **7–9**. Reserve 9–10 for the
+  truly exceptional. A close debate between two good cases is a 6–7, not a 5.
 
 - **deciding_factor**: ONE sentence — the single most important point in
   the debate that drove your judgment. Quote specifics.

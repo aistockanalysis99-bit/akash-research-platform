@@ -40,9 +40,11 @@ export default function PortfolioPage() {
   const [resetOpen, setResetOpen] = useState(false);
   const [cashOpen, setCashOpen] = useState(false);
   const [maxOpen, setMaxOpen] = useState(false);
+  const [capOpen, setCapOpen] = useState(false);
   const [detailId, setDetailId] = useState<number | null>(null);
 
   const maxPositions = Number(settings.data?.portfolio?.max_positions?.value ?? 30);
+  const maxSingleNamePct = Number(settings.data?.portfolio?.max_single_name_pct?.value ?? 0.1) * 100;
 
   const invalidate = () => {
     ["snap", "open", "closed", "pfHistory"].forEach((k) =>
@@ -199,6 +201,13 @@ export default function PortfolioPage() {
           >
             {positions.length} / {maxPositions} max ✎
           </button>
+          <button
+            onClick={() => setCapOpen(true)}
+            title="Max weight for any one stock (AI sizes within this)"
+            className="text-xs font-mono text-gray-500 hover:text-brand transition-colors"
+          >
+            ≤ {maxSingleNamePct.toFixed(0)}% / stock ✎
+          </button>
         </div>
         {positions.length > 0 && (
           <button
@@ -349,6 +358,13 @@ export default function PortfolioPage() {
           current={maxPositions}
           held={positions.length}
           onClose={() => setMaxOpen(false)}
+          onDone={() => qc.invalidateQueries({ queryKey: ["settings"] })}
+        />
+      )}
+      {capOpen && (
+        <SingleNameCapModal
+          currentPct={maxSingleNamePct}
+          onClose={() => setCapOpen(false)}
           onDone={() => qc.invalidateQueries({ queryKey: ["settings"] })}
         />
       )}
@@ -507,6 +523,56 @@ function MaxPositionsModal({
         <div className="flex items-center justify-end gap-2 mt-2">
           <Button variant="ghost" onClick={onClose}>Cancel</Button>
           <Button onClick={() => save.mutate()} disabled={save.isPending || max < 1}>
+            {save.isPending ? "Saving…" : "Save limit"}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SingleNameCapModal({
+  currentPct,
+  onClose,
+  onDone,
+}: {
+  currentPct: number;
+  onClose: () => void;
+  onDone: () => void;
+}) {
+  const [pct, setPct] = useState(currentPct);
+  const save = useMutation({
+    mutationFn: () => api.updateSettings({ virtual_max_single_name_pct: Math.round(pct) / 100 }),
+    onSuccess: () => {
+      onDone();
+      onClose();
+    },
+  });
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={onClose}>
+      <div className="card p-6 w-[400px]" onClick={(e) => e.stopPropagation()}>
+        <h3 className="text-lg font-bold text-white mb-1">Max weight per stock</h3>
+        <p className="text-xs text-gray-400 mb-4">
+          The hard ceiling for any single position, as a % of the fund. The AI sizes
+          each holding by conviction and volatility, but can never exceed this — so no
+          one stock can dominate the portfolio.
+        </p>
+        <label className="block mb-4">
+          <span className="text-xs uppercase text-gray-500 mb-1 block">Max % of fund per stock</span>
+          <input
+            type="number"
+            value={pct}
+            min={1}
+            max={100}
+            step={1}
+            onChange={(e) => setPct(Number(e.target.value))}
+            className="w-full bg-bg-soft border border-line rounded-lg px-3 py-2 text-sm stat-num focus:border-brand/50 outline-none"
+          />
+        </label>
+        {save.error && <div className="text-sm text-neg mb-3">{(save.error as Error).message}</div>}
+        <div className="flex items-center justify-end gap-2">
+          <Button variant="ghost" onClick={onClose}>Cancel</Button>
+          <Button onClick={() => save.mutate()} disabled={save.isPending || pct < 1}>
             {save.isPending ? "Saving…" : "Save limit"}
           </Button>
         </div>

@@ -17,7 +17,24 @@ def render(d: PMDecision) -> str:
         f"## {decision_emoji} **Decision: {d.decision}**",
         "",
         f"- **Conviction:** {d.conviction_score}/10",
-        f"- **Recommended size:** {d.recommended_size_pct}% of normal allocation",
+    ]
+
+    # Dynamic, AI-decided risk plan (per-stock).
+    if d.position_pct_of_fund is not None:
+        lines.append(f"- **Position size:** {d.position_pct_of_fund:.1f}% of the fund")
+        if d.sizing_rationale:
+            lines.append(f"  - _{d.sizing_rationale}_")
+    if d.stop_price is not None:
+        stop_txt = f"- **Stop-loss:** ${d.stop_price:,.2f}"
+        if d.stop_pct is not None:
+            stop_txt += f" (−{d.stop_pct:.1f}%)"
+        lines.append(stop_txt)
+        if d.stop_rationale:
+            lines.append(f"  - _{d.stop_rationale}_")
+    if d.position_pct_of_fund is None:
+        lines.append(f"- **Recommended size:** {d.recommended_size_pct}% of normal allocation")
+
+    lines += [
         "",
         "## Investment Rationale",
         "",

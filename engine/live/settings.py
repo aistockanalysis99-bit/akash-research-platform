@@ -137,6 +137,17 @@ def get_max_positions() -> int:
     return _get_int("virtual_max_positions", DEFAULT_MAX_POSITIONS, 1, 200)
 
 
+# Hard ceiling on any single stock's weight, as a fraction of the fund.
+# The AI sizes each position within this cap (default 10%).
+DEFAULT_MAX_SINGLE_NAME_PCT = 0.10
+
+
+def get_max_single_name_pct() -> float:
+    """Max weight for any one stock, as a fraction of total fund (0.10 = 10%)."""
+    return _get_float("virtual_max_single_name_pct",
+                       DEFAULT_MAX_SINGLE_NAME_PCT, 0.01, 1.0)
+
+
 # ---- Scheduler accessors ------------------------------------------------- #
 
 
@@ -187,6 +198,7 @@ def get_all() -> dict[str, Any]:
             "trail_pct":         {"value": get_trail_pct(),          "env_default": VIRTUAL_TRAIL_PCT},
             "max_gross_pct":     {"value": get_max_gross_pct(),      "env_default": VIRTUAL_MAX_GROSS_PCT},
             "max_positions":     {"value": get_max_positions(),      "env_default": DEFAULT_MAX_POSITIONS},
+            "max_single_name_pct": {"value": get_max_single_name_pct(), "env_default": DEFAULT_MAX_SINGLE_NAME_PCT},
         },
         "scheduler": {
             "enabled":           {"value": get_scheduler_enabled(),  "env_default": ENABLE_SCHEDULER},
@@ -210,6 +222,7 @@ SETTABLE_KEYS = {
     "virtual_trail_pct",
     "virtual_max_gross_pct",
     "virtual_max_positions",
+    "virtual_max_single_name_pct",
     # scheduler
     "enable_scheduler",
     "scheduler_timezone",

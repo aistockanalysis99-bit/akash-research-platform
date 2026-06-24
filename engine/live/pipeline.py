@@ -785,59 +785,67 @@ def _build_pricing_context(ctx: dict, snap: dict) -> dict:
             "_note": "Current price unavailable — do NOT fabricate price targets.",
         }
 
-    # Sizing math — must mirror engine.live.portfolio.create_from_pm_decision
-    # exactly so PM's prose matches what the portfolio engine actually does.
-    risk_pct = live_settings.get_risk_pct()
-    stop_pct = live_settings.get_stop_pct()
-    max_gross_pct = live_settings.get_max_gross_pct()
+    # ---- Volatility from recent closes (ATR-style proxy) -------------------
+    # We feed the AI the stock's OWN volatility so it can size + stop per name,
+    # instead of a flat 8% / 25% formula.
+    closes = []
+    for row in price_history:
+        try:
+            c = float(row.get("close") or 0)
+            if c > 0:
+                closes.append(c)
+        except (TypeError, ValueError):
+            continue
+
+    def _ret(days: int):
+        if len(closes) > days:
+            base = closes[-days - 1]
+            return round((last_close / base - 1) * 100, 1) if base else None
+        return None
+
+    atr_pct = None
+    if len(closes) >= 6:
+        window = closes[-21:] if len(closes) >= 21 else closes
+        moves = [abs(window[i] / window[i - 1] - 1) for i in range(1, len(window)) if window[i - 1]]
+        if moves:
+            atr_pct = round(sum(moves) / len(moves) * 100, 2)  # avg daily % move
+
+    # Volatility-based stop guidance: ~3× the average daily move, floored/capped.
+    suggested_stop_pct = None
+    if atr_pct:
+        suggested_stop_pct = round(min(22.0, max(6.0, atr_pct * 3.0)), 1)
 
     equity = float(snap.get("equity") or 0.0)
     current_mv = float(snap.get("open_market_value") or 0.0)
+    max_gross_pct = live_settings.get_max_gross_pct()
     room_usd = max(max_gross_pct * equity - current_mv, 0.0)
 
-    # APPROVE (100%) and RESIZE (50%) scenarios.
-    # Math mirrors engine.live.portfolio.create_from_pm_decision exactly:
-    #   risk_usd = equity * risk_pct * size_factor   ($ at risk in trade)
-    #   units = risk_usd / stop_distance_usd          (shares)
-    #   notional_usd = units * current_price          (position value)
-    # Then cap by gross-exposure room (dollars).
-    def _scenario(size_factor: float) -> dict:
-        risk_usd = equity * risk_pct * size_factor
-        stop_distance_usd = last_close * stop_pct
-        units_target = risk_usd / stop_distance_usd if stop_distance_usd > 0 else 0.0
-        notional_target = units_target * last_close
-        # Cap by available room (both in dollars now)
-        notional_capped = min(notional_target, room_usd)
-        capped = notional_capped < notional_target - 0.01
-        units_final = round(notional_capped / last_close, 4) if last_close > 0 else 0.0
-        return {
-            "size_factor": size_factor,
-            "notional_usd": round(notional_capped, 0),
-            "pct_of_equity": round(notional_capped / equity * 100.0, 2) if equity > 0 else 0.0,
-            "units": units_final,
-            "risk_usd": round(risk_usd, 0),
-            "capped_by_gross_cap": capped,
-        }
-
-    stop_distance_usd = last_close * stop_pct
-    stop_price = last_close * (1.0 - stop_pct)
+    cap_pct = live_settings.get_max_single_name_pct() * 100.0   # e.g. 10.0
+    cap_usd = round(live_settings.get_max_single_name_pct() * equity, 0)
 
     return {
         "data_available": True,
         "current_price": round(last_close, 2),
-        "stop_pct": stop_pct,
-        "stop_distance_usd": round(stop_distance_usd, 2),
-        "stop_price": round(stop_price, 2),
+        # --- the stock's own volatility (drives YOUR size + stop) ---
+        "volatility": {
+            "avg_daily_move_pct": atr_pct,               # "ATR%" — how much it swings/day
+            "return_1m_pct": _ret(21),
+            "return_3m_pct": _ret(63),
+            "return_6m_pct": _ret(126),
+            "high_recent": round(max(closes), 2) if closes else None,
+            "low_recent": round(min(closes), 2) if closes else None,
+            "suggested_stop_pct_guide": suggested_stop_pct,  # ~3× daily move, guidance only
+        },
+        # --- your hard limits (size MUST stay within these) ---
+        "max_single_name_pct": round(cap_pct, 1),
+        "max_single_name_usd": cap_usd,
         "equity_usd": round(equity, 0),
         "available_room_usd": round(room_usd, 0),
-        "available_room_pct_of_equity": round(room_usd / equity * 100.0, 2) if equity > 0 else 0.0,
-        "approve_scenario": _scenario(1.0),
-        "resize_scenario": _scenario(0.5),
         "_note": (
-            "Current price + scenario sizes are AUTHORITATIVE. "
-            "Price targets MUST be expressed relative to current_price. "
-            "Position size in client message MUST cite approve_scenario or "
-            "resize_scenario numbers — not a guess."
+            "Current price is AUTHORITATIVE; price targets MUST be relative to it. "
+            "YOU choose position_pct_of_fund (≤ max_single_name_pct) and a "
+            "volatility-based stop_price — there is no fixed sizing formula. "
+            "Use avg_daily_move_pct: calm stock → tighter stop, jumpy stock → wider."
         ),
     }
 

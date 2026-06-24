@@ -466,6 +466,12 @@ class PositionReview(BaseModel):
     thesis_status: Literal["intact", "weakening", "broken"]
     momentum_status: Literal["strengthening", "stable", "fading"]
     reason: str = Field(..., max_length=1000)
+    # Daily lifecycle risk re-rating (AI-managed, notify-only — never executed)
+    risk_action: Literal["hold", "trim", "add", "tighten_stop", "widen_stop"] = "hold"
+    new_stop_price: Optional[float] = Field(
+        None, description="updated stop for this position, on current volatility")
+    risk_note: Optional[str] = Field(
+        None, max_length=600, description="one-line reason for the risk_action / new stop")
 
 
 class PositionMonitorReport(BaseModel):
@@ -710,7 +716,19 @@ class PMDecision(BaseModel):
     decision: Literal["APPROVE", "RESIZE", "REJECT"]
     conviction_score: int = Field(..., ge=1, le=10)
     recommended_size_pct: int = Field(..., ge=0, le=100,
-                                       description="100=full, 50=half, 0=skip")
+                                       description="legacy: 100=full, 50=half, 0=skip")
+    # Dynamic, AI-decided risk plan (per-stock, set by the PM within guardrails)
+    position_pct_of_fund: Optional[float] = Field(
+        None, ge=0, le=100,
+        description="AI-chosen target weight as % of the TOTAL fund (≤ single-name cap)")
+    stop_price: Optional[float] = Field(
+        None, description="AI-chosen stop price, placed on the stock's own volatility")
+    stop_pct: Optional[float] = Field(
+        None, description="how far below current price the stop sits, as a positive %")
+    sizing_rationale: Optional[str] = Field(
+        None, max_length=400, description="one sentence: why this size for THIS stock")
+    stop_rationale: Optional[str] = Field(
+        None, max_length=400, description="one sentence: why this stop (cite volatility)")
     investment_rationale: InvestmentRationale
     exit_thesis: str = Field(..., max_length=1000)
     monitoring_flags: list[str] = Field(default_factory=list, max_length=8)

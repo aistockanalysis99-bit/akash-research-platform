@@ -132,6 +132,11 @@ async def run_morning_cycle(
                   f"review complete — {counts}",
                   agent="position_review", action="complete",
                   metrics={"counts": counts, "total": len(review.reviews)})
+            # Lifecycle: apply AI-set stops to positions + notify risk suggestions.
+            try:
+                await _apply_lifecycle(review.reviews, _step)
+            except Exception as e:  # noqa: BLE001
+                _step("lifecycle", f"risk re-rating failed (non-fatal): {e}")
 
     # 4. Agent 12: Exit Confirmer (one per EXIT flag, parallel)
     review = state.get("position_review")
@@ -235,6 +240,55 @@ async def _run_agent_with_morning_writes(
     new_state: MorningState = dict(state)  # type: ignore[assignment]
     new_state[slot] = result.instance  # type: ignore[literal-required]
     return new_state
+
+
+async def _apply_lifecycle(reviews: list, step_fn) -> None:
+    """Daily AI-managed risk: store each position's updated stop and Telegram
+    any trim/add/tighten/widen suggestions. Notify-only — never executed."""
+    from .portfolio import VirtualPortfolio
+    from .telegram import telegram as _telegram
+
+    notes: list[dict[str, Any]] = []
+    portfolio = VirtualPortfolio()
+    try:
+        open_by_sym = {p["symbol"].upper(): p for p in portfolio.list_open()}
+        for r in reviews:
+            sym = (getattr(r, "symbol", "") or "").upper()
+            pos = open_by_sym.get(sym)
+            if not pos:
+                continue
+            new_stop = getattr(r, "new_stop_price", None)
+            risk_action = getattr(r, "risk_action", "hold") or "hold"
+            risk_note = getattr(r, "risk_note", None)
+            # Persist the AI stop (used by refresh_all breach alerts) when given.
+            if new_stop and new_stop > 0:
+                portfolio.set_ai_stop(pos["id"], float(new_stop), risk_note)
+            if risk_action != "hold":
+                notes.append({"symbol": sym, "action": risk_action,
+                              "new_stop": new_stop, "note": risk_note})
+    finally:
+        portfolio.close_conn()
+
+    if notes:
+        step_fn("lifecycle",
+                f"{len(notes)} risk suggestion(s): "
+                + ", ".join(f"{n['symbol']}:{n['action']}" for n in notes))
+        client = _telegram()
+        for n in notes:
+            verb = {"trim": "Consider trimming", "add": "Consider adding to",
+                    "tighten_stop": "Tighten the stop on", "widen_stop": "Widen the stop on"}.get(
+                        n["action"], "Review")
+            msg = f"🛠 Risk update: {n['symbol']}\n\n{verb} {n['symbol']}."
+            if n.get("new_stop"):
+                msg += f"\nSuggested new stop: ${float(n['new_stop']):,.2f}."
+            if n.get("note"):
+                msg += f"\n\nWhy: {n['note']}"
+            msg += ("\n\nThe system has NOT changed anything — this is a suggestion. "
+                    f"You decide whether to act on {n['symbol']} in your real account.")
+            try:
+                await client.send_message(msg, kind="risk_update", symbol=n["symbol"])
+            except Exception as e:  # noqa: BLE001
+                log.warning("risk update send failed for %s: %s", n["symbol"], e)
 
 
 async def _notify_exit_suggestions(suggestions: list[dict[str, Any]]) -> None:

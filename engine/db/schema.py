@@ -217,6 +217,10 @@ _MIGRATIONS = [
     # Stop-alert de-dupe: the date we last notified that this position breached
     # its trailing stop. The system NEVER auto-closes — it only notifies.
     ("virtual_positions", "stop_alerted_on", "TEXT"),
+    # AI-managed risk: the per-stock stop the AI set (overrides the flat
+    # trailing stop for breach alerts), refreshed by the daily lifecycle review.
+    ("virtual_positions", "ai_stop_price", "REAL"),
+    ("virtual_positions", "ai_stop_rationale", "TEXT"),
 ]
 
 
