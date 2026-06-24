@@ -27,6 +27,7 @@ MODELS: list[dict[str, str]] = [
     {"key": "deepseek-r1", "id": "deepseek/deepseek-r1",        "name": "DeepSeek-R1",      "tagline": "Deep reasoning / skeptic"},
     {"key": "glm-5.2",     "id": "z-ai/glm-5.2",                "name": "GLM-5.2",          "tagline": "All-rounder / long context"},
     {"key": "qwen-3.7",    "id": "qwen/qwen3.7-plus",           "name": "Qwen 3.7 Plus",    "tagline": "News & filings reader"},
+    {"key": "fugu-ultra",  "id": "sakana/fugu-ultra",           "name": "Fugu Ultra",       "tagline": "Sakana (Japanese lab)"},
     {"key": "claude-opus", "id": "anthropic/claude-opus-4.8",   "name": "Claude Opus 4.8",  "tagline": "Gold-standard baseline"},
 ]
 _BY_KEY = {m["key"]: m for m in MODELS}

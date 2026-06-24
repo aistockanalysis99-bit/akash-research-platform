@@ -24,6 +24,7 @@ STACKS: list[tuple[str, Optional[str]]] = [
     ("DeepSeek-R1", "deepseek/deepseek-r1"),
     ("GLM-5.2", "z-ai/glm-5.2"),
     ("Qwen 3.7 Plus", "qwen/qwen3.7-plus"),
+    ("Fugu Ultra", "sakana/fugu-ultra"),
 ]
 
 # In-memory job store (fine for a manual tool on a single instance).
