@@ -131,8 +131,12 @@ async def _simulate_one_event(symbol: str, earnings_date: date, prior_events: li
     if entry_idx < 0 or exit_idx < 0 or entry_idx >= len(trading_dates):
         return None
     entry_date, exit_date = trading_dates[entry_idx], trading_dates[exit_idx]
-    spot_entry = close_by_date.get(entry_date)
-    if not spot_entry:
+    # FMP close is FULLY split+dividend adjusted. That's correct for realized
+    # MOVE %s above (they're ratios of adjacent bars, so adjustment cancels),
+    # but WRONG as an absolute price level to compare against raw option
+    # strikes/prices. We only keep it as a fallback for the level basis.
+    spot_adj = close_by_date.get(entry_date)
+    if not spot_adj:
         return None
 
     expiry = await poly.first_expiry_after_historical(symbol, earnings_date.isoformat())
@@ -144,22 +148,32 @@ async def _simulate_one_event(symbol: str, earnings_date: date, prior_events: li
     if not strikes:
         return {"earnings_date": earnings_date.isoformat(), "actual_move_pct": actual_move,
                 "hist_median_move_pct": hist_median, "error": "no strikes listed"}
+
+    # Price-LEVEL comparisons (ATM-strike selection, implied-move denominator)
+    # must use a spot in the SAME basis as Polygon's contemporaneous option
+    # strikes/prices — i.e. the RAW, unadjusted underlying close for that date,
+    # NOT FMP's fully-adjusted close. Otherwise any split/dividend between this
+    # past event and today shifts spot away from the strikes and inflates
+    # implied move. Fall back to FMP's adjusted spot only if Polygon has no raw
+    # stock bar for the window.
+    spot_from = (date.fromisoformat(entry_date) - timedelta(days=6)).isoformat()
+    poly_spot = await poly.underlying_close(symbol, spot_from, entry_date, entry_date)
+    spot_entry = poly_spot or spot_adj
+
     atm_strike = min(strikes, key=lambda k: abs(k - spot_entry))
 
-    # Data-integrity guard: FMP's daily bars are DIVIDEND-adjusted only, not
-    # split-adjusted. If the stock split between this past event and today,
-    # old closes stay at the pre-split (much higher) level while Polygon's
-    # option strikes for that expiry are in the OLD (also pre-split, correct
-    # for their own time) regime -- so this check alone won't always catch a
-    # split. What it DOES catch: the nearest listed strike being wildly far
-    # from spot_entry, which happens when the two are actually mismatched.
+    # Sanity backstop: with a correct same-basis spot the nearest listed strike
+    # is essentially always within a strike-increment of spot. If it's >25% off,
+    # the reference data is internally inconsistent for this date (or we fell
+    # back to the adjusted FMP spot across a split) — skip rather than emit a
+    # wrong number.
     if abs(atm_strike - spot_entry) / spot_entry > 0.25:
         return {"earnings_date": earnings_date.isoformat(), "actual_move_pct": actual_move,
                 "hist_median_move_pct": hist_median,
-                "error": (f"nearest strike ${atm_strike} is >25% from the FMP spot "
-                          f"${spot_entry:.2f} for this date -- likely a stock split "
-                          f"between this event and today; skipped rather than "
-                          f"produce a wrong number")}
+                "error": (f"nearest strike ${atm_strike} is >25% from the raw spot "
+                          f"${spot_entry:.2f} for this date -- inconsistent option "
+                          f"reference data (possible unhandled corporate action); "
+                          f"skipped rather than produce a wrong number")}
 
     lo, hi = min(entry_date, exit_date), max(entry_date, exit_date)
     pad_lo = (date.fromisoformat(lo) - timedelta(days=5)).isoformat()
@@ -180,14 +194,17 @@ async def _simulate_one_event(symbol: str, earnings_date: date, prior_events: li
     entry_cost = round(call_entry + put_entry, 4)
     exit_cost = round(call_exit + put_exit, 4)
     implied_move = ev.implied_move_pct(entry_cost, spot_entry)
-    # A sane ATM straddle rarely costs more than ~30% of spot for a
-    # few-weeks expiry. A wildly higher cost is another split/price-regime
-    # mismatch signal worth refusing rather than reporting.
-    if implied_move is not None and implied_move > 30.0:
+    # Pure data-artifact backstop (NOT a volatility filter). Now that spot and
+    # the straddle share one raw basis, a genuinely high-vol name can legitimately
+    # print a 2-week ATM straddle worth 30-50% of spot — we must NOT reject those,
+    # they're the whole point. Only a cost above ~60% of spot is essentially
+    # always a broken quote / unhandled corporate action rather than a real trade.
+    if implied_move is not None and implied_move > 60.0:
         return {"earnings_date": earnings_date.isoformat(), "actual_move_pct": actual_move,
                 "hist_median_move_pct": hist_median,
-                "error": (f"computed implied move {implied_move}% is implausible -- "
-                          f"likely a stock split/price mismatch; skipped")}
+                "error": (f"computed implied move {implied_move}% exceeds the 60% "
+                          f"data-artifact ceiling -- almost certainly a broken quote "
+                          f"or unhandled corporate action; skipped")}
     cheapness = ev.cheapness_ratio(implied_move, hist_median)
     trade_pnl_pct = round((exit_cost / entry_cost - 1) * 100, 2) if entry_cost else None
 

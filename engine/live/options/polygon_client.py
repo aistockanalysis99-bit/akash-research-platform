@@ -135,21 +135,48 @@ class PolygonOptionsClient:
     @staticmethod
     def nearest_bar_close(bars: list[dict], on_or_before_date: str) -> Optional[float]:
         """Closing price of the bar nearest to (and not after) the target date.
-        Options trade thinly — the exact date often has no print."""
-        target_ms = None
-        try:
-            from datetime import datetime as _dt
-            target_ms = _dt.strptime(on_or_before_date, "%Y-%m-%d").timestamp() * 1000
-        except ValueError:
-            return None
+        Options trade thinly — the exact date often has no print.
+
+        Polygon daily-bar timestamps (`t`) are epoch-MILLISECONDS anchored at
+        00:00 US/Eastern, i.e. 04:00-05:00 UTC on that same calendar day. We
+        compare by that UTC-derived CALENDAR DATE, never by a raw epoch built
+        from a naive local datetime: a naive `strptime(...).timestamp()` is
+        interpreted in the *server's* local zone, so on a UTC host (Render is
+        UTC) every bar's 04-05:00-UTC stamp reads as "after" local-midnight of
+        its own date and the target day's bar gets skipped — shifting every
+        entry/exit price one trading day early. Date-string compare is both
+        server-timezone- and DST-proof.
+        """
+        from datetime import datetime as _dt, timezone as _tz
         best = None
+        best_day: Optional[str] = None
         for b in bars:
             t = b.get("t")
-            if t is None or t > target_ms:
+            if t is None:
                 continue
-            if best is None or t > best["t"]:
-                best = b
+            day = _dt.fromtimestamp(t / 1000, _tz.utc).strftime("%Y-%m-%d")
+            if day > on_or_before_date:
+                continue
+            if best_day is None or day > best_day:
+                best_day, best = day, b
         return float(best["c"]) if best else None
+
+    async def underlying_close(self, underlying: str, date_from: str,
+                               date_to: str, on_or_before: str) -> Optional[float]:
+        """RAW (unadjusted) stock close nearest to `on_or_before`, in the SAME
+        price basis as Polygon option strikes/prices.
+
+        FMP's daily bars are fully split+dividend adjusted, so dividing a raw
+        historical straddle cost by an FMP spot distorts implied-move on any
+        name with a corporate action between a past event and today. Pricing
+        the implied-move denominator (and picking the ATM strike) off this raw
+        Polygon close keeps numerator and denominator in one basis. Returns
+        None if Polygon has no stock bar for the window (caller falls back)."""
+        j = await self._get(
+            f"/v2/aggs/ticker/{underlying.upper()}/range/1/day/{date_from}/{date_to}",
+            {"adjusted": "false", "sort": "asc"},
+        )
+        return self.nearest_bar_close(j.get("results") or [], on_or_before)
 
     async def chain_for_expiry(self, underlying: str, expiry: str,
                                strike_lo: float, strike_hi: float) -> list[dict]:

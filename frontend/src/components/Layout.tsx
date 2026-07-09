@@ -1,6 +1,6 @@
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { BookOpen } from "lucide-react";
+import { BookOpen, Sparkles } from "lucide-react";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
@@ -120,6 +120,20 @@ export default function Layout() {
           </div>
           <div className="flex items-center gap-4">
             <NavLink
+              to="/whats-new"
+              className={({ isActive }) =>
+                cn(
+                  "flex items-center gap-1.5 px-2.5 py-1 text-sm font-semibold rounded-lg transition-colors",
+                  isActive
+                    ? "text-brand bg-brand/10"
+                    : "text-gray-400 hover:text-gray-200"
+                )
+              }
+            >
+              <Sparkles className="h-4 w-4" />
+              <span className="hidden sm:block">What's New</span>
+            </NavLink>
+            <NavLink
               to="/guide"
               className={({ isActive }) =>
                 cn(
@@ -147,7 +161,7 @@ export default function Layout() {
           </div>
         </div>
         {/* Row 2: sub-nav for the active section (hidden on the standalone Guide page) */}
-        {!pathname.startsWith("/guide") && (
+        {!pathname.startsWith("/guide") && !pathname.startsWith("/whats-new") && (
         <div className="flex items-center gap-1 px-5 h-10 bg-bg/40 border-t border-line/50 overflow-x-auto">
           {section.items.map((it) => (
             <NavLink

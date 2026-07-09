@@ -17,6 +17,7 @@ import ComparePage from "./pages/ComparePage";
 import DataPage from "./pages/DataPage";
 import ParamsPage from "./pages/ParamsPage";
 import GuidePage from "./pages/GuidePage";
+import WhatsNewPage from "./pages/WhatsNewPage";
 import ModelLabPage from "./pages/ModelLabPage";
 import PipelineBakeoffPage from "./pages/PipelineBakeoffPage";
 import OptionsScannerPage from "./pages/OptionsScannerPage";
@@ -27,8 +28,9 @@ export default function App() {
   return (
     <Routes>
       <Route element={<Layout />}>
-        {/* Guide (cross-cutting) */}
+        {/* Guide + What's New (cross-cutting) */}
         <Route path="/guide" element={<GuidePage />} />
+        <Route path="/whats-new" element={<WhatsNewPage />} />
         {/* Portfolio section */}
         <Route path="/" element={<PortfolioPage />} />
         <Route path="/watchlist" element={<WatchlistPage />} />
