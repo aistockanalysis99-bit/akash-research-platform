@@ -122,6 +122,46 @@ async def _job_weekly_review() -> None:
         log.exception("scheduler: weekly review failed: %s", e)
 
 
+# ---- Options module jobs (fully additive — failures never touch the rest) -- #
+
+
+async def _job_options_scan() -> None:
+    """Evening earnings-straddle scan (16:45 ET, on fresh EOD chains)."""
+    try:
+        from .options.scanner import run_scan
+        res = await run_scan(notify=True)
+        _last_runs["options_scan"] = {
+            "at": datetime.utcnow().isoformat(),
+            "scanned": res.get("scanned"), "qualified": res.get("qualified")}
+    except Exception as e:  # noqa: BLE001
+        log.exception("scheduler: options scan failed: %s", e)
+
+
+async def _job_options_morning() -> None:
+    """Morning mark: refresh open straddles + drift / date-revision / exit-day alerts."""
+    try:
+        from .options.positions import check_exit_alerts, mark_open_positions
+        res = await mark_open_positions(notify=True)
+        n = await check_exit_alerts(notify=True)
+        _last_runs["options_morning"] = {
+            "at": datetime.utcnow().isoformat(),
+            "marked": res.get("marked"), "exit_alerts": n}
+    except Exception as e:  # noqa: BLE001
+        log.exception("scheduler: options morning failed: %s", e)
+
+
+async def _job_options_final_alert() -> None:
+    """Final pre-deadline exit warning (14:45 ET, fresh values, no digest)."""
+    try:
+        from .options.positions import check_exit_alerts, mark_open_positions
+        await mark_open_positions(notify=False)
+        n = await check_exit_alerts(notify=True)
+        _last_runs["options_final_alert"] = {
+            "at": datetime.utcnow().isoformat(), "exit_alerts": n}
+    except Exception as e:  # noqa: BLE001
+        log.exception("scheduler: options final alert failed: %s", e)
+
+
 # --------------------------------------------------------------------------- #
 # Public API
 # --------------------------------------------------------------------------- #
@@ -175,6 +215,28 @@ def start_scheduler(force: bool = False) -> None:
                     day_of_week="fri", timezone=tz),
         id="weekly_review",
         name="Weekly performance review (Friday)",
+        replace_existing=True,
+    )
+    # ---- Options module (earnings straddles) — additive jobs ----
+    sched.add_job(
+        _job_options_scan,
+        CronTrigger(hour=16, minute=45, day_of_week="mon-fri", timezone=tz),
+        id="options_scan",
+        name="Options: earnings-straddle scan",
+        replace_existing=True,
+    )
+    sched.add_job(
+        _job_options_morning,
+        CronTrigger(hour=9, minute=15, day_of_week="mon-fri", timezone=tz),
+        id="options_morning",
+        name="Options: mark positions + exit-day alerts",
+        replace_existing=True,
+    )
+    sched.add_job(
+        _job_options_final_alert,
+        CronTrigger(hour=14, minute=45, day_of_week="mon-fri", timezone=tz),
+        id="options_final_alert",
+        name="Options: final exit warning",
         replace_existing=True,
     )
     sched.start()

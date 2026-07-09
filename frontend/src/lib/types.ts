@@ -176,3 +176,33 @@ export interface TelegramLogRow {
   status?: string;
   error?: string;
 }
+
+export interface OptionPosition {
+  id: number;
+  symbol: string;
+  status: string;
+  contracts: number;
+  strike?: number;
+  expiry?: string;
+  earnings_date?: string;
+  exit_deadline?: string;
+  entry_date?: string;
+  entry_spot?: number;
+  entry_cost?: number;
+  entry_iv?: number;
+  current_value?: number;
+  current_iv?: number;
+  current_spot?: number;
+  pnl_usd?: number;
+  pnl_pct?: number;
+  vega_pnl?: number | null;
+  theta_pnl?: number | null;
+  move_pnl?: number | null;
+  last_marked?: string;
+  exit_date?: string;
+  exit_value?: number;
+  exit_reason?: string;
+  final_pnl_usd?: number;
+  final_pnl_pct?: number;
+  notes?: string;
+}

@@ -33,6 +33,14 @@ const SECTIONS: {
     ],
   },
   {
+    name: "Options",
+    base: "options",
+    items: [
+      { label: "Scanner", to: "/options" },
+      { label: "Positions", to: "/options/positions" },
+    ],
+  },
+  {
     name: "Backtesting",
     base: "backtest",
     items: [
@@ -57,6 +65,7 @@ function sectionForPath(path: string): string {
     path.startsWith("/pipeline-test")
   )
     return "AI Analysis";
+  if (path.startsWith("/options")) return "Options";
   if (
     path.startsWith("/backtest") ||
     path.startsWith("/runs") ||

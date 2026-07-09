@@ -19,6 +19,8 @@ import ParamsPage from "./pages/ParamsPage";
 import GuidePage from "./pages/GuidePage";
 import ModelLabPage from "./pages/ModelLabPage";
 import PipelineBakeoffPage from "./pages/PipelineBakeoffPage";
+import OptionsScannerPage from "./pages/OptionsScannerPage";
+import OptionsPositionsPage from "./pages/OptionsPositionsPage";
 
 export default function App() {
   return (
@@ -40,6 +42,9 @@ export default function App() {
         <Route path="/memory" element={<MemoryPage />} />
         <Route path="/model-lab" element={<ModelLabPage />} />
         <Route path="/pipeline-test" element={<PipelineBakeoffPage />} />
+        {/* Options section */}
+        <Route path="/options" element={<OptionsScannerPage />} />
+        <Route path="/options/positions" element={<OptionsPositionsPage />} />
         {/* Backtesting section */}
         <Route path="/backtest" element={<BacktestPage />} />
         <Route path="/runs" element={<RunsPage />} />

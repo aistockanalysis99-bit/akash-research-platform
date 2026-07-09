@@ -148,6 +148,29 @@ def get_max_single_name_pct() -> float:
                        DEFAULT_MAX_SINGLE_NAME_PCT, 0.01, 1.0)
 
 
+# ---- Options module (earnings-straddle scanner) accessors ------------------ #
+
+
+def get_options_entry_min_days() -> int:
+    return _get_int("options_entry_min_days", 3, 1, 30)
+
+
+def get_options_entry_max_days() -> int:
+    return _get_int("options_entry_max_days", 14, 2, 30)
+
+
+def get_options_cheapness_max() -> float:
+    return _get_float("options_cheapness_max", 0.80, 0.3, 2.0)
+
+
+def get_options_min_oi() -> int:
+    return _get_int("options_min_oi", 500, 0, 100_000)
+
+
+def get_options_max_spread_pct() -> float:
+    return _get_float("options_max_spread_pct", 1.5, 0.1, 20.0)
+
+
 # ---- Scheduler accessors ------------------------------------------------- #
 
 
@@ -200,6 +223,13 @@ def get_all() -> dict[str, Any]:
             "max_positions":     {"value": get_max_positions(),      "env_default": DEFAULT_MAX_POSITIONS},
             "max_single_name_pct": {"value": get_max_single_name_pct(), "env_default": DEFAULT_MAX_SINGLE_NAME_PCT},
         },
+        "options": {
+            "entry_min_days":  {"value": get_options_entry_min_days(),  "env_default": 3},
+            "entry_max_days":  {"value": get_options_entry_max_days(),  "env_default": 14},
+            "cheapness_max":   {"value": get_options_cheapness_max(),   "env_default": 0.80},
+            "min_oi":          {"value": get_options_min_oi(),          "env_default": 500},
+            "max_spread_pct":  {"value": get_options_max_spread_pct(),  "env_default": 1.5},
+        },
         "scheduler": {
             "enabled":           {"value": get_scheduler_enabled(),  "env_default": ENABLE_SCHEDULER},
             "timezone":          {"value": get_scheduler_timezone(), "env_default": SCHEDULER_TIMEZONE},
@@ -223,6 +253,12 @@ SETTABLE_KEYS = {
     "virtual_max_gross_pct",
     "virtual_max_positions",
     "virtual_max_single_name_pct",
+    # options module
+    "options_entry_min_days",
+    "options_entry_max_days",
+    "options_cheapness_max",
+    "options_min_oi",
+    "options_max_spread_pct",
     # scheduler
     "enable_scheduler",
     "scheduler_timezone",

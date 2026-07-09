@@ -5,6 +5,7 @@ import type {
   DecisionRow,
   Health,
   Lesson,
+  OptionPosition,
   Position,
   PortfolioSnapshot,
   ProfileRow,
@@ -144,6 +145,34 @@ export const api = {
         avg_cost?: number | null; avg_secs?: number | null;
       }[];
     }>("/compare/scorecard"),
+
+  // Options module (earnings straddles)
+  optionsScan: (notify = false) =>
+    post<{ scanned: number; qualified: number; universe: number }>(
+      "/options/scan", { notify }),
+  optionsCandidates: () =>
+    get<{
+      id: number; scan_date: string; symbol: string; earnings_date: string;
+      days_to_earnings: number; spot?: number; strike?: number; expiry?: string;
+      straddle_cost?: number; implied_move_pct?: number;
+      hist_median_move_pct?: number; hist_events?: number; cheapness?: number;
+      atm_iv?: number; min_oi?: number; max_leg_spread_pct?: number | null;
+      qualified: number; reject_reason?: string | null; dual_signal: number;
+    }[]>("/options/candidates"),
+  optionsTrack: (candidateId: number, contracts: number) =>
+    post<{ position_id: number }>("/options/track",
+      { candidate_id: candidateId, contracts }),
+  optionsPositions: () =>
+    get<{
+      open: OptionPosition[]; closed: OptionPosition[];
+      stats: { trades: number; win_rate_pct?: number | null;
+               total_pnl_usd: number; avg_win_pct?: number | null;
+               avg_loss_pct?: number | null };
+    }>("/options/positions"),
+  optionsRefresh: () =>
+    post<{ marked: number }>("/options/positions/refresh"),
+  optionsClose: (id: number, reason = "manual") =>
+    post<OptionPosition>(`/options/position/${id}/close`, { reason }),
 
   // Settings (portfolio + scheduler)
   getSettings: () =>

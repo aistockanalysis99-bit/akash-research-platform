@@ -1330,6 +1330,75 @@ async def compare_full_status(job_id: str) -> dict[str, Any]:
     return job
 
 
+# --------------- Options module (earnings straddles) ---------------
+
+
+@app.post("/options/scan")
+async def options_scan(payload: Optional[dict[str, Any]] = None) -> dict[str, Any]:
+    """Run the earnings-straddle scan now. notify=false to skip the digest."""
+    from engine.config import POLYGON_API_KEY
+    if not POLYGON_API_KEY:
+        raise HTTPException(400, "POLYGON_API_KEY not configured on the server")
+    from engine.live.options.scanner import run_scan
+    notify = bool((payload or {}).get("notify", False))
+    try:
+        return await run_scan(notify=notify)
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(500, f"scan failed: {str(e)[:200]}")
+
+
+@app.get("/options/candidates")
+async def options_candidates() -> list[dict[str, Any]]:
+    """Latest scan's candidates (qualified + rejected with reasons)."""
+    from engine.live.options.store import latest_candidates
+    return latest_candidates()
+
+
+@app.post("/options/track")
+async def options_track(payload: dict[str, Any]) -> dict[str, Any]:
+    """Track a scanner candidate as a paper straddle position."""
+    candidate_id = int(payload.get("candidate_id") or 0)
+    contracts = int(payload.get("contracts") or 1)
+    if not candidate_id:
+        raise HTTPException(400, "candidate_id required")
+    from engine.live.options.positions import track_candidate
+    pos_id = track_candidate(candidate_id, contracts)
+    if pos_id is None:
+        raise HTTPException(400, "candidate not found or not priceable")
+    return {"position_id": pos_id}
+
+
+@app.get("/options/positions")
+async def options_positions(status: Optional[str] = None) -> dict[str, Any]:
+    from engine.live.options.store import list_positions, stats
+    return {
+        "open": list_positions("open"),
+        "closed": list_positions("closed", limit=100) if status != "open" else [],
+        "stats": stats(),
+    }
+
+
+@app.post("/options/positions/refresh")
+async def options_positions_refresh() -> dict[str, Any]:
+    """Re-mark all open straddles now (no Telegram)."""
+    from engine.live.options.positions import mark_open_positions
+    try:
+        return await mark_open_positions(notify=False)
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(500, f"refresh failed: {str(e)[:200]}")
+
+
+@app.post("/options/position/{position_id}/close")
+async def options_position_close(position_id: int,
+                                 payload: Optional[dict[str, Any]] = None) -> dict[str, Any]:
+    from engine.live.options.positions import close_position
+    reason = (payload or {}).get("reason", "manual")
+    pos = await close_position(position_id, reason=reason, notify=True)
+    if pos is None:
+        raise HTTPException(404, "position not found or already closed")
+    return pos
+
+
 # --------------- Telegram (Phase 4) ---------------
 
 

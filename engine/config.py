@@ -29,6 +29,9 @@ OPENROUTER_API_KEY: str = os.getenv("OPENROUTER_API_KEY", "")
 OPENROUTER_FALLBACK_MODEL: str = os.getenv(
     "OPENROUTER_FALLBACK_MODEL", "qwen/qwen3.7-plus")
 
+# Options module — Polygon.io/"Massive" (chains, greeks, IV; $79 Developer tier)
+POLYGON_API_KEY: str = os.getenv("POLYGON_API_KEY", "")
+
 def _resolve_path(env_key: str, default_rel: str) -> Path:
     """Resolve a storage path from env.
 
