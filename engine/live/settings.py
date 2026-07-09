@@ -171,6 +171,13 @@ def get_options_max_spread_pct() -> float:
     return _get_float("options_max_spread_pct", 1.5, 0.1, 20.0)
 
 
+def get_options_universe() -> str:
+    """Broad universe the scanner adds on top of watchlist + held stocks.
+    'sp500' (default) · 'sp100' · 'none' (watchlist + holdings only)."""
+    raw = (_get_raw("options_universe") or "sp500").strip().lower()
+    return raw if raw in ("sp500", "sp100", "none") else "sp500"
+
+
 # ---- Scheduler accessors ------------------------------------------------- #
 
 
@@ -229,6 +236,7 @@ def get_all() -> dict[str, Any]:
             "cheapness_max":   {"value": get_options_cheapness_max(),   "env_default": 0.80},
             "min_oi":          {"value": get_options_min_oi(),          "env_default": 500},
             "max_spread_pct":  {"value": get_options_max_spread_pct(),  "env_default": 1.5},
+            "universe":        {"value": get_options_universe(),        "env_default": "sp500"},
         },
         "scheduler": {
             "enabled":           {"value": get_scheduler_enabled(),  "env_default": ENABLE_SCHEDULER},
@@ -259,6 +267,7 @@ SETTABLE_KEYS = {
     "options_cheapness_max",
     "options_min_oi",
     "options_max_spread_pct",
+    "options_universe",
     # scheduler
     "enable_scheduler",
     "scheduler_timezone",

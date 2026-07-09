@@ -28,8 +28,9 @@ from .polygon_client import PolygonOptionsClient
 log = logging.getLogger(__name__)
 
 
-def _universe() -> list[str]:
-    """Watchlist (enabled) + currently-held equity symbols, deduped."""
+async def _universe() -> list[str]:
+    """Watchlist (enabled) + held equity symbols + the configured broad
+    universe (default S&P 500, live-fetched + weekly-cached), deduped."""
     syms = {s.upper() for s in list_enabled_symbols()}
     try:
         from ..portfolio import VirtualPortfolio
@@ -42,6 +43,15 @@ def _universe() -> list[str]:
             p.close_conn()
     except Exception as e:  # noqa: BLE001
         log.warning("options scan: portfolio read failed: %s", e)
+
+    broad = live_settings.get_options_universe()
+    if broad and broad != "none":
+        try:
+            from ...data.universe import get_universe_async
+            extra = await get_universe_async(broad)
+            syms.update(s.upper() for s in extra)
+        except Exception as e:  # noqa: BLE001
+            log.warning("options scan: broad universe '%s' fetch failed: %s", broad, e)
     return sorted(syms)
 
 
@@ -164,13 +174,15 @@ async def run_scan(notify: bool = True) -> dict[str, Any]:
     from ...data.fmp_client import FMPClient
     from ..data.fmp_research import FMPResearchClient
 
-    universe = _universe()
+    universe = await _universe()
     convictions = _latest_convictions()
     results: list[dict[str, Any]] = []
 
     async with FMPClient() as fmp, PolygonOptionsClient() as poly:
         research = FMPResearchClient(fmp)
-        sem = asyncio.Semaphore(4)
+        # Bigger universe (S&P 500) needs more concurrency to finish in a
+        # reasonable window, but still gentle on FMP/Polygon rate limits.
+        sem = asyncio.Semaphore(10)
 
         async def one(sym: str):
             async with sem:
