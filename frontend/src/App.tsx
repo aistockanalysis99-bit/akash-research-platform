@@ -21,6 +21,7 @@ import ModelLabPage from "./pages/ModelLabPage";
 import PipelineBakeoffPage from "./pages/PipelineBakeoffPage";
 import OptionsScannerPage from "./pages/OptionsScannerPage";
 import OptionsPositionsPage from "./pages/OptionsPositionsPage";
+import OptionsBacktestPage from "./pages/OptionsBacktestPage";
 
 export default function App() {
   return (
@@ -45,6 +46,7 @@ export default function App() {
         {/* Options section */}
         <Route path="/options" element={<OptionsScannerPage />} />
         <Route path="/options/positions" element={<OptionsPositionsPage />} />
+        <Route path="/options/backtest/:symbol" element={<OptionsBacktestPage />} />
         {/* Backtesting section */}
         <Route path="/backtest" element={<BacktestPage />} />
         <Route path="/runs" element={<RunsPage />} />

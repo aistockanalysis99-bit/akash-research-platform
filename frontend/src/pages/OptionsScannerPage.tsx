@@ -1,6 +1,7 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronDown, ChevronRight, Crosshair, RefreshCw, Star } from "lucide-react";
+import { BarChart3, ChevronDown, ChevronRight, Crosshair, RefreshCw, Star } from "lucide-react";
 import { api } from "@/lib/api";
 import { Badge, Button, Card, EmptyState, ErrorBox, Loading, PageTitle, Spinner } from "@/components/ui";
 import { cn } from "@/lib/utils";
@@ -127,6 +128,12 @@ function CandidateCard({ c }: { c: Candidate }) {
         <Button onClick={() => track.mutate()} disabled={track.isPending || track.isSuccess}>
           {track.isSuccess ? "Tracking ✓" : track.isPending ? <Spinner /> : "▶ Track it (paper)"}
         </Button>
+        <Link
+          to={`/options/backtest/${c.symbol}`}
+          className="inline-flex items-center gap-1 text-xs text-gray-400 hover:text-brand transition-colors"
+        >
+          <BarChart3 className="h-3.5 w-3.5" /> Track record
+        </Link>
         {track.error && (
           <span className="text-xs text-neg">{(track.error as Error).message.slice(0, 80)}</span>
         )}
@@ -171,6 +178,12 @@ function RejectedList({ rows }: { rows: Candidate[] }) {
               {c.cheapness != null && (
                 <span className={cn("text-xs font-mono", cheapCls(c.cheapness))}>{c.cheapness}</span>
               )}
+              <Link
+                to={`/options/backtest/${c.symbol}`}
+                className="text-xs text-gray-500 hover:text-brand transition-colors shrink-0"
+              >
+                track record
+              </Link>
             </div>
           ))}
         </div>

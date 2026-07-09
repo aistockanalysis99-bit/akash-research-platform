@@ -65,10 +65,46 @@ def ensure_tables() -> None:
                 implied_move_pct REAL,
                 PRIMARY KEY (symbol, snap_date)
             )""")
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS options_backtests (
+                symbol TEXT PRIMARY KEY,
+                entry_days INTEGER,
+                computed_at TEXT,
+                result_json TEXT
+            )""")
         conn.commit()
         _ensured = True
     finally:
         conn.close()
+
+
+def save_backtest(symbol: str, entry_days: int, result: dict[str, Any]) -> None:
+    ensure_tables()
+    conn = get_connection()
+    try:
+        conn.execute(
+            "INSERT OR REPLACE INTO options_backtests VALUES (?,?,?,?)",
+            (symbol.upper(), entry_days, datetime.utcnow().isoformat(),
+             json.dumps(result)))
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def load_backtest(symbol: str) -> Optional[dict[str, Any]]:
+    ensure_tables()
+    conn = get_connection()
+    try:
+        r = conn.execute(
+            "SELECT computed_at, result_json FROM options_backtests WHERE symbol=?",
+            (symbol.upper(),)).fetchone()
+    finally:
+        conn.close()
+    if not r:
+        return None
+    result = json.loads(r["result_json"])
+    result["computed_at"] = r["computed_at"]
+    return result
 
 
 # ---- candidates ----------------------------------------------------------- #

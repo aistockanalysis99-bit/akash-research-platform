@@ -173,6 +173,26 @@ export const api = {
     post<{ marked: number }>("/options/positions/refresh"),
   optionsClose: (id: number, reason = "manual") =>
     post<OptionPosition>(`/options/position/${id}/close`, { reason }),
+  optionsBacktest: (symbol: string, opts?: { refresh?: boolean; entryDays?: number }) =>
+    get<{
+      symbol: string; entry_days: number; computed_at?: string; error?: string;
+      note?: string;
+      summary: {
+        events_simulated: number; events_priced: number; qualifying_events: number;
+        qualifying_win_rate_pct?: number | null; qualifying_avg_pnl_pct?: number | null;
+        all_events_avg_pnl_pct?: number | null; avg_implied_vs_actual?: number | null;
+      };
+      events: {
+        earnings_date: string; entry_date?: string; exit_date?: string;
+        spot_entry?: number; strike?: number; expiry?: string;
+        entry_cost?: number; exit_cost?: number;
+        implied_move_pct?: number; hist_median_move_pct?: number;
+        actual_move_pct?: number; cheapness?: number; would_qualify?: boolean;
+        trade_pnl_pct?: number; error?: string | null;
+      }[];
+    }>(`/options/backtest/${symbol}` +
+      `?refresh=${opts?.refresh ? "true" : "false"}` +
+      (opts?.entryDays ? `&entry_days=${opts.entryDays}` : "")),
 
   // Settings (portfolio + scheduler)
   getSettings: () =>

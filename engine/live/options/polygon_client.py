@@ -73,6 +73,84 @@ class PolygonOptionsClient:
                 return exp
         return None
 
+    async def first_expiry_after_historical(self, underlying: str,
+                                            after_date: str) -> Optional[str]:
+        """Like first_expiry_after, but for a PAST after_date — searches
+        Polygon's expired-contracts reference data (falls back to the live
+        /not-yet-expired set for very recent dates whose expiry may not be
+        flagged 'expired' yet)."""
+        for expired_flag in ("true", "false"):
+            j = await self._get(
+                "/v3/reference/options/contracts",
+                {
+                    "underlying_ticker": underlying.upper(),
+                    "expiration_date.gt": after_date,
+                    "expired": expired_flag,
+                    "sort": "expiration_date",
+                    "order": "asc",
+                    "limit": 50,
+                },
+            )
+            rows = j.get("results") or []
+            if rows:
+                exp = rows[0].get("expiration_date")
+                if exp:
+                    return exp
+        return None
+
+    async def strikes_available(self, underlying: str, expiry: str) -> list[float]:
+        """All strikes listed for one expiry. Tries expired=true first (the
+        common case for backtests over past events), falls back to false."""
+        for expired_flag in ("true", "false"):
+            j = await self._get(
+                "/v3/reference/options/contracts",
+                {
+                    "underlying_ticker": underlying.upper(),
+                    "expiration_date": expiry,
+                    "expired": expired_flag,
+                    "limit": 250,
+                },
+            )
+            strikes = sorted({float(r["strike_price"]) for r in (j.get("results") or [])
+                              if r.get("strike_price") is not None})
+            if strikes:
+                return strikes
+        return []
+
+    async def historical_leg_bars(self, underlying: str, expiry: str,
+                                  strike: float, contract_type: str,
+                                  date_from: str, date_to: str) -> list[dict]:
+        """Daily OHLCV bars for one option leg over a date range (works for
+        expired contracts — Polygon Developer tier gives 4yrs of history)."""
+        strike_int = int(round(strike * 1000))
+        cp = "C" if contract_type == "call" else "P"
+        exp_compact = expiry.replace("-", "")[2:]  # YYMMDD
+        ticker = f"O:{underlying.upper()}{exp_compact}{cp}{strike_int:08d}"
+        j = await self._get(
+            f"/v2/aggs/ticker/{ticker}/range/1/day/{date_from}/{date_to}",
+            {"adjusted": "true", "sort": "asc"},
+        )
+        return j.get("results") or []
+
+    @staticmethod
+    def nearest_bar_close(bars: list[dict], on_or_before_date: str) -> Optional[float]:
+        """Closing price of the bar nearest to (and not after) the target date.
+        Options trade thinly — the exact date often has no print."""
+        target_ms = None
+        try:
+            from datetime import datetime as _dt
+            target_ms = _dt.strptime(on_or_before_date, "%Y-%m-%d").timestamp() * 1000
+        except ValueError:
+            return None
+        best = None
+        for b in bars:
+            t = b.get("t")
+            if t is None or t > target_ms:
+                continue
+            if best is None or t > best["t"]:
+                best = b
+        return float(best["c"]) if best else None
+
     async def chain_for_expiry(self, underlying: str, expiry: str,
                                strike_lo: float, strike_hi: float) -> list[dict]:
         """Chain snapshot (both types) for one expiry within a strike band.

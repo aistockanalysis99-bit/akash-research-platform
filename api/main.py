@@ -1388,6 +1388,29 @@ async def options_positions_refresh() -> dict[str, Any]:
         raise HTTPException(500, f"refresh failed: {str(e)[:200]}")
 
 
+@app.get("/options/backtest/{symbol}")
+async def options_backtest(symbol: str, refresh: bool = False,
+                           entry_days: int = 10) -> dict[str, Any]:
+    """Per-ticker historical straddle backtest (Phase 3). Cached; pass
+    refresh=true to recompute from live Polygon history."""
+    from engine.config import POLYGON_API_KEY
+    if not POLYGON_API_KEY:
+        raise HTTPException(400, "POLYGON_API_KEY not configured on the server")
+    from engine.live.options.store import load_backtest, save_backtest
+    if not refresh:
+        cached = load_backtest(symbol)
+        if cached:
+            return cached
+    from engine.live.options.backtest import backtest_symbol
+    try:
+        result = await backtest_symbol(symbol, entry_days=entry_days)
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(500, f"backtest failed: {str(e)[:200]}")
+    save_backtest(symbol, entry_days, result)
+    result["computed_at"] = datetime.utcnow().isoformat()
+    return result
+
+
 @app.post("/options/position/{position_id}/close")
 async def options_position_close(position_id: int,
                                  payload: Optional[dict[str, Any]] = None) -> dict[str, Any]:
