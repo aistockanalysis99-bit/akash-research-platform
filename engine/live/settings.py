@@ -178,6 +178,48 @@ def get_options_universe() -> str:
     return raw if raw in ("sp500", "sp100", "none") else "sp500"
 
 
+def get_options_max_iv_percentile() -> float:
+    """Optional richness gate: reject a candidate when its current ATM IV sits
+    above this percentile of the stock's OWN accumulated IV history (we build
+    that history daily — Polygon has no historical-IV feed). 100 = OFF (never
+    rejects); the gate also stays inert until enough history exists. Buying a
+    straddle when IV is already rich is the losing side, so tightening this
+    (e.g. 80) refuses the most over-pumped names."""
+    return _get_float("options_max_iv_percentile", 100.0, 0.0, 100.0)
+
+
+def get_options_require_dual_signal() -> bool:
+    """When ON, only names that are ALSO a 7+ AI-conviction pick qualify —
+    focuses the strategy on stocks the platform independently likes. OFF by
+    default (dual-signal stays a badge, not a filter)."""
+    return _get_bool("options_require_dual_signal", False)
+
+
+def get_options_profit_target_pct() -> float:
+    """Send a one-time 'consider taking profit' suggestion once an open paper
+    straddle is up at least this %. 0 = OFF. Notify-only — never auto-closed."""
+    return _get_float("options_profit_target_pct", 50.0, 0.0, 500.0)
+
+
+def get_options_stop_loss_pct() -> float:
+    """Send a one-time 'consider cutting' suggestion once an open paper straddle
+    is down at least this %. 0 = OFF (default — long-vol stops into earnings are
+    noisy). Notify-only — never auto-closed."""
+    return _get_float("options_stop_loss_pct", 0.0, 0.0, 100.0)
+
+
+def get_options_max_concurrent() -> int:
+    """Cap on simultaneously-open paper straddles. 0 = OFF (unlimited)."""
+    return _get_int("options_max_concurrent", 0, 0, 100)
+
+
+def get_options_max_sleeve_capital() -> float:
+    """Cap on total capital tied up across open paper straddles (sum of entry
+    cost × 100 × contracts, in $). 0 = OFF (unlimited). Keeps the options sleeve
+    from quietly growing past a comfort level; fully separate from equity cash."""
+    return _get_float("options_max_sleeve_capital", 0.0, 0.0, 100_000_000.0)
+
+
 # ---- Scheduler accessors ------------------------------------------------- #
 
 
@@ -237,6 +279,12 @@ def get_all() -> dict[str, Any]:
             "min_oi":          {"value": get_options_min_oi(),          "env_default": 500},
             "max_spread_pct":  {"value": get_options_max_spread_pct(),  "env_default": 1.5},
             "universe":        {"value": get_options_universe(),        "env_default": "sp500"},
+            "max_iv_percentile":   {"value": get_options_max_iv_percentile(),   "env_default": 100.0},
+            "require_dual_signal": {"value": get_options_require_dual_signal(),  "env_default": False},
+            "profit_target_pct":   {"value": get_options_profit_target_pct(),    "env_default": 50.0},
+            "stop_loss_pct":       {"value": get_options_stop_loss_pct(),        "env_default": 0.0},
+            "max_concurrent":      {"value": get_options_max_concurrent(),       "env_default": 0},
+            "max_sleeve_capital":  {"value": get_options_max_sleeve_capital(),   "env_default": 0.0},
         },
         "scheduler": {
             "enabled":           {"value": get_scheduler_enabled(),  "env_default": ENABLE_SCHEDULER},
@@ -268,6 +316,12 @@ SETTABLE_KEYS = {
     "options_min_oi",
     "options_max_spread_pct",
     "options_universe",
+    "options_max_iv_percentile",
+    "options_require_dual_signal",
+    "options_profit_target_pct",
+    "options_stop_loss_pct",
+    "options_max_concurrent",
+    "options_max_sleeve_capital",
     # scheduler
     "enable_scheduler",
     "scheduler_timezone",

@@ -48,6 +48,10 @@ export default function OptionsScannerPage() {
         {scanDate ? `Last scan: ${scanDate}` : "No scan yet"} · auto-scan 16:45 ET weekdays ·
         rules: {opts.entry_min_days?.value ?? 3}–{opts.entry_max_days?.value ?? 14} days out ·
         cheapness ≤ {opts.cheapness_max?.value ?? 0.8} · OI ≥ {opts.min_oi?.value ?? 500}
+        {opts.max_iv_percentile?.value != null && opts.max_iv_percentile.value < 100 && (
+          <> · IV ≤ {opts.max_iv_percentile.value}th pctile</>
+        )}
+        {opts.require_dual_signal?.value ? <> · 7+ AI picks only</> : null}
       </div>
 
       {scan.error && <ErrorBox error={scan.error} />}
@@ -110,6 +114,15 @@ function CandidateCard({ c }: { c: Candidate }) {
         <Stat label="Cheapness" value={c.cheapness ?? "—"} cls={cheapCls(c.cheapness)} bold />
         <Stat label="Min OI" value={c.min_oi?.toLocaleString() ?? "—"} />
       </div>
+
+      {c.iv_percentile != null && (
+        <div className="text-xs text-gray-500 mb-3">
+          Current IV sits at the <b className="text-gray-300">{c.iv_percentile}th percentile</b> of
+          this stock's own history
+          {c.iv_percentile >= 80 ? " — richer than usual, buy carefully"
+            : c.iv_percentile <= 30 ? " — cheaper than usual" : ""}.
+        </div>
+      )}
 
       <div className="text-sm text-gray-300 mb-3">
         <span className="text-gray-500">The trade: </span>

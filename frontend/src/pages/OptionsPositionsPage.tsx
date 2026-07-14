@@ -25,6 +25,7 @@ export default function OptionsPositionsPage() {
   const open = q.data?.open || [];
   const closed = q.data?.closed || [];
   const stats = q.data?.stats;
+  const sleeve = q.data?.sleeve;
 
   return (
     <div>
@@ -39,14 +40,24 @@ export default function OptionsPositionsPage() {
         }
       />
 
-      {stats && stats.trades > 0 && (
-        <div className="text-sm text-gray-400 mb-4">
-          📈 {stats.trades} closed · win rate {stats.win_rate_pct ?? 0}% ·
-          avg win {stats.avg_win_pct != null ? `+${stats.avg_win_pct}%` : "—"} ·
-          avg loss {stats.avg_loss_pct != null ? `${stats.avg_loss_pct}%` : "—"} ·
-          total <span className={pnlCls(stats.total_pnl_usd)}>
-            ${stats.total_pnl_usd.toLocaleString()}
-          </span> (paper)
+      {((stats && stats.trades > 0) || (sleeve && sleeve.count > 0)) && (
+        <div className="mb-4 space-y-1">
+          {stats && stats.trades > 0 && (
+            <div className="text-sm text-gray-400">
+              📈 {stats.trades} closed · win rate {stats.win_rate_pct ?? 0}% ·
+              avg win {stats.avg_win_pct != null ? `+${stats.avg_win_pct}%` : "—"} ·
+              avg loss {stats.avg_loss_pct != null ? `${stats.avg_loss_pct}%` : "—"} ·
+              total <span className={pnlCls(stats.total_pnl_usd)}>
+                ${stats.total_pnl_usd.toLocaleString()}
+              </span> (paper)
+            </div>
+          )}
+          {sleeve && sleeve.count > 0 && (
+            <div className="text-xs text-gray-500">
+              Sleeve in use: {sleeve.count} open · ${sleeve.capital.toLocaleString()} capital
+              deployed (paper — fully separate from equity cash)
+            </div>
+          )}
         </div>
       )}
 
@@ -132,6 +143,12 @@ function OpenCard({ p, onClose, closing }: {
           ${p.strike} straddle · {p.contracts} contract(s) · in for ${invested.toLocaleString(undefined, { maximumFractionDigits: 0 })}
         </span>
         <div className="flex-1" />
+        {!!p.profit_alerted && (
+          <Badge className="border-pos/40 bg-pos/10 text-pos">💰 take-profit suggested</Badge>
+        )}
+        {!!p.stop_alerted && (
+          <Badge className="border-neg/40 bg-neg/10 text-neg">stop level hit</Badge>
+        )}
         <Badge className="border-warn/40 bg-warn/10 text-warn">
           <Clock className="h-3 w-3 mr-1" />
           {daysLeft != null ? `exit in ${daysLeft}d` : "exit —"}

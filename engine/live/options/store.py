@@ -72,6 +72,16 @@ def ensure_tables() -> None:
                 computed_at TEXT,
                 result_json TEXT
             )""")
+        # ---- lightweight migrations (columns added after initial ship) ---- #
+        for table, col, decl in (
+            ("options_candidates", "iv_percentile", "REAL"),
+            ("options_positions", "profit_alerted", "INTEGER DEFAULT 0"),
+            ("options_positions", "stop_alerted", "INTEGER DEFAULT 0"),
+        ):
+            try:
+                conn.execute(f"ALTER TABLE {table} ADD COLUMN {col} {decl}")
+            except Exception:  # noqa: BLE001 — column already exists
+                pass
         conn.commit()
         _ensured = True
     finally:
@@ -119,12 +129,12 @@ def save_candidate(row: dict[str, Any]) -> None:
                  strike, expiry, straddle_cost, implied_move_pct,
                  hist_median_move_pct, hist_events, cheapness, atm_iv,
                  min_oi, max_leg_spread_pct, avg_theta, avg_vega,
-                 qualified, reject_reason, dual_signal, created_at)
+                 qualified, reject_reason, dual_signal, iv_percentile, created_at)
             VALUES (:scan_date,:symbol,:earnings_date,:days_to_earnings,:spot,
                     :strike,:expiry,:straddle_cost,:implied_move_pct,
                     :hist_median_move_pct,:hist_events,:cheapness,:atm_iv,
                     :min_oi,:max_leg_spread_pct,:avg_theta,:avg_vega,
-                    :qualified,:reject_reason,:dual_signal,:created_at)
+                    :qualified,:reject_reason,:dual_signal,:iv_percentile,:created_at)
             ON CONFLICT(scan_date, symbol) DO UPDATE SET
                 earnings_date=excluded.earnings_date,
                 days_to_earnings=excluded.days_to_earnings,
@@ -139,7 +149,8 @@ def save_candidate(row: dict[str, Any]) -> None:
                 avg_theta=excluded.avg_theta, avg_vega=excluded.avg_vega,
                 qualified=excluded.qualified,
                 reject_reason=excluded.reject_reason,
-                dual_signal=excluded.dual_signal
+                dual_signal=excluded.dual_signal,
+                iv_percentile=excluded.iv_percentile
             """, row)
         conn.commit()
     finally:
@@ -185,6 +196,57 @@ def save_iv_snapshot(symbol: str, snap_date: str, expiry: str,
         conn.commit()
     finally:
         conn.close()
+
+
+# Minimum accumulated IV snapshots before an IV-percentile is trustworthy.
+MIN_IV_SAMPLES = 15
+
+
+def iv_percentile(symbol: str, current_iv: Optional[float],
+                  lookback_days: int = 365) -> Optional[float]:
+    """Where `current_iv` ranks (0-100) within the symbol's OWN accumulated ATM
+    IV history over the trailing `lookback_days`. Returns None until at least
+    MIN_IV_SAMPLES prior snapshots exist (Polygon has no historical IV, so this
+    history is built forward from first scan — sparse early on, by design).
+
+    Today's snapshot is excluded from the ranking by date (snap_date < today),
+    so a re-scan later the same day can't count its own morning snapshot and
+    inflate the percentile — the exclusion holds regardless of call order."""
+    if current_iv is None:
+        return None
+    ensure_tables()
+    from datetime import date, timedelta
+    today = date.today()
+    since = (today - timedelta(days=lookback_days)).isoformat()
+    conn = get_connection()
+    try:
+        rows = conn.execute(
+            "SELECT atm_iv FROM options_iv_history "
+            "WHERE symbol=? AND snap_date>=? AND snap_date<? "
+            "AND atm_iv IS NOT NULL",
+            (symbol.upper(), since, today.isoformat())).fetchall()
+    finally:
+        conn.close()
+    hist = [float(r["atm_iv"]) for r in rows]
+    if len(hist) < MIN_IV_SAMPLES:
+        return None
+    below = sum(1 for v in hist if v <= current_iv)
+    return round(below / len(hist) * 100, 1)
+
+
+def open_sleeve() -> dict[str, Any]:
+    """Count + total capital ($) tied up across OPEN paper straddles."""
+    ensure_tables()
+    conn = get_connection()
+    try:
+        rows = conn.execute(
+            "SELECT contracts, entry_cost FROM options_positions "
+            "WHERE status='open'").fetchall()
+    finally:
+        conn.close()
+    capital = sum((r["entry_cost"] or 0.0) * 100 * (r["contracts"] or 1)
+                  for r in rows)
+    return {"count": len(rows), "capital": round(capital, 2)}
 
 
 # ---- positions ------------------------------------------------------------ #

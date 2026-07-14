@@ -10,6 +10,7 @@ over time.
 """
 from __future__ import annotations
 
+import asyncio
 import logging
 from typing import Any, Optional
 
@@ -20,6 +21,13 @@ from ...config import POLYGON_API_KEY
 log = logging.getLogger(__name__)
 
 BASE = "https://api.polygon.io"
+
+# Rate-limit / transient-error backoff. The $79 tier throttles under a wide
+# scan (500 names × several calls each), so retry 429 + 5xx with exponential
+# backoff, honoring Retry-After when present.
+_MAX_RETRIES = 5
+_BACKOFF_BASE_SECS = 1.5
+_BACKOFF_CAP_SECS = 30.0
 
 
 class PolygonError(RuntimeError):
@@ -46,10 +54,26 @@ class PolygonOptionsClient:
         params = dict(params or {})
         params["apiKey"] = self.api_key
         url = path_or_url if path_or_url.startswith("http") else f"{BASE}{path_or_url}"
-        r = await self._client.get(url, params=params)
-        if r.status_code != 200:
-            raise PolygonError(f"polygon {r.status_code}: {r.text[:150]}")
-        return r.json()
+        last_status = None
+        for attempt in range(_MAX_RETRIES + 1):
+            r = await self._client.get(url, params=params)
+            if r.status_code == 200:
+                return r.json()
+            last_status = r.status_code
+            # Retry only on rate-limit / transient upstream errors.
+            if r.status_code not in (429, 500, 502, 503, 504) or attempt == _MAX_RETRIES:
+                raise PolygonError(f"polygon {r.status_code}: {r.text[:150]}")
+            delay = min(_BACKOFF_CAP_SECS, _BACKOFF_BASE_SECS * (2 ** attempt))
+            retry_after = r.headers.get("Retry-After")
+            if retry_after:
+                try:
+                    delay = max(delay, float(retry_after))
+                except ValueError:
+                    pass
+            log.warning("polygon %s on %s — backoff %.1fs (attempt %d/%d)",
+                        r.status_code, url.split("?")[0], delay, attempt + 1, _MAX_RETRIES)
+            await asyncio.sleep(delay)
+        raise PolygonError(f"polygon {last_status}: exhausted retries")
 
     # ------------------------------------------------------------------ #
 

@@ -199,6 +199,8 @@ export interface OptionPosition {
   theta_pnl?: number | null;
   move_pnl?: number | null;
   last_marked?: string;
+  profit_alerted?: number;
+  stop_alerted?: number;
   exit_date?: string;
   exit_value?: number;
   exit_reason?: string;

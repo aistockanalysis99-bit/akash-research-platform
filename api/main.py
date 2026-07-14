@@ -1358,9 +1358,27 @@ async def options_candidates() -> list[dict[str, Any]]:
 async def options_track(payload: dict[str, Any]) -> dict[str, Any]:
     """Track a scanner candidate as a paper straddle position."""
     candidate_id = int(payload.get("candidate_id") or 0)
-    contracts = int(payload.get("contracts") or 1)
+    contracts = max(1, int(payload.get("contracts") or 1))
     if not candidate_id:
         raise HTTPException(400, "candidate_id required")
+    from engine.live import settings as live_settings
+    from engine.live.options.store import get_candidate, open_sleeve
+    cand = get_candidate(candidate_id)
+    if not cand or not cand.get("straddle_cost"):
+        raise HTTPException(400, "candidate not found or not priceable")
+    # Options-sleeve caps (0 = OFF) — kept entirely separate from equity cash.
+    sleeve = open_sleeve()
+    max_conc = live_settings.get_options_max_concurrent()
+    if max_conc and sleeve["count"] >= max_conc:
+        raise HTTPException(400, f"options sleeve is at its {max_conc}-position "
+                                 f"limit — close one or raise the cap in settings")
+    max_cap = live_settings.get_options_max_sleeve_capital()
+    add_cost = (cand.get("straddle_cost") or 0) * 100 * contracts
+    if max_cap and sleeve["capital"] + add_cost > max_cap:
+        raise HTTPException(400, f"tracking this would put the options sleeve at "
+                                 f"${sleeve['capital'] + add_cost:,.0f}, over your "
+                                 f"${max_cap:,.0f} cap — reduce contracts or raise "
+                                 f"the cap in settings")
     from engine.live.options.positions import track_candidate
     pos_id = track_candidate(candidate_id, contracts)
     if pos_id is None:
@@ -1370,11 +1388,12 @@ async def options_track(payload: dict[str, Any]) -> dict[str, Any]:
 
 @app.get("/options/positions")
 async def options_positions(status: Optional[str] = None) -> dict[str, Any]:
-    from engine.live.options.store import list_positions, stats
+    from engine.live.options.store import list_positions, open_sleeve, stats
     return {
         "open": list_positions("open"),
         "closed": list_positions("closed", limit=100) if status != "open" else [],
         "stats": stats(),
+        "sleeve": open_sleeve(),
     }
 
 

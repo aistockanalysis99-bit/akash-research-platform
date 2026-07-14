@@ -180,6 +180,10 @@ async def mark_open_positions(notify: bool = True) -> dict[str, Any]:
                 alerts.append(_drift_msg(pos, cur, att))
             store.update_position(pos["id"], fields)
             marked += 1
+            # profit-target / stop-loss suggestions (notify-only, once each)
+            for flag, msg in _profit_stop_alerts(pos, att, cur):
+                store.update_position(pos["id"], {flag: 1})
+                alerts.append(msg)
 
     # earnings-date revision watch (FMP)
     try:
@@ -190,6 +194,38 @@ async def mark_open_positions(notify: bool = True) -> dict[str, Any]:
     if notify:
         await _send_alerts(alerts)
     return {"marked": marked, "alerts": len(alerts)}
+
+
+def _profit_stop_alerts(pos: dict, att: dict, cur: dict) -> list[tuple[str, dict]]:
+    """Emit at most one profit-target and one stop-loss SUGGESTION per position,
+    when the configured thresholds are crossed. Notify-only — never closes."""
+    from .. import settings as live_settings
+    out: list[tuple[str, dict]] = []
+    pnl_pct = att.get("pnl_pct")
+    if pnl_pct is None:
+        return out
+    val = cur.get("value")
+    target = live_settings.get_options_profit_target_pct()
+    stop = live_settings.get_options_stop_loss_pct()
+    if target > 0 and pnl_pct >= target and not pos.get("profit_alerted"):
+        deadline = str(pos.get("exit_deadline") or "")[:16].replace("T", " ")
+        out.append(("profit_alerted", {
+            "symbol": pos["symbol"], "kind": "options_alert",
+            "text": (f"💰 {pos['symbol']} straddle is up {pnl_pct:+.1f}% — it hit "
+                     f"your +{target:.0f}% profit target.\n\n"
+                     f"Value ≈ ${val:.2f}/share. Consider taking profit before "
+                     f"the exit deadline ({deadline} ET) rather than riding it "
+                     f"into the print. Nothing was changed — your call."),
+        }))
+    if stop > 0 and pnl_pct <= -stop and not pos.get("stop_alerted"):
+        out.append(("stop_alerted", {
+            "symbol": pos["symbol"], "kind": "options_alert",
+            "text": (f"🩹 {pos['symbol']} straddle is down {pnl_pct:+.1f}% — past "
+                     f"your -{stop:.0f}% stop level.\n\n"
+                     f"Value ≈ ${val:.2f}/share. Consider cutting the position. "
+                     f"Notify-only — your call."),
+        }))
+    return out
 
 
 def _drift_msg(pos, cur, att) -> dict:

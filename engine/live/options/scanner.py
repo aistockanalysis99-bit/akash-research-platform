@@ -116,12 +116,18 @@ async def _scan_symbol(sym: str, research, fmp, poly: PolygonOptionsClient,
 
     implied = ev.implied_move_pct(straddle["straddle_cost"], spot)
     cheap = ev.cheapness_ratio(implied, hist_median)
+    atm_iv = straddle.get("atm_iv")
+
+    # IV percentile vs the stock's OWN accumulated history — computed BEFORE we
+    # record today's snapshot so today isn't counted in its own ranking.
+    iv_pctile = store.iv_percentile(sym, atm_iv)
 
     # accumulate our own IV history (Polygon has no historical IV endpoint)
-    store.save_iv_snapshot(sym, today.isoformat(), expiry,
-                           straddle.get("atm_iv"), implied)
+    store.save_iv_snapshot(sym, today.isoformat(), expiry, atm_iv, implied)
 
     # ---- gates ----
+    dual = (convictions.get(sym) or 0) >= 7
+    max_ivp = live_settings.get_options_max_iv_percentile()
     reject = None
     if hist_median is None:
         reject = "not enough earnings history (need 4+ past events)"
@@ -132,17 +138,22 @@ async def _scan_symbol(sym: str, research, fmp, poly: PolygonOptionsClient,
                   f"(max {live_settings.get_options_cheapness_max():.2f})")
     elif (straddle.get("min_oi") or 0) < live_settings.get_options_min_oi():
         reject = f"open interest {straddle.get('min_oi')} below minimum"
+    elif iv_pctile is not None and iv_pctile > max_ivp:
+        reject = (f"IV at {iv_pctile:.0f}th percentile of its own history — "
+                  f"too rich to buy (max {max_ivp:.0f})")
+    elif live_settings.get_options_require_dual_signal() and not dual:
+        reject = "not also a 7+ AI-conviction pick (dual-signal filter on)"
     else:
         sp = straddle.get("max_leg_spread_pct")
         if sp is not None and sp > live_settings.get_options_max_spread_pct():
             reject = f"bid-ask spread {sp:.1f}% too wide"
 
     return _row(sym, nxt, days_out, spot, straddle, implied, hist_median,
-                len(moves), cheap, straddle.get("atm_iv"), reject, convictions)
+                len(moves), cheap, atm_iv, reject, convictions, iv_pctile)
 
 
 def _row(sym, nxt, days_out, spot, straddle, implied, hist_median,
-         n_events, cheap, atm_iv, reject, convictions) -> dict[str, Any]:
+         n_events, cheap, atm_iv, reject, convictions, iv_pctile=None) -> dict[str, Any]:
     s = straddle or {}
     return {
         "scan_date": date.today().isoformat(),
@@ -158,6 +169,7 @@ def _row(sym, nxt, days_out, spot, straddle, implied, hist_median,
         "hist_events": n_events,
         "cheapness": cheap,
         "atm_iv": atm_iv,
+        "iv_percentile": iv_pctile,
         "min_oi": s.get("min_oi"),
         "max_leg_spread_pct": s.get("max_leg_spread_pct"),
         "avg_theta": s.get("avg_theta"),

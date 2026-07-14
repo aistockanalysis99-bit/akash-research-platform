@@ -156,7 +156,8 @@ export const api = {
       days_to_earnings: number; spot?: number; strike?: number; expiry?: string;
       straddle_cost?: number; implied_move_pct?: number;
       hist_median_move_pct?: number; hist_events?: number; cheapness?: number;
-      atm_iv?: number; min_oi?: number; max_leg_spread_pct?: number | null;
+      atm_iv?: number; iv_percentile?: number | null;
+      min_oi?: number; max_leg_spread_pct?: number | null;
       qualified: number; reject_reason?: string | null; dual_signal: number;
     }[]>("/options/candidates"),
   optionsTrack: (candidateId: number, contracts: number) =>
@@ -168,6 +169,7 @@ export const api = {
       stats: { trades: number; win_rate_pct?: number | null;
                total_pnl_usd: number; avg_win_pct?: number | null;
                avg_loss_pct?: number | null };
+      sleeve?: { count: number; capital: number };
     }>("/options/positions"),
   optionsRefresh: () =>
     post<{ marked: number }>("/options/positions/refresh"),
