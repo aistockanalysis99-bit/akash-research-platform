@@ -314,6 +314,34 @@ def update_position(position_id: int, fields: dict[str, Any]) -> None:
         conn.close()
 
 
+def league_record() -> Optional[dict[str, Any]]:
+    """The straddle family's realized record in the SHARED league-table shape
+    (see structures.family_stats), so R1 appears alongside the multi-leg
+    strategies. Straddles are debit trades, so P&L % on premium IS P&L % on
+    capital at risk — the two axes coincide and are directly comparable."""
+    ensure_tables()
+    conn = get_connection()
+    try:
+        rows = conn.execute(
+            "SELECT final_pnl_usd, final_pnl_pct FROM options_positions "
+            "WHERE status='closed' AND final_pnl_usd IS NOT NULL").fetchall()
+    finally:
+        conn.close()
+    if not rows:
+        return None
+    pnls = [r["final_pnl_usd"] for r in rows]
+    pcts = [r["final_pnl_pct"] for r in rows if r["final_pnl_pct"] is not None]
+    wins = [p for p in pnls if p > 0]
+    return {
+        "trades": len(pnls),
+        "win_rate_pct": round(len(wins) / len(pnls) * 100),
+        "total_pnl_usd": round(sum(pnls), 2),
+        "avg_return_on_risk_pct": (round(sum(pcts) / len(pcts), 1)
+                                   if pcts else None),
+        "worst_trade_usd": round(min(pnls), 2),
+    }
+
+
 def stats() -> dict[str, Any]:
     """Running paper record across closed positions."""
     ensure_tables()

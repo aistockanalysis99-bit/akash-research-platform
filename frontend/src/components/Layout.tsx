@@ -168,7 +168,7 @@ export default function Layout() {
             <NavLink
               key={it.to}
               to={it.to}
-              end={it.to === "/"}
+              end={it.to === "/" || it.to === "/options"}
               className={({ isActive }) =>
                 cn(
                   "px-3 py-1 text-sm rounded-md whitespace-nowrap transition-colors",

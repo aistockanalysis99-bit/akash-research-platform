@@ -84,6 +84,7 @@ export default function RulebookPage() {
             the ATM neighborhood of the nearest Friday expiry), re-checked every
             Monday 08:10 ET. Short-premium strategies only trade names on this list.
           </p>
+          {refreshPool.error && <ErrorBox error={refreshPool.error} />}
           {data.pool_b.length === 0 ? (
             <Card className="text-center py-8 text-gray-500 text-sm">
               Not measured yet — hit “Re-measure now” to qualify the seed list.
@@ -106,7 +107,7 @@ export default function RulebookPage() {
                       <tr key={p.symbol} className="border-b border-line/40">
                         <td className="p-2 font-mono font-semibold">{p.symbol}</td>
                         <td className="p-2 text-right stat-num">
-                          {p.spot != null ? `$${p.spot}` : "—"}
+                          {p.spot != null ? `$${p.spot.toFixed(2)}` : "—"}
                         </td>
                         <td className="p-2 pl-4 text-xs text-gray-400">{p.expiry ?? "—"}</td>
                         <td className="p-2 text-right stat-num">
@@ -173,7 +174,9 @@ function StrategyCard({ s, stats }: {
           Realized record: {stats.trades} closed · win rate {stats.win_rate_pct ?? 0}% ·
           avg {stats.avg_return_on_risk_pct != null ? `${stats.avg_return_on_risk_pct >= 0 ? "+" : ""}${stats.avg_return_on_risk_pct}%` : "—"} on risk ·
           total <span className={stats.total_pnl_usd >= 0 ? "text-pos" : "text-neg"}>
-            ${stats.total_pnl_usd.toLocaleString()}
+            {stats.total_pnl_usd < 0 ? "-" : ""}$
+            {Math.abs(stats.total_pnl_usd).toLocaleString(undefined, {
+              minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </span> (paper)
         </div>
       )}

@@ -120,13 +120,18 @@ def is_defined_risk(legs: list[dict[str, Any]],
 
 def capital_at_risk(legs: list[dict[str, Any]], entry_value: float,
                     cash_secured_strike: Optional[float] = None) -> Optional[float]:
-    """Per-share capital genuinely at risk.
+    """Per-share capital genuinely at risk (per SHARE-SET, i.e. qty-scaled to
+    match entry_value / package_value).
 
     Defined-risk structures: |max_loss|. Cash-secured puts: the secured cash
-    (strike − credit), which is the honest denominator his site also uses.
-    Returns None for unbounded structures (which we refuse anyway)."""
+    (qty × strike − credit), which is the honest denominator his site also
+    uses. Returns None for unbounded structures (which we refuse anyway)."""
     if cash_secured_strike is not None:
-        return round(cash_secured_strike + min(entry_value, 0.0), 4)
+        # entry_value scales with qty, so the strike term must too — otherwise
+        # a 2-lot CSP reports half its true secured cash and double its yield.
+        qty = sum(int(l.get("qty", 1)) for l in legs
+                  if l["side"] < 0 and l["contract_type"] == "put") or 1
+        return round(qty * cash_secured_strike + min(entry_value, 0.0), 4)
     stats = payoff_stats(legs, entry_value)
     if stats["unbounded_loss"]:
         return None
@@ -157,10 +162,17 @@ def return_on_risk_pct(max_profit: float, max_loss: float) -> Optional[float]:
 def pop_estimate_pct(legs: list[dict[str, Any]]) -> Optional[float]:
     """Probability-of-profit ESTIMATE for net-credit structures, from short-leg
     deltas (|Δ| of a short option ≈ probability it finishes in the money).
-    Standard trader heuristic, clearly labeled an estimate. None for debit
-    structures — a straddle's odds don't reduce to its deltas."""
+    Standard trader heuristic, clearly labeled an estimate.
+
+    None for DEBIT structures — the heuristic is only valid when the credit
+    itself is the profit. On a debit vertical it would report P(short strike
+    not breached), which is roughly the probability the trade does NOT reach
+    max profit: an inverted, dangerously optimistic number."""
+    net = package_value(legs)
+    if net is None or net >= 0:      # unpriced, or a net debit was paid
+        return None
     shorts = [l for l in legs if l["side"] < 0]
     if not shorts or any(l.get("delta") is None for l in shorts):
         return None
-    p_breach = sum(abs(float(l["delta"])) for l in shorts)
+    p_breach = sum(abs(float(l["delta"])) * int(l.get("qty", 1)) for l in shorts)
     return round(max(0.0, min(1.0, 1.0 - p_breach)) * 100)

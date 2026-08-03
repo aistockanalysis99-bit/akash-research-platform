@@ -1450,12 +1450,19 @@ async def options_rulebook() -> dict[str, Any]:
     rules, Pool B membership, and the realized league table."""
     from engine.live.options.pools import list_pool_b
     from engine.live.options.registry import GOVERNANCE, rulebook
+    from engine.live.options.store import league_record as straddle_record
     from engine.live.options.structures import family_stats
+    league = family_stats()
+    # R1 straddles predate the multi-leg table — merge their record in so the
+    # one strategy that IS live can show a realized row.
+    straddle = straddle_record()
+    if straddle:
+        league.setdefault("long_straddle", straddle)
     return {
         "strategies": rulebook(),
         "governance": GOVERNANCE,
         "pool_b": list_pool_b(),
-        "league": family_stats(),
+        "league": league,
     }
 
 
