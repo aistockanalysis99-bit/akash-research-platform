@@ -220,6 +220,39 @@ def get_options_max_sleeve_capital() -> float:
     return _get_float("options_max_sleeve_capital", 0.0, 0.0, 100_000_000.0)
 
 
+# ---- Strategy Board (Phase 0+) — rulebook parameters ----------------------- #
+
+
+def get_options_pool_b_min_oi() -> int:
+    """Pool B (liquidity list) qualification bar: minimum ATM open interest
+    on the nearest tradeable expiry. Membership is earned by this number."""
+    return _get_int("options_pool_b_min_oi", 1000, 0, 100_000)
+
+
+def get_options_condor_short_delta() -> float:
+    """Iron condor (R2): target |delta| for each short strike. 0.20 ≈ short
+    strikes near the edge of the expected move (~80% chance each side holds)."""
+    return _get_float("options_condor_short_delta", 0.20, 0.05, 0.45)
+
+
+def get_options_condor_wing_pct() -> float:
+    """Iron condor (R2): wing width as % of spot — the distance from each
+    short strike to its protective long strike. Sets max loss."""
+    return _get_float("options_condor_wing_pct", 3.0, 0.5, 10.0)
+
+
+def get_options_condor_min_cheapness() -> float:
+    """Iron condor (R2): only fires when the implied earnings move is at least
+    this multiple of the stock's historical move (the overpricing edge)."""
+    return _get_float("options_condor_min_cheapness", 1.25, 1.0, 3.0)
+
+
+def get_options_condor_min_iv_rank() -> float:
+    """Iron condor (R2): minimum IV percentile vs the stock's own accumulated
+    IV history. Gate is inert for a symbol until 15+ snapshots exist."""
+    return _get_float("options_condor_min_iv_rank", 60.0, 0.0, 100.0)
+
+
 # ---- Scheduler accessors ------------------------------------------------- #
 
 
@@ -285,6 +318,11 @@ def get_all() -> dict[str, Any]:
             "stop_loss_pct":       {"value": get_options_stop_loss_pct(),        "env_default": 0.0},
             "max_concurrent":      {"value": get_options_max_concurrent(),       "env_default": 0},
             "max_sleeve_capital":  {"value": get_options_max_sleeve_capital(),   "env_default": 0.0},
+            "pool_b_min_oi":       {"value": get_options_pool_b_min_oi(),        "env_default": 1000},
+            "condor_short_delta":  {"value": get_options_condor_short_delta(),   "env_default": 0.20},
+            "condor_wing_pct":     {"value": get_options_condor_wing_pct(),      "env_default": 3.0},
+            "condor_min_cheapness": {"value": get_options_condor_min_cheapness(), "env_default": 1.25},
+            "condor_min_iv_rank":  {"value": get_options_condor_min_iv_rank(),   "env_default": 60.0},
         },
         "scheduler": {
             "enabled":           {"value": get_scheduler_enabled(),  "env_default": ENABLE_SCHEDULER},
@@ -322,6 +360,11 @@ SETTABLE_KEYS = {
     "options_stop_loss_pct",
     "options_max_concurrent",
     "options_max_sleeve_capital",
+    "options_pool_b_min_oi",
+    "options_condor_short_delta",
+    "options_condor_wing_pct",
+    "options_condor_min_cheapness",
+    "options_condor_min_iv_rank",
     # scheduler
     "enable_scheduler",
     "scheduler_timezone",

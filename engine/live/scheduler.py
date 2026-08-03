@@ -162,6 +162,30 @@ async def _job_options_final_alert() -> None:
         log.exception("scheduler: options final alert failed: %s", e)
 
 
+async def _job_pool_b_refresh() -> None:
+    """Weekly re-qualification of the Pool B liquidity list (Mon 08:10 ET,
+    fresh overnight OI). Membership is earned by measured liquidity."""
+    try:
+        from .options.pools import refresh_pool_b
+        res = await refresh_pool_b()
+        _last_runs["pool_b_refresh"] = {
+            "at": datetime.utcnow().isoformat(), **res}
+    except Exception as e:  # noqa: BLE001
+        log.exception("scheduler: pool B refresh failed: %s", e)
+
+
+async def _job_mark_structures() -> None:
+    """Morning mark for multi-leg paper structures (09:20 ET, after the
+    straddle mark)."""
+    try:
+        from .options.structures import mark_structures
+        res = await mark_structures()
+        _last_runs["mark_structures"] = {
+            "at": datetime.utcnow().isoformat(), **res}
+    except Exception as e:  # noqa: BLE001
+        log.exception("scheduler: structure mark failed: %s", e)
+
+
 # --------------------------------------------------------------------------- #
 # Public API
 # --------------------------------------------------------------------------- #
@@ -230,6 +254,20 @@ def start_scheduler(force: bool = False) -> None:
         CronTrigger(hour=9, minute=15, day_of_week="mon-fri", timezone=tz),
         id="options_morning",
         name="Options: mark positions + exit-day alerts",
+        replace_existing=True,
+    )
+    sched.add_job(
+        _job_pool_b_refresh,
+        CronTrigger(hour=8, minute=10, day_of_week="mon", timezone=tz),
+        id="pool_b_refresh",
+        name="Options: weekly Pool B liquidity re-qualification",
+        replace_existing=True,
+    )
+    sched.add_job(
+        _job_mark_structures,
+        CronTrigger(hour=9, minute=20, day_of_week="mon-fri", timezone=tz),
+        id="mark_structures",
+        name="Options: mark multi-leg structures",
         replace_existing=True,
     )
     sched.add_job(

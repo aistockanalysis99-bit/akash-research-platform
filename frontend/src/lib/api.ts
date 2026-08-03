@@ -196,6 +196,29 @@ export const api = {
       `?refresh=${opts?.refresh ? "true" : "false"}` +
       (opts?.entryDays ? `&entry_days=${opts.entryDays}` : "")),
 
+  // Options: Strategy Board foundations (Phase 0)
+  optionsRulebook: () =>
+    get<{
+      strategies: {
+        key: string; name: string; status: "live" | "paper" | "planned";
+        phase: string; direction: string; risk_type: string; pools: string[];
+        plain: string; entry_conditions: string[]; structure: string;
+        exit_rules: string[]; return_metrics: string[];
+      }[];
+      governance: string[];
+      pool_b: {
+        symbol: string; asof?: string; spot?: number | null;
+        expiry?: string | null; atm_oi?: number | null;
+        spread_pct?: number | null; qualified: number; note?: string;
+      }[];
+      league: Record<string, {
+        trades: number; win_rate_pct?: number | null; total_pnl_usd: number;
+        avg_return_on_risk_pct?: number | null; worst_trade_usd?: number | null;
+      }>;
+    }>("/options/rulebook"),
+  optionsPoolBRefresh: () =>
+    post<{ measured: number; qualified: number }>("/options/pool-b/refresh"),
+
   // Settings (portfolio + scheduler)
   getSettings: () =>
     get<{

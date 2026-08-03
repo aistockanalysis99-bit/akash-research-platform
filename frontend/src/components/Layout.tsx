@@ -38,6 +38,7 @@ const SECTIONS: {
     items: [
       { label: "Scanner", to: "/options" },
       { label: "Positions", to: "/options/positions" },
+      { label: "Rulebook", to: "/options/rulebook" },
     ],
   },
   {

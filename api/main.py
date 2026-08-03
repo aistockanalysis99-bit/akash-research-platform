@@ -1441,6 +1441,69 @@ async def options_position_close(position_id: int,
     return pos
 
 
+# --------------- Options: Strategy Board foundations (Phase 0) ---------------
+
+
+@app.get("/options/rulebook")
+async def options_rulebook() -> dict[str, Any]:
+    """The complete strategy rulebook with live parameter values, governance
+    rules, Pool B membership, and the realized league table."""
+    from engine.live.options.pools import list_pool_b
+    from engine.live.options.registry import GOVERNANCE, rulebook
+    from engine.live.options.structures import family_stats
+    return {
+        "strategies": rulebook(),
+        "governance": GOVERNANCE,
+        "pool_b": list_pool_b(),
+        "league": family_stats(),
+    }
+
+
+@app.post("/options/pool-b/refresh")
+async def options_pool_b_refresh() -> dict[str, Any]:
+    """Re-measure Pool B liquidity now (also runs Mondays 08:10 ET)."""
+    from engine.config import POLYGON_API_KEY
+    if not POLYGON_API_KEY:
+        raise HTTPException(400, "POLYGON_API_KEY not configured on the server")
+    from engine.live.options.pools import refresh_pool_b
+    try:
+        return await refresh_pool_b()
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(500, f"pool refresh failed: {str(e)[:200]}")
+
+
+@app.get("/options/structures")
+async def options_structures(status: Optional[str] = None) -> dict[str, Any]:
+    """Multi-leg paper structures (condors, spreads, …) + per-family stats."""
+    from engine.live.options.structures import family_stats, list_structures
+    return {
+        "open": list_structures("open"),
+        "closed": list_structures("closed", limit=100) if status != "open" else [],
+        "league": family_stats(),
+    }
+
+
+@app.post("/options/structures/refresh")
+async def options_structures_refresh() -> dict[str, Any]:
+    """Re-price all open multi-leg structures now."""
+    from engine.live.options.structures import mark_structures
+    try:
+        return await mark_structures()
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(500, f"structure refresh failed: {str(e)[:200]}")
+
+
+@app.post("/options/structure/{position_id}/close")
+async def options_structure_close(position_id: int,
+                                  payload: Optional[dict[str, Any]] = None) -> dict[str, Any]:
+    from engine.live.options.structures import close_structure
+    reason = (payload or {}).get("reason", "manual")
+    pos = await close_structure(position_id, reason=reason)
+    if pos is None:
+        raise HTTPException(404, "structure not found or already closed")
+    return pos
+
+
 # --------------- Telegram (Phase 4) ---------------
 
 

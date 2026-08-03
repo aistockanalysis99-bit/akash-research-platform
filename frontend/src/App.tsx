@@ -23,6 +23,7 @@ import PipelineBakeoffPage from "./pages/PipelineBakeoffPage";
 import OptionsScannerPage from "./pages/OptionsScannerPage";
 import OptionsPositionsPage from "./pages/OptionsPositionsPage";
 import OptionsBacktestPage from "./pages/OptionsBacktestPage";
+import RulebookPage from "./pages/RulebookPage";
 
 export default function App() {
   return (
@@ -49,6 +50,7 @@ export default function App() {
         <Route path="/options" element={<OptionsScannerPage />} />
         <Route path="/options/positions" element={<OptionsPositionsPage />} />
         <Route path="/options/backtest/:symbol" element={<OptionsBacktestPage />} />
+        <Route path="/options/rulebook" element={<RulebookPage />} />
         {/* Backtesting section */}
         <Route path="/backtest" element={<BacktestPage />} />
         <Route path="/runs" element={<RunsPage />} />
