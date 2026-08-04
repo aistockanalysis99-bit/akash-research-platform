@@ -264,6 +264,53 @@ export const api = {
     post<{ position_id: number; kind: string }>(
       "/options/board/track", { board_id: boardId, contracts }),
 
+  // Options: Returns Engine (Phase 2)
+  optionsLeague: () =>
+    get<{
+      rows: {
+        key: string; name: string; status: string;
+        trades: number; win_rate_pct?: number | null;
+        avg_return_on_risk_pct?: number | null; total_pnl_usd: number;
+        worst_trade_usd?: number | null;
+        open_count: number; open_capital: number;
+      }[];
+    }>("/options/league"),
+  optionsReportCard: () =>
+    get<{
+      symbols_covered: number; symbols_errored: number;
+      events_priced: number; qualifying_events: number;
+      qualifying_win_rate_pct?: number | null;
+      qualifying_avg_pnl_pct?: number | null;
+      avg_implied_vs_actual?: number | null;
+      leaders: { symbol: string; qualifying_events?: number | null;
+                 win_rate_pct?: number | null;
+                 avg_pnl_pct?: number | null }[];
+      generated_at: string;
+    }>("/options/report-card"),
+  optionsReportCardRun: (limit = 5) =>
+    post<{ batch_done: number; batch_failed: number;
+           coverage: number; universe: number }>(
+      "/options/report-card/run", { limit }),
+  optionsCondorBacktest: (symbol: string, refresh = false) =>
+    get<{
+      symbol: string; entry_days: number; computed_at?: string;
+      error?: string; note?: string;
+      summary?: {
+        events_simulated: number; events_priced: number;
+        rule_fired_events: number;
+        fired_win_rate_pct?: number | null;
+        fired_avg_return_on_risk_pct?: number | null;
+        all_avg_return_on_risk_pct?: number | null;
+      };
+      events?: {
+        earnings_date: string; error?: string | null;
+        credit?: number; max_loss?: number; cheapness?: number | null;
+        implied_move_pct?: number; actual_move_pct?: number | null;
+        inside_range?: boolean | null; trade_pnl_usd?: number;
+        return_on_risk_pct?: number; would_fire?: boolean;
+      }[];
+    }>(`/options/condor-backtest/${symbol}?refresh=${refresh ? "true" : "false"}`),
+
   // Settings (portfolio + scheduler)
   getSettings: () =>
     get<{

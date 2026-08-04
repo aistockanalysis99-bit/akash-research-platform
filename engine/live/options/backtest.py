@@ -29,6 +29,10 @@ log = logging.getLogger(__name__)
 MIN_TRAILING_EVENTS = 4     # need at least this many PRIOR events for a median
 MAX_TRAILING_EVENTS = 12
 EXIT_OFFSET_DAYS = 1        # exit the trading day before earnings (mirrors positions.py)
+# Data-artifact backstop shared by ALL historical simulations (straddle +
+# condor): an implied move above this is essentially always a broken quote or
+# unhandled corporate action, never a real market.
+IMPLIED_MOVE_ARTIFACT_CEILING = 60.0
 
 
 def _trading_day_index(dates: list[str], target: str) -> Optional[int]:
@@ -183,8 +187,13 @@ async def _simulate_one_event(symbol: str, earnings_date: date, prior_events: li
     put_bars = await poly.historical_leg_bars(symbol, expiry, atm_strike, "put", pad_lo, pad_hi)
     call_entry = poly.nearest_bar_close(call_bars, entry_date)
     put_entry = poly.nearest_bar_close(put_bars, entry_date)
-    call_exit = poly.nearest_bar_close(call_bars, exit_date)
-    put_exit = poly.nearest_bar_close(put_bars, exit_date)
+    # Exit marks must come from the exit day itself — otherwise a leg that
+    # never printed after entry silently "exits" at its own entry-day close
+    # and books a fake break-even into the record.
+    call_exit = poly.nearest_bar_close(call_bars, exit_date,
+                                       not_before_date=exit_date)
+    put_exit = poly.nearest_bar_close(put_bars, exit_date,
+                                      not_before_date=exit_date)
 
     if not (call_entry and put_entry and call_exit and put_exit):
         return {"earnings_date": earnings_date.isoformat(), "actual_move_pct": actual_move,
@@ -199,11 +208,12 @@ async def _simulate_one_event(symbol: str, earnings_date: date, prior_events: li
     # print a 2-week ATM straddle worth 30-50% of spot — we must NOT reject those,
     # they're the whole point. Only a cost above ~60% of spot is essentially
     # always a broken quote / unhandled corporate action rather than a real trade.
-    if implied_move is not None and implied_move > 60.0:
+    if implied_move is not None and implied_move > IMPLIED_MOVE_ARTIFACT_CEILING:
         return {"earnings_date": earnings_date.isoformat(), "actual_move_pct": actual_move,
                 "hist_median_move_pct": hist_median,
-                "error": (f"computed implied move {implied_move}% exceeds the 60% "
-                          f"data-artifact ceiling -- almost certainly a broken quote "
+                "error": (f"computed implied move {implied_move}% exceeds the "
+                          f"{IMPLIED_MOVE_ARTIFACT_CEILING:.0f}% data-artifact "
+                          f"ceiling -- almost certainly a broken quote "
                           f"or unhandled corporate action; skipped")}
     cheapness = ev.cheapness_ratio(implied_move, hist_median)
     trade_pnl_pct = round((exit_cost / entry_cost - 1) * 100, 2) if entry_cost else None

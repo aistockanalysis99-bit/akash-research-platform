@@ -180,8 +180,60 @@ function CondorCard({ c }: { c: BoardCard }) {
         {" "}{c.exit_rule}
       </div>
 
+      <CondorHistory symbol={c.symbol} />
+
       <TrackControl boardId={c.id} invalidate={["optBoard", "optStructures"]} />
     </Card>
+  );
+}
+
+/** Layer 2 on demand: what this exact rule did on this stock's real past
+ * earnings. Loaded only when asked — a condor backtest costs API budget. */
+function CondorHistory({ symbol }: { symbol: string }) {
+  const [wanted, setWanted] = useState(false);
+  const q = useQuery({
+    queryKey: ["condorBt", symbol],
+    queryFn: () => api.optionsCondorBacktest(symbol),
+    enabled: wanted,
+    staleTime: 24 * 3600 * 1000,
+  });
+
+  if (!wanted) {
+    return (
+      <button
+        onClick={() => setWanted(true)}
+        className="text-xs text-gray-400 hover:text-brand transition-colors mb-3 block"
+      >
+        📜 Load this rule's history on {symbol} (real past option prices)
+      </button>
+    );
+  }
+  if (q.isLoading) return <div className="text-xs text-gray-500 mb-3">Backtesting {symbol} on real historical option prices…</div>;
+  const s = q.data?.summary;
+  if (q.error || q.data?.error || !s) {
+    return <div className="text-xs text-gray-500 mb-3">History unavailable: {q.data?.error || (q.error as Error)?.message?.slice(0, 60) || "no data"}</div>;
+  }
+  return (
+    <div className="text-xs text-gray-300 mb-3 rounded-lg bg-bg-hover/40 border border-line/50 px-3 py-2">
+      This rule on {symbol}, last {s.events_priced} priced events:{" "}
+      {s.rule_fired_events > 0 ? (
+        <>
+          fired {s.rule_fired_events}×, won{" "}
+          <b className={s.fired_win_rate_pct != null && s.fired_win_rate_pct >= 50 ? "text-pos" : "text-neg"}>
+            {s.fired_win_rate_pct ?? "—"}%
+          </b>
+          , avg{" "}
+          <b className={(s.fired_avg_return_on_risk_pct ?? 0) >= 0 ? "text-pos" : "text-neg"}>
+            {(s.fired_avg_return_on_risk_pct ?? 0) >= 0 ? "+" : ""}
+            {s.fired_avg_return_on_risk_pct ?? "—"}%
+          </b>{" "}
+          on risk
+        </>
+      ) : (
+        <>the rule never fired historically on this name — today's setup is its first</>
+      )}
+      <span className="text-gray-500"> · real expired-contract prices, no simulation</span>
+    </div>
   );
 }
 

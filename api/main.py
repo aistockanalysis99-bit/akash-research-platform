@@ -1425,14 +1425,20 @@ async def options_backtest(symbol: str, refresh: bool = False,
     from engine.live.options.store import load_backtest, save_backtest
     if not refresh:
         cached = load_backtest(symbol)
-        if cached:
+        # Error / zero-priced rows are transient failures — cache miss.
+        if cached and not cached.get("error") \
+                and (cached.get("summary") or {}).get("events_priced", 0) > 0:
             return cached
     from engine.live.options.backtest import backtest_symbol
     try:
         result = await backtest_symbol(symbol, entry_days=entry_days)
     except Exception as e:  # noqa: BLE001
         raise HTTPException(500, f"backtest failed: {str(e)[:200]}")
-    save_backtest(symbol, entry_days, result)
+    if not result.get("error") \
+            and (result.get("summary") or {}).get("events_priced", 0) > 0:
+        save_backtest(symbol, entry_days, result)
+    else:
+        result["transient"] = True
     result["computed_at"] = datetime.utcnow().isoformat()
     return result
 
@@ -1592,6 +1598,107 @@ async def options_board_track(payload: dict[str, Any]) -> dict[str, Any]:
 
     raise HTTPException(400, f"tracking not implemented for "
                              f"{card['strategy_key']}")
+
+
+# --------------- Options: Returns Engine (Phase 2) ---------------
+
+
+@app.get("/options/league")
+async def options_league() -> dict[str, Any]:
+    """The Strategy League Table: realized record per family + open exposure.
+    Return axis everywhere: % on capital at risk."""
+    from engine.live.options.registry import rulebook
+    from engine.live.options.store import league_record, list_positions, open_sleeve
+    from engine.live.options.structures import family_stats, list_structures
+
+    realized = family_stats()
+    straddle = league_record()
+    if straddle:
+        realized.setdefault("long_straddle", straddle)
+
+    open_structs = list_structures("open")
+    open_by_family: dict[str, dict[str, float]] = {}
+    for p in open_structs:
+        fam = open_by_family.setdefault(p["strategy_key"],
+                                        {"count": 0, "capital": 0.0})
+        fam["count"] += 1
+        fam["capital"] += (p.get("capital_at_risk") or 0) * 100
+    sleeve = open_sleeve()
+    if sleeve["count"]:
+        open_by_family["long_straddle"] = {"count": sleeve["count"],
+                                           "capital": sleeve["capital"]}
+    else:
+        open_by_family.setdefault("long_straddle", {"count": len(list_positions("open")),
+                                                    "capital": sleeve["capital"]})
+
+    rows = []
+    for strat in rulebook():
+        key = strat["key"]
+        r = realized.get(key) or {}
+        o = open_by_family.get(key) or {"count": 0, "capital": 0.0}
+        rows.append({
+            "key": key, "name": strat["name"], "status": strat["status"],
+            "trades": r.get("trades", 0),
+            "win_rate_pct": r.get("win_rate_pct"),
+            "avg_return_on_risk_pct": r.get("avg_return_on_risk_pct"),
+            "total_pnl_usd": r.get("total_pnl_usd", 0.0),
+            "worst_trade_usd": r.get("worst_trade_usd"),
+            "open_count": int(o["count"]),
+            "open_capital": round(o["capital"], 2),
+        })
+    return {"rows": rows}
+
+
+@app.get("/options/report-card")
+async def options_report_card() -> dict[str, Any]:
+    """Aggregate Layer-2 evidence across every cached straddle backtest."""
+    from engine.live.options.report_card import aggregate_report_card
+    return aggregate_report_card()
+
+
+@app.post("/options/report-card/run")
+async def options_report_card_run(payload: Optional[dict[str, Any]] = None) -> dict[str, Any]:
+    """Run a small coverage batch now (nightly job does 20 at 03:30 ET)."""
+    from engine.config import POLYGON_API_KEY
+    if not POLYGON_API_KEY:
+        raise HTTPException(400, "POLYGON_API_KEY not configured on the server")
+    from engine.live.options.report_card import run_report_card_batch
+    limit = min(10, max(1, int((payload or {}).get("limit") or 5)))
+    try:
+        return await run_report_card_batch(limit=limit)
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(500, f"report card batch failed: {str(e)[:200]}")
+
+
+@app.get("/options/condor-backtest/{symbol}")
+async def options_condor_backtest(symbol: str, refresh: bool = False,
+                                  entry_days: int = 5) -> dict[str, Any]:
+    """R2's Layer 2: historical condor simulation on real option prices."""
+    from engine.config import POLYGON_API_KEY
+    if not POLYGON_API_KEY:
+        raise HTTPException(400, "POLYGON_API_KEY not configured on the server")
+    from engine.live.options.store import (load_strategy_backtest,
+                                           save_strategy_backtest)
+    if not refresh:
+        cached = load_strategy_backtest("iron_condor", symbol)
+        # An error or zero-priced cache row is usually a transient failure
+        # (FMP down, Polygon 429 storm) — treat as a miss, never serve forever.
+        if cached and not cached.get("error") \
+                and (cached.get("summary") or {}).get("events_priced", 0) > 0:
+            return cached
+    from engine.live.options.condor_backtest import condor_backtest_symbol
+    try:
+        result = await condor_backtest_symbol(symbol, entry_days=entry_days)
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(500, f"condor backtest failed: {str(e)[:200]}")
+    trustworthy = (not result.get("error")
+                   and (result.get("summary") or {}).get("events_priced", 0) > 0)
+    if trustworthy:
+        save_strategy_backtest("iron_condor", symbol, result)
+    else:
+        result["transient"] = True
+    result["computed_at"] = datetime.utcnow().isoformat()
+    return result
 
 
 # --------------- Telegram (Phase 4) ---------------

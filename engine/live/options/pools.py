@@ -32,6 +32,11 @@ POOL_B_SEED = [
     "PLTR", "SHOP", "COIN", "SNOW", "SOFI", "HOOD", "PYPL", "UBER",
     "DIS", "NKE", "F", "GM", "BA", "WMT", "HD", "COST",
     "XOM", "CVX", "JPM", "BAC", "GS", "C",
+    # Season-1 learning (2026-08-04): liquid names the first live board run
+    # surfaced as cheapness-qualified but absent from the seed. Membership is
+    # still earned — the qualifier measures these like everyone else.
+    "CSCO", "AMAT", "QCOM", "TXN", "ADBE", "MRVL", "DELL", "LRCX", "KLAC",
+    "ABNB", "CRWD", "PANW", "SBUX", "T", "VZ",
 ]
 
 _ensured = False
