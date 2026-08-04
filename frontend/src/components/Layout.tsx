@@ -39,6 +39,7 @@ const SECTIONS: {
       { label: "Board", to: "/options/board" },
       { label: "Scanner", to: "/options" },
       { label: "Positions", to: "/options/positions" },
+      { label: "Wheel", to: "/options/wheel" },
       { label: "League", to: "/options/league" },
       { label: "Rulebook", to: "/options/rulebook" },
     ],

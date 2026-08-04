@@ -272,6 +272,45 @@ export const api = {
     post<{ position_id: number; kind: string }>(
       "/options/board/track", { board_id: boardId, contracts }),
 
+  // Options: The Wheel (Phase 4)
+  optionsWheels: () =>
+    get<{
+      wheels: {
+        id: number; symbol: string; state: string; qty: number;
+        capital_per_share?: number | null; assigned_price?: number | null;
+        premiums_net?: number | null; exit_price?: number | null;
+        cycle_roi_pct?: number | null; effective_basis?: number | null;
+        started_at?: string; completed_at?: string | null; notes?: string;
+        legs: {
+          id: number; wheel_id: number; seq: number; kind: string;
+          strike: number; expiry: string; premium: number; qty: number;
+          outcome?: string | null; close_price?: number | null;
+          opened_at?: string; closed_at?: string | null;
+        }[];
+      }[];
+    }>("/options/wheels"),
+  optionsWheelStart: (symbol: string, qty = 1) =>
+    post<unknown>("/options/wheels", { symbol, qty }),
+  optionsWheelLeg: (wheelId: number, kind: string, strike: number,
+                    expiry: string, premium: number) =>
+    post<unknown>(`/options/wheels/${wheelId}/leg`,
+      { kind, strike, expiry, premium }),
+  optionsWheelResolve: (wheelId: number, legId: number, outcome: string,
+                        closePrice?: number) =>
+    post<unknown>(`/options/wheels/${wheelId}/leg/${legId}/resolve`,
+      { outcome, close_price: closePrice }),
+  optionsWheelSuggest: (wheelId: number) =>
+    get<{
+      state: string; kind?: "csp" | "cc"; note?: string;
+      suggestion?: {
+        ok: boolean; reason?: string; strike?: number; expiry?: string;
+        premium?: number; premium_usd_per_contract?: number;
+        annualized_pct?: number | null;
+      } | null;
+      ai_levels?: { entry?: number | null; target?: number | null;
+                    conviction?: number | null } | null;
+    }>(`/options/wheels/${wheelId}/suggest`),
+
   // Options: Returns Engine (Phase 2)
   optionsLeague: () =>
     get<{

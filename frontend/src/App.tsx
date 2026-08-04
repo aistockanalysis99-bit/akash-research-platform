@@ -26,6 +26,7 @@ import OptionsBacktestPage from "./pages/OptionsBacktestPage";
 import RulebookPage from "./pages/RulebookPage";
 import StrategyBoardPage from "./pages/StrategyBoardPage";
 import LeagueTablePage from "./pages/LeagueTablePage";
+import WheelPage from "./pages/WheelPage";
 
 export default function App() {
   return (
@@ -55,6 +56,7 @@ export default function App() {
         <Route path="/options/rulebook" element={<RulebookPage />} />
         <Route path="/options/board" element={<StrategyBoardPage />} />
         <Route path="/options/league" element={<LeagueTablePage />} />
+        <Route path="/options/wheel" element={<WheelPage />} />
         {/* Backtesting section */}
         <Route path="/backtest" element={<BacktestPage />} />
         <Route path="/runs" element={<RunsPage />} />

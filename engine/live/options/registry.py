@@ -130,6 +130,36 @@ def rulebook() -> list[dict[str, Any]]:
                                "if-called total return"],
         },
         {
+            "key": "wheel",
+            "name": "R4½ · The Wheel",
+            "status": "paper",
+            "phase": "Phase 4 (lifecycle machine — paper)",
+            "direction": "income cycle (bullish carry)",
+            "risk_type": "cash-secured cycle — capital fixed at the first "
+                         "secured strike",
+            "pools": ["C (ownership list)"],
+            "plain": ("The full income cycle as one machine: get paid to wait "
+                      "(sell a put) → if assigned, own a wanted stock at a "
+                      "discounted basis → rent it out (sell calls) → if called "
+                      "away, the cycle completes and books its TRUE return. "
+                      "Every premium lands in a ledger; the cost basis you see "
+                      "is the real one, net of everything banked."),
+            "entry_conditions": [
+                "Pool C stock (the AI would own it)",
+                "each leg follows the income rules (R3/R4 strikes & DTE)",
+                "state machine enforces the grammar: puts only from CASH, "
+                "calls only while HOLDING",
+            ],
+            "structure": "CSP → (assigned) stock → covered calls → called away",
+            "exit_rules": [
+                "outcomes confirmed by YOU from the broker — never assumed",
+                "expiry-day Telegram suggestion compares close vs strike",
+                "cycle ROI books only at completion (or honest abandonment)",
+            ],
+            "return_metrics": ["full-cycle ROI on committed capital",
+                               "effective basis (assigned − premiums banked)"],
+        },
+        {
             "key": "bull_put_spread",
             "name": "R5 · Bull Put Spread",
             "status": "planned",

@@ -189,9 +189,11 @@ async def _job_mark_structures() -> None:
         res = await mark_structures()
         n = await check_exit_alerts(notify=True)
         nc = await check_coverage_alerts(notify=True)
+        from .options.wheel import expiry_day_suggestions
+        nw = await expiry_day_suggestions(notify=True)
         _last_runs["mark_structures"] = {
             "at": datetime.utcnow().isoformat(), **res, "exit_alerts": n,
-            "coverage_alerts": nc}
+            "coverage_alerts": nc, "wheel_suggestions": nw}
     except Exception as e:  # noqa: BLE001
         log.exception("scheduler: structure mark failed: %s", e)
 

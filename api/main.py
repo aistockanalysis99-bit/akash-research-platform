@@ -1650,6 +1650,10 @@ async def options_league() -> dict[str, Any]:
     straddle = league_record()
     if straddle:
         realized.setdefault("long_straddle", straddle)
+    from engine.live.options.wheel import wheel_league_row
+    wheel_row = wheel_league_row()
+    if wheel_row:
+        realized["wheel"] = wheel_row
 
     open_structs = list_structures("open")
     open_by_family: dict[str, dict[str, float]] = {}
@@ -1734,6 +1738,116 @@ async def options_condor_backtest(symbol: str, refresh: bool = False,
         result["transient"] = True
     result["computed_at"] = datetime.utcnow().isoformat()
     return result
+
+
+# --------------- Options: Wheel (Phase 4) ---------------
+
+
+@app.get("/options/wheels")
+async def options_wheels(active: bool = False) -> dict[str, Any]:
+    from engine.live.options.wheel import list_wheels
+    return {"wheels": list_wheels(active_only=active)}
+
+
+@app.post("/options/wheels")
+async def options_wheel_start(payload: dict[str, Any]) -> dict[str, Any]:
+    from engine.live.options.wheel import WheelError, get_wheel, start_wheel
+    symbol = (payload.get("symbol") or "").strip().upper()
+    if not symbol:
+        raise HTTPException(400, "symbol required")
+    qty = min(100, max(1, int(payload.get("qty") or 1)))
+    try:
+        wid = start_wheel(symbol, qty, notes=payload.get("notes") or "")
+    except WheelError as e:
+        raise HTTPException(400, str(e))
+    return get_wheel(wid)
+
+
+@app.post("/options/wheels/{wheel_id}/leg")
+async def options_wheel_leg(wheel_id: int, payload: dict[str, Any]) -> dict[str, Any]:
+    from engine.live.options.wheel import WheelError, get_wheel, open_leg
+    try:
+        strike = float(payload.get("strike") or 0)
+        premium = float(payload.get("premium") or 0)
+    except (TypeError, ValueError):
+        raise HTTPException(400, "strike and premium must be numbers")
+    try:
+        open_leg(wheel_id, (payload.get("kind") or "").lower(),
+                 strike, str(payload.get("expiry") or ""), premium,
+                 payload.get("qty"))
+    except WheelError as e:
+        raise HTTPException(400, str(e))
+    return get_wheel(wheel_id)
+
+
+@app.post("/options/wheels/{wheel_id}/leg/{leg_id}/resolve")
+async def options_wheel_resolve(wheel_id: int, leg_id: int,
+                                payload: dict[str, Any]) -> dict[str, Any]:
+    from engine.live.options.wheel import WheelError, resolve_leg
+    try:
+        return resolve_leg(wheel_id, leg_id,
+                           (payload.get("outcome") or "").lower(),
+                           payload.get("close_price"))
+    except WheelError as e:
+        raise HTTPException(400, str(e))
+
+
+@app.post("/options/wheels/{wheel_id}/abandon")
+async def options_wheel_abandon(wheel_id: int,
+                                payload: Optional[dict[str, Any]] = None) -> dict[str, Any]:
+    from engine.live.options.wheel import WheelError, abandon_wheel
+    exit_price = (payload or {}).get("exit_price")
+    if exit_price is not None:
+        try:
+            exit_price = float(exit_price)
+        except (TypeError, ValueError):
+            raise HTTPException(400, "exit_price must be a number")
+    try:
+        return abandon_wheel(wheel_id, exit_price=exit_price)
+    except WheelError as e:
+        raise HTTPException(400, str(e))
+
+
+@app.get("/options/wheels/{wheel_id}/suggest")
+async def options_wheel_suggest(wheel_id: int) -> dict[str, Any]:
+    """Next-action suggestion for the wheel's current state, priced live via
+    the income builders with the AI's levels."""
+    from engine.config import POLYGON_API_KEY
+    if not POLYGON_API_KEY:
+        raise HTTPException(400, "POLYGON_API_KEY not configured on the server")
+    from engine.data.fmp_client import FMPClient
+    from engine.live.data.fmp_research import FMPResearchClient
+    from engine.live.options.income import ai_levels, build_covered_call, build_csp
+    from engine.live.options.polygon_client import PolygonOptionsClient
+    from engine.live.options.wheel import WheelError, get_wheel
+    try:
+        w = get_wheel(wheel_id)
+    except WheelError as e:
+        raise HTTPException(404, str(e))
+    if w["state"] not in ("CASH", "HOLDING"):
+        return {"state": w["state"],
+                "suggestion": None,
+                "note": "resolve the open leg first — suggestions apply to "
+                        "resting states only"}
+    lv = ai_levels(w["symbol"]) or {}
+    async with FMPClient() as fmp, PolygonOptionsClient() as poly:
+        research = FMPResearchClient(fmp)
+        bars = await fmp.fetch_daily(w["symbol"])
+        if bars is None or bars.empty:
+            raise HTTPException(500, "no price data")
+        spot = float(bars["close"].iloc[-1])
+        if w["state"] == "CASH":
+            sug = await build_csp(poly, research, w["symbol"], spot,
+                                  float(lv.get("entry") or spot),
+                                  lv.get("conviction"))
+            kind = "csp"
+        else:
+            sug = await build_covered_call(poly, research, w["symbol"],
+                                           (w["qty"] or 1) * 100, spot,
+                                           lv.get("target"))
+            kind = "cc"
+    return {"state": w["state"], "kind": kind, "suggestion": sug,
+            "ai_levels": lv or None}
 
 
 # --------------- Telegram (Phase 4) ---------------
