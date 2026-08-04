@@ -41,10 +41,18 @@ def _league() -> dict[str, dict[str, Any]]:
 
 def viable_structures(symbol: str, ctx: dict[str, Any]) -> list[dict[str, Any]]:
     """Which families COULD fire for this symbol, from the signal context:
-    {holding_shares, ai: {conviction, decision, entry, target, stop},
-     earnings_days, cheapness}. Pure logic — no I/O."""
+    {holding_shares, ai: {date, conviction, decision, entry, target, stop,
+    ceiling}, earnings_days, cheapness}. Pure logic — no I/O.
+
+    Gates mirror the BUILDERS exactly (review finding: the allocator must
+    never rank a structure viable that the builders would refuse to card):
+    PM vocabulary APPROVE/RESIZE/REJECT, REJECT fires no spread, bear calls
+    need an explicit ceiling, and AI-driven families need a FRESH decision."""
     out = []
     ai = ctx.get("ai") or {}
+    from datetime import date as _date, timedelta as _td
+    fresh = bool(ai.get("date")
+                 and ai["date"] >= (_date.today() - _td(days=45)).isoformat())
     conviction = ai.get("conviction") or 0
     decision = (ai.get("decision") or "").upper()
     days = ctx.get("earnings_days")
@@ -54,18 +62,20 @@ def viable_structures(symbol: str, ctx: dict[str, Any]) -> list[dict[str, Any]]:
         out.append({"key": "covered_call",
                     "why": "the fund already holds the shares — rent is the "
                            "lowest-risk income available"})
-    if conviction >= 7 and ai.get("entry"):
+    if fresh and decision in ("APPROVE", "RESIZE") and conviction >= 7 \
+            and ai.get("entry"):
         out.append({"key": "cash_secured_put",
-                    "why": f"AI BUY {conviction}/10 — get paid to wait at its "
-                           f"own entry level"})
-    if conviction >= 7 and ai.get("stop") and decision not in ("AVOID", "SELL"):
+                    "why": f"AI {decision} {conviction}/10 — get paid to wait "
+                           f"at its own entry level"})
+    if fresh and decision in ("APPROVE", "RESIZE") and conviction >= 7 \
+            and ai.get("stop"):
         out.append({"key": "bull_put_spread",
                     "why": "defined-risk premium against the AI's stop — wins "
                            "unless its own invalidation level breaks"})
-    if decision in ("AVOID", "SELL") and ai.get("stop"):
+    if fresh and decision in ("AVOID", "SELL") and ai.get("ceiling"):
         out.append({"key": "bear_call_spread",
-                    "why": "the bearish verdict finally earns — premium "
-                           "against the AI's invalidation ceiling"})
+                    "why": "the bearish verdict earns — premium against the "
+                           "AI's explicit re-entry ceiling"})
     if days is not None and 1 <= days <= 10 and cheap is not None:
         if cheap <= 0.80:
             out.append({"key": "long_straddle",

@@ -330,15 +330,24 @@ async def _spread_cards() -> tuple[list[dict], list[dict]]:
                 newest[sym] = r
         cand_bull, cand_bear = [], []
         for sym, r in newest.items():
-            if (r.get("date") or "") < stale_before:
-                continue
             lv = ai_levels(sym)
-            if not lv or not lv.get("stop"):
+            if not lv:
                 continue
+            # Freshness on the decision that supplies the LEVELS (ai_levels
+            # skips failed runs — the newest folder's date can lie).
+            if (lv.get("date") or "") < stale_before:
+                continue
+            # PM vocabulary is APPROVE / RESIZE / REJECT (review HIGH —
+            # "AVOID"/"SELL" never occur; legacy strings kept defensively).
+            # REJECT fires NEITHER side: it can mean risk-cap-blocked-bullish
+            # (NVDA case) or thesis-rejected, and the decision field alone
+            # can't tell them apart — ambiguity means no trade.
             decision = (lv.get("decision") or r.get("decision") or "").upper()
             if decision in ("AVOID", "SELL"):
-                cand_bear.append((sym, lv))
-            elif (lv.get("conviction") or 0) >= 7:
+                if lv.get("ceiling"):   # explicit upside invalidation ONLY
+                    cand_bear.append((sym, lv))
+            elif decision in ("APPROVE", "RESIZE") \
+                    and (lv.get("conviction") or 0) >= 7 and lv.get("stop"):
                 cand_bull.append((sym, lv))
     except Exception as e:  # noqa: BLE001
         log.warning("board: spread candidate sweep failed: %s", e)
@@ -364,8 +373,8 @@ async def _spread_cards() -> tuple[list[dict], list[dict]]:
                 continue
             bulls.append({**s,
                           "rules_fired": [
-                              f"AI BUY conviction {lv.get('conviction')} "
-                              f"({lv.get('date')})",
+                              f"AI {lv.get('decision')} conviction "
+                              f"{lv.get('conviction')} ({lv.get('date')})",
                               f"short strike ${s['short_strike']} ≤ AI stop "
                               f"${lv['stop']:,.2f}",
                               "no earnings inside expiry"],
@@ -380,7 +389,7 @@ async def _spread_cards() -> tuple[list[dict], list[dict]]:
                     continue
                 spot = float(bars["close"].iloc[-1])
                 s = await build_bear_call(poly, research, sym, spot,
-                                          float(lv["stop"]))
+                                          float(lv["ceiling"]))
             except Exception as e:  # noqa: BLE001
                 log.warning("board: bear call %s failed: %s", sym, e)
                 continue
@@ -390,8 +399,9 @@ async def _spread_cards() -> tuple[list[dict], list[dict]]:
             bears.append({**s,
                           "rules_fired": [
                               f"AI verdict {lv.get('decision')} ({lv.get('date')})",
-                              f"short strike ${s['short_strike']} ≥ AI "
-                              f"invalidation ${lv['stop']:,.2f}",
+                              f"short strike ${s['short_strike']} ≥ the AI's "
+                              f"re-entry ceiling ${lv['ceiling']:,.2f} "
+                              f"('wrong if it climbs back above')",
                               "no earnings inside expiry"],
                           "exit_rule": "suggestion: take profit at ~50-60% of "
                                        "the credit; close if the AI verdict "

@@ -29,6 +29,13 @@ MAX_INCOME_BUILDS = 6      # per family per board run — rate-limit discipline
 _RE_ENTRY = re.compile(r"Buy around:?\s*\$([\d,]+(?:\.\d+)?)", re.I)
 _RE_TARGET = re.compile(r"target:?\s*\$([\d,]+(?:\.\d+)?)", re.I)
 _RE_STOP = re.compile(r"cut losses at:?\s*\$([\d,]+(?:\.\d+)?)", re.I)
+# Upside invalidation in BEARISH messages ("only think about buying again if
+# the price climbs back above $121"). This — never the downside stop — is the
+# only honest ceiling for a bear call (review HIGH: the stop is ~8% BELOW the
+# entry and carries zero "won't rally past here" meaning).
+_RE_CEILING = re.compile(
+    r"(?:climbs?|rises?|gets?|moves?)\s+back\s+above:?\s*\$([\d,]+(?:\.\d+)?)",
+    re.I)
 
 
 def _num(m: Optional[re.Match]) -> Optional[float]:
@@ -66,6 +73,7 @@ def ai_levels(symbol: str) -> Optional[dict[str, Any]]:
             "entry": _num(_RE_ENTRY.search(msg)),
             "target": _num(_RE_TARGET.search(msg)),
             "stop": _num(_RE_STOP.search(msg)),
+            "ceiling": _num(_RE_CEILING.search(msg)),
         }
         if levels["conviction"] is not None:
             return levels
@@ -111,8 +119,16 @@ def pool_c() -> dict[str, Any]:
             if (r.get("date") or "") < stale_before:
                 continue  # never sell puts on a months-old opinion
             lv = ai_levels(sym)
-            if lv and lv.get("entry"):
-                buys.append({"symbol": sym, **lv})
+            # Freshness must hold on the decision that SUPPLIES the levels —
+            # ai_levels skips failed runs, so its date can be older than the
+            # newest folder's (review finding: a crashed August run must not
+            # launder a May decision's levels through the date check).
+            if not lv or not lv.get("entry") \
+                    or (lv.get("date") or "") < stale_before:
+                continue
+            if (lv.get("decision") or "").upper() not in ("APPROVE", "RESIZE"):
+                continue  # a REJECT's "Buy around" line is not a buy order
+            buys.append({"symbol": sym, **lv})
     except Exception as e:  # noqa: BLE001
         log.warning("pool C: decisions read failed: %s", e)
     return {"holdings": holdings, "buy_candidates": buys}
