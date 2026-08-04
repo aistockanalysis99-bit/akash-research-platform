@@ -135,6 +135,11 @@ def capital_at_risk(legs: list[dict[str, Any]], entry_value: float,
     stats = payoff_stats(legs, entry_value)
     if stats["unbounded_loss"]:
         return None
+    if stats["max_loss"] >= 0:
+        # No losing scenario = arbitrage manufactured by stale quotes.
+        # Returning None makes create_structure refuse the position instead
+        # of booking it with fantasy capital-at-risk.
+        return None
     return round(abs(stats["max_loss"]), 4)
 
 

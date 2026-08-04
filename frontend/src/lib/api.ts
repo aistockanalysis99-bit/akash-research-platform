@@ -12,6 +12,7 @@ import type {
   RunRow,
   Scorecard,
   SchedulerStatus,
+  StructurePosition,
   TelegramLogRow,
   WatchlistItem,
 } from "./types";
@@ -218,6 +219,50 @@ export const api = {
     }>("/options/rulebook"),
   optionsPoolBRefresh: () =>
     post<{ measured: number; qualified: number }>("/options/pool-b/refresh"),
+
+  // Options: multi-leg paper structures (condors, spreads, …)
+  optionsStructures: () =>
+    get<{
+      open: StructurePosition[]; closed: StructurePosition[];
+      league: Record<string, { trades: number; win_rate_pct?: number | null;
+        total_pnl_usd: number; avg_return_on_risk_pct?: number | null;
+        worst_trade_usd?: number | null }>;
+    }>("/options/structures"),
+  optionsStructuresRefresh: () =>
+    post<{ marked: number }>("/options/structures/refresh"),
+  optionsStructureClose: (id: number, reason = "manual") =>
+    post<StructurePosition>(`/options/structure/${id}/close`, { reason }),
+
+  // Options: Strategy Board (Phase 1)
+  optionsBoard: () =>
+    get<{
+      board_date: string | null;
+      cards: {
+        id: number; strategy_key: string; symbol: string;
+        rules_fired?: string[]; exit_rule?: string;
+        earnings_date?: string; days_to_earnings?: number; expiry?: string;
+        // straddle mirror fields
+        candidate_id?: number; strike?: number; straddle_cost?: number;
+        cheapness?: number; dual_signal?: number;
+        implied_move_pct?: number; hist_median_move_pct?: number;
+        // condor fields
+        spot?: number; credit?: number; max_profit?: number | null;
+        max_loss?: number; breakevens?: number[]; pop_est?: number | null;
+        return_on_risk_pct?: number | null; annualized_pct?: number | null;
+        dte?: number; min_oi?: number; max_leg_spread_pct?: number | null;
+        legs?: { side: number; contract_type: string; strike: number;
+                 expiry: string; qty: number; price: number;
+                 delta?: number | null; oi?: number;
+                 spread_pct?: number | null }[];
+      }[];
+    }>("/options/board"),
+  optionsBoardRefresh: (notify = false) =>
+    post<{ board_date: string | null; straddle_cards?: number;
+           condor_cards?: number; note?: string }>(
+      "/options/board/refresh", { notify }),
+  optionsBoardTrack: (boardId: number, contracts: number) =>
+    post<{ position_id: number; kind: string }>(
+      "/options/board/track", { board_id: boardId, contracts }),
 
   // Settings (portfolio + scheduler)
   getSettings: () =>

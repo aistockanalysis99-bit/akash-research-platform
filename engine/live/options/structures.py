@@ -58,6 +58,12 @@ def ensure_tables() -> None:
             )""")
         conn.execute("CREATE INDEX IF NOT EXISTS idx_multi_legs_pos "
                      "ON options_multi_legs(position_id)")
+        # lightweight migrations
+        try:
+            conn.execute("ALTER TABLE options_multi_positions "
+                         "ADD COLUMN exit_alerted INTEGER DEFAULT 0")
+        except Exception:  # noqa: BLE001 — column already exists
+            pass
         conn.commit()
         _ensured = True
     finally:
@@ -328,6 +334,82 @@ async def close_structure(position_id: int,
     finally:
         conn.close()
     return get_structure(position_id)
+
+
+async def check_exit_alerts(notify: bool = True) -> int:
+    """One-time exit SUGGESTION for open structures on their exit-deadline
+    DAY (e.g. condors: the morning after earnings). Never closes anything.
+
+    Two deliberate semantics, both review findings:
+    * MORNING-OF, not moment-after: the 09:20 ET sweep must warn before a
+      10:00 ET deadline, so the trigger is calendar-day based — a strict
+      `now < deadline` skip would push every alert to the NEXT day's run.
+    * Flag AFTER delivery: exit_alerted is only set once Telegram confirms
+      the send. Flag-first would burn the once-only alert on a failed send
+      and the suggestion would be lost forever. With notify=False nothing is
+      flagged — detection defers to the next notifying run.
+    """
+    from zoneinfo import ZoneInfo
+    et = ZoneInfo("America/New_York")
+    now = datetime.now(et)
+    pending = []
+    for pos in list_structures("open"):
+        deadline_raw = pos.get("exit_deadline")
+        if not deadline_raw or pos.get("exit_alerted"):
+            continue
+        try:
+            deadline = datetime.fromisoformat(deadline_raw)
+        except ValueError:
+            continue
+        if deadline.tzinfo is None:
+            deadline = deadline.replace(tzinfo=et)
+        if now.date() < deadline.date():
+            continue
+        pnl = pos.get("pnl_usd")
+        pnl_txt = (f" Current P&L {pnl:+,.0f} USD "
+                   f"({pos.get('pnl_pct_on_risk') or 0:+.1f}% on risk).") \
+            if pnl is not None else ""
+        pending.append({
+            "id": pos["id"],
+            "symbol": pos["symbol"], "kind": "options_exit",
+            "text": (f"⏰ {pos['symbol']} {pos['strategy_key'].replace('_', ' ')} "
+                     f"#{pos['id']} — exit point is "
+                     f"{deadline.strftime('%b %d %H:%M ET')}.{pnl_txt}\n"
+                     f"Suggestion: close it in your account and mark it closed "
+                     f"on the platform. Nothing was changed — your call."),
+        })
+    if not pending:
+        return 0
+    if not notify:
+        log.info("structure exit alerts: %d due, deferred (notify=False)",
+                 len(pending))
+        return 0
+
+    sent = 0
+    try:
+        from ..telegram import telegram as _telegram
+        client = _telegram()
+    except Exception as e:  # noqa: BLE001
+        log.warning("structure exit alerts: telegram unavailable: %s", e)
+        return 0
+    for a in pending:
+        try:
+            ok = await client.send_message(a["text"], kind=a["kind"],
+                                           symbol=a.get("symbol"))
+        except Exception as e:  # noqa: BLE001
+            log.warning("structure exit alert send failed for #%d: %s",
+                        a["id"], e)
+            ok = False
+        if ok:
+            conn = get_connection()
+            try:
+                conn.execute("UPDATE options_multi_positions SET "
+                             "exit_alerted=1 WHERE id=?", (a["id"],))
+                conn.commit()
+            finally:
+                conn.close()
+            sent += 1
+    return sent
 
 
 def family_stats() -> dict[str, dict[str, Any]]:

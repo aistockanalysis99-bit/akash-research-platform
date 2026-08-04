@@ -24,6 +24,7 @@ import OptionsScannerPage from "./pages/OptionsScannerPage";
 import OptionsPositionsPage from "./pages/OptionsPositionsPage";
 import OptionsBacktestPage from "./pages/OptionsBacktestPage";
 import RulebookPage from "./pages/RulebookPage";
+import StrategyBoardPage from "./pages/StrategyBoardPage";
 
 export default function App() {
   return (
@@ -51,6 +52,7 @@ export default function App() {
         <Route path="/options/positions" element={<OptionsPositionsPage />} />
         <Route path="/options/backtest/:symbol" element={<OptionsBacktestPage />} />
         <Route path="/options/rulebook" element={<RulebookPage />} />
+        <Route path="/options/board" element={<StrategyBoardPage />} />
         {/* Backtesting section */}
         <Route path="/backtest" element={<BacktestPage />} />
         <Route path="/runs" element={<RunsPage />} />

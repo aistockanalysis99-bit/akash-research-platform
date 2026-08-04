@@ -1354,19 +1354,12 @@ async def options_candidates() -> list[dict[str, Any]]:
     return latest_candidates()
 
 
-@app.post("/options/track")
-async def options_track(payload: dict[str, Any]) -> dict[str, Any]:
-    """Track a scanner candidate as a paper straddle position."""
-    candidate_id = int(payload.get("candidate_id") or 0)
-    contracts = max(1, int(payload.get("contracts") or 1))
-    if not candidate_id:
-        raise HTTPException(400, "candidate_id required")
+def _enforce_straddle_sleeve_caps(cand: dict[str, Any], contracts: int) -> None:
+    """Options-sleeve caps (0 = OFF) — enforced on EVERY path that opens a
+    straddle paper position (scanner track AND board track), kept entirely
+    separate from equity cash."""
     from engine.live import settings as live_settings
-    from engine.live.options.store import get_candidate, open_sleeve
-    cand = get_candidate(candidate_id)
-    if not cand or not cand.get("straddle_cost"):
-        raise HTTPException(400, "candidate not found or not priceable")
-    # Options-sleeve caps (0 = OFF) — kept entirely separate from equity cash.
+    from engine.live.options.store import open_sleeve
     sleeve = open_sleeve()
     max_conc = live_settings.get_options_max_concurrent()
     if max_conc and sleeve["count"] >= max_conc:
@@ -1379,6 +1372,20 @@ async def options_track(payload: dict[str, Any]) -> dict[str, Any]:
                                  f"${sleeve['capital'] + add_cost:,.0f}, over your "
                                  f"${max_cap:,.0f} cap — reduce contracts or raise "
                                  f"the cap in settings")
+
+
+@app.post("/options/track")
+async def options_track(payload: dict[str, Any]) -> dict[str, Any]:
+    """Track a scanner candidate as a paper straddle position."""
+    candidate_id = int(payload.get("candidate_id") or 0)
+    contracts = max(1, int(payload.get("contracts") or 1))
+    if not candidate_id:
+        raise HTTPException(400, "candidate_id required")
+    from engine.live.options.store import get_candidate
+    cand = get_candidate(candidate_id)
+    if not cand or not cand.get("straddle_cost"):
+        raise HTTPException(400, "candidate not found or not priceable")
+    _enforce_straddle_sleeve_caps(cand, contracts)
     from engine.live.options.positions import track_candidate
     pos_id = track_candidate(candidate_id, contracts)
     if pos_id is None:
@@ -1509,6 +1516,82 @@ async def options_structure_close(position_id: int,
     if pos is None:
         raise HTTPException(404, "structure not found or already closed")
     return pos
+
+
+# --------------- Options: Strategy Board (Phase 1) ---------------
+
+
+@app.get("/options/board")
+async def options_board() -> dict[str, Any]:
+    """Latest Strategy Board — one card per (strategy, symbol) that fired."""
+    from engine.live.options.board import get_board
+    return get_board()
+
+
+@app.post("/options/board/refresh")
+async def options_board_refresh(payload: Optional[dict[str, Any]] = None) -> dict[str, Any]:
+    """Rebuild the board from the latest scan now (also runs 17:05 ET)."""
+    from engine.config import POLYGON_API_KEY
+    if not POLYGON_API_KEY:
+        raise HTTPException(400, "POLYGON_API_KEY not configured on the server")
+    from engine.live.options.board import generate_board
+    notify = bool((payload or {}).get("notify", False))
+    try:
+        return await generate_board(notify=notify)
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(500, f"board build failed: {str(e)[:200]}")
+
+
+@app.post("/options/board/track")
+async def options_board_track(payload: dict[str, Any]) -> dict[str, Any]:
+    """Track a board card as a paper position. Straddle cards route to the
+    existing straddle tracker; condor cards open a multi-leg structure."""
+    card_id = int(payload.get("board_id") or 0)
+    contracts = max(1, int(payload.get("contracts") or 1))
+    if not card_id:
+        raise HTTPException(400, "board_id required")
+    from engine.live.options.board import get_card
+    card = get_card(card_id)
+    if not card:
+        raise HTTPException(404, "board card not found")
+
+    if card["strategy_key"] == "long_straddle":
+        from engine.live.options.positions import track_candidate
+        from engine.live.options.store import get_candidate
+        cand = get_candidate(int(card.get("candidate_id") or 0))
+        if not cand or not cand.get("straddle_cost"):
+            raise HTTPException(400, "candidate no longer trackable — rerun the scan")
+        _enforce_straddle_sleeve_caps(cand, contracts)
+        pos_id = track_candidate(int(cand["id"]), contracts)
+        if pos_id is None:
+            raise HTTPException(400, "candidate no longer trackable — rerun the scan")
+        return {"position_id": pos_id, "kind": "straddle"}
+
+    if card["strategy_key"] == "iron_condor":
+        from datetime import datetime, timedelta
+        from zoneinfo import ZoneInfo
+        from engine.live.options.structures import StructureError, create_structure
+        legs = [{**l, "qty": int(l.get("qty", 1)) * contracts}
+                for l in (card.get("legs") or [])]
+        deadline = None
+        if card.get("earnings_date"):
+            from datetime import date as _date
+            ed = _date.fromisoformat(card["earnings_date"])
+            deadline = datetime.combine(
+                ed + timedelta(days=1), datetime.min.time().replace(hour=10),
+                tzinfo=ZoneInfo("America/New_York")).isoformat()
+        try:
+            pos_id = create_structure(
+                "iron_condor", card["symbol"], legs,
+                earnings_date=card.get("earnings_date"),
+                exit_deadline=deadline,
+                notes=f"board {card.get('rules_fired')}")
+        except StructureError as e:
+            raise HTTPException(400, str(e))
+        return {"position_id": pos_id, "kind": "structure"}
+
+    raise HTTPException(400, f"tracking not implemented for "
+                             f"{card['strategy_key']}")
 
 
 # --------------- Telegram (Phase 4) ---------------

@@ -36,6 +36,7 @@ const SECTIONS: {
     name: "Options",
     base: "options",
     items: [
+      { label: "Board", to: "/options/board" },
       { label: "Scanner", to: "/options" },
       { label: "Positions", to: "/options/positions" },
       { label: "Rulebook", to: "/options/rulebook" },

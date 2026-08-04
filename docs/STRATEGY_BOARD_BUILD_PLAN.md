@@ -60,7 +60,7 @@ selection. Suggest-only forever; the client executes in his own broker.
 | Phase | Name | Status | Commits | Exit gate |
 |---|---|---|---|---|
 | 0 | Foundations | ✅ done (2026-08-03) | `16139d3`, `de68a9e` | met — multi-leg store/price/mark/close proven live; rulebook page live; defined-risk rule adversarially hardened |
-| 1 | Strategy Board + Iron Condor | 🔨 in progress | — | see Phase 1 |
+| 1 | Strategy Board + Iron Condor | 🚀 shipped (2026-08-04) — pending live verify | this commit | build+tests+review done: 8/8 confirmed findings fixed (exit-alert timing, flag-after-send, degenerate-payoff guard, board staleness+honest-empty, visible structures UI, sleeve-cap parity). Live NVDA/SNOW rehearsal Aug 20–21 outstanding. |
 | 2 | Returns Engine + League Table | ⬜ | — | see Phase 2 |
 | 3 | Income Layer (CC + CSP) | ⬜ | — | see Phase 3 |
 | 4 | Wheel State Machine | ⬜ | — | see Phase 4 |
