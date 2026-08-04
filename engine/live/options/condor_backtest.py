@@ -105,9 +105,17 @@ async def _simulate_event(symbol: str, earnings_date: date,
     if not expiry:
         return _skip(earnings_date, actual_move, "no option expiry found")
 
-    # RAW same-basis spot for strike work (the straddle backtest lesson)
+    # RAW same-basis spot for strike work (the straddle backtest lesson).
+    # Stock aggregates 403 beyond the plan's ~2yr window — fall back to the
+    # FMP adjusted close; the ATM basis-mismatch guard below covers splits.
     spot_from = (date.fromisoformat(entry_date) - timedelta(days=6)).isoformat()
-    spot = await poly.underlying_close(symbol, spot_from, entry_date, entry_date)
+    try:
+        spot = await poly.underlying_close(symbol, spot_from, entry_date,
+                                           entry_date)
+    except Exception as e:  # noqa: BLE001
+        log.info("raw spot unavailable for %s @ %s (%s) — FMP fallback",
+                 symbol, entry_date, str(e)[:80])
+        spot = None
     if not spot:
         spot = close_by_date.get(entry_date)
     if not spot:
