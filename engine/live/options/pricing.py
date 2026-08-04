@@ -56,12 +56,14 @@ class DelayedPolygonPricing:
                 leg = out[i]
                 c = book.get((float(leg["strike"]), leg["contract_type"]))
                 if not c:
-                    leg.update(price=None, delta=None, oi=None, iv=None,
-                               spread_pct=None)
+                    leg.update(price=None, delta=None, theta=None, vega=None,
+                               oi=None, iv=None, spread_pct=None)
                     continue
                 greeks = c.get("greeks") or {}
                 leg["price"] = self._poly.leg_price(c)
                 leg["delta"] = greeks.get("delta")
+                leg["theta"] = greeks.get("theta")
+                leg["vega"] = greeks.get("vega")
                 leg["oi"] = c.get("open_interest")
                 leg["iv"] = c.get("implied_volatility")
                 leg["spread_pct"] = self._poly.leg_spread_pct(c)

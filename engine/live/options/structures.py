@@ -61,10 +61,18 @@ def ensure_tables() -> None:
         # lightweight migrations
         for col, decl in (("exit_alerted", "INTEGER DEFAULT 0"),
                           ("stock_covered", "INTEGER DEFAULT 0"),
-                          ("coverage_alerted", "INTEGER DEFAULT 0")):
+                          ("coverage_alerted", "INTEGER DEFAULT 0"),
+                          ("real_entry_value", "REAL"),
+                          ("real_exit_value", "REAL")):
             try:
                 conn.execute(f"ALTER TABLE options_multi_positions "
                              f"ADD COLUMN {col} {decl}")
+            except Exception:  # noqa: BLE001 — column already exists
+                pass
+        for col in ("current_theta", "current_vega"):
+            try:
+                conn.execute(f"ALTER TABLE options_multi_legs "
+                             f"ADD COLUMN {col} REAL")
             except Exception:  # noqa: BLE001 — column already exists
                 pass
         conn.commit()
@@ -346,8 +354,10 @@ async def mark_structures(status: str = "open") -> dict[str, Any]:
                 for db_leg, q in zip(pos["legs"], quoted):
                     conn.execute(
                         "UPDATE options_multi_legs SET current_price=?, "
-                        "current_delta=? WHERE id=?",
-                        (q.get("price"), q.get("delta"), db_leg["id"]))
+                        "current_delta=?, current_theta=?, current_vega=? "
+                        "WHERE id=?",
+                        (q.get("price"), q.get("delta"), q.get("theta"),
+                         q.get("vega"), db_leg["id"]))
                 conn.commit()
             finally:
                 conn.close()
@@ -550,6 +560,106 @@ async def check_coverage_alerts(notify: bool = True) -> int:
                 conn.close()
             sent += 1
     return sent
+
+
+def greeks_rollup() -> dict[str, Any]:
+    """Portfolio-level Greeks across OPEN multi-leg structures, from the last
+    mark. Share-equivalents: net delta × 100 per contract. Honest about
+    coverage — positions never marked (no greeks yet) are counted and named,
+    not silently treated as zero."""
+    open_pos = list_structures("open")
+    by_symbol: dict[str, dict[str, float]] = {}
+    unmarked: list[str] = []
+    for pos in open_pos:
+        legs = pos["legs"]
+        if any(l.get("current_delta") is None for l in legs):
+            unmarked.append(f"{pos['symbol']}#{pos['id']}")
+            continue
+        agg = by_symbol.setdefault(pos["symbol"],
+                                   {"delta": 0.0, "theta": 0.0, "vega": 0.0})
+        for l in legs:
+            mult = l["side"] * l["qty"] * 100
+            agg["delta"] += (l.get("current_delta") or 0) * mult
+            agg["theta"] += (l.get("current_theta") or 0) * mult
+            agg["vega"] += (l.get("current_vega") or 0) * mult
+    totals = {k: round(sum(s[k] for s in by_symbol.values()), 1)
+              for k in ("delta", "theta", "vega")}
+    return {
+        "totals": totals,
+        "per_symbol": {sym: {k: round(v, 1) for k, v in s.items()}
+                       for sym, s in by_symbol.items()},
+        "positions_counted": len(open_pos) - len(unmarked),
+        "unmarked": unmarked,
+        "note": ("Share-equivalents: delta +100 ≈ owning 100 shares' worth of "
+                 "direction. Theta is $/day for the whole book; vega is $ per "
+                 "1-point IV move. Multi-leg structures only; straddles are "
+                 "tracked separately on the Positions page."),
+    }
+
+
+def record_real_fill(position_id: int, *, entry: Optional[float] = None,
+                     exit_: Optional[float] = None) -> None:
+    """Log what the broker ACTUALLY filled (per share-set, signed like
+    entry_value). Slippage vs the paper mid decides the live-data upgrade."""
+    fields = {}
+    if entry is not None:
+        fields["real_entry_value"] = float(entry)
+    if exit_ is not None:
+        fields["real_exit_value"] = float(exit_)
+    if not fields:
+        return
+    ensure_tables()
+    conn = get_connection()
+    try:
+        sets = ", ".join(f"{k}=?" for k in fields)
+        conn.execute(f"UPDATE options_multi_positions SET {sets} WHERE id=?",
+                     (*fields.values(), position_id))
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def slippage_report() -> dict[str, Any]:
+    """Paper mid vs real fill, per family. The live-data upgrade trigger:
+    median entry slippage > 10% of the credit/debit means delayed quotes are
+    costing real money and the $199 feed pays for itself."""
+    ensure_tables()
+    conn = get_connection()
+    try:
+        rows = conn.execute(
+            "SELECT strategy_key, entry_value, real_entry_value, exit_value, "
+            "real_exit_value FROM options_multi_positions "
+            "WHERE real_entry_value IS NOT NULL "
+            "OR real_exit_value IS NOT NULL").fetchall()
+    finally:
+        conn.close()
+    fams: dict[str, list[float]] = {}
+    for r in rows:
+        if r["real_entry_value"] is not None and r["entry_value"]:
+            slip = abs(r["real_entry_value"] - r["entry_value"]) \
+                / abs(r["entry_value"]) * 100
+            fams.setdefault(r["strategy_key"], []).append(slip)
+        if r["real_exit_value"] is not None and r["exit_value"]:
+            slip = abs(r["real_exit_value"] - r["exit_value"]) \
+                / abs(r["exit_value"]) * 100
+            fams.setdefault(r["strategy_key"], []).append(slip)
+    import statistics as _st
+    out = {}
+    all_slips: list[float] = []
+    for fam, slips in fams.items():
+        all_slips.extend(slips)
+        out[fam] = {"fills": len(slips),
+                    "median_slippage_pct": round(_st.median(slips), 2)}
+    overall = round(_st.median(all_slips), 2) if all_slips else None
+    return {
+        "families": out,
+        "fills_recorded": len(all_slips),
+        "median_slippage_pct": overall,
+        "upgrade_trigger_pct": 10.0,
+        "upgrade_recommended": bool(overall is not None and overall > 10.0),
+        "note": "record the broker's real fills when tracking/closing — this "
+                "number, not a feeling, decides the real-time data upgrade",
+    }
 
 
 def family_stats() -> dict[str, dict[str, Any]]:

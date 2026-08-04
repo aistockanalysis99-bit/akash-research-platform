@@ -28,7 +28,7 @@ import io
 import json
 import threading
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Query
@@ -1750,6 +1750,74 @@ async def options_condor_backtest(symbol: str, refresh: bool = False,
         result["transient"] = True
     result["computed_at"] = datetime.utcnow().isoformat()
     return result
+
+
+# --------------- Options: Pro Desk (Phase 6) ---------------
+
+
+@app.get("/options/greeks")
+async def options_greeks() -> dict[str, Any]:
+    """Portfolio-level Greeks across open multi-leg structures (last mark)."""
+    from engine.live.options.structures import greeks_rollup
+    return greeks_rollup()
+
+
+@app.get("/options/slippage")
+async def options_slippage() -> dict[str, Any]:
+    """Paper-mid vs real-fill quality — the live-data upgrade metric."""
+    from engine.live.options.structures import slippage_report
+    return slippage_report()
+
+
+@app.post("/options/structure/{position_id}/fill")
+async def options_structure_fill(position_id: int,
+                                 payload: dict[str, Any]) -> dict[str, Any]:
+    """Record the broker's REAL fill (per share-set, signed like entry_value:
+    negative = credit received). Slippage vs paper decides the data upgrade."""
+    from engine.live.options.structures import get_structure, record_real_fill
+    pos = get_structure(position_id)
+    if not pos:
+        raise HTTPException(404, "structure not found")
+    entry = payload.get("real_entry_value")
+    exit_ = payload.get("real_exit_value")
+    try:
+        entry = float(entry) if entry is not None else None
+        exit_ = float(exit_) if exit_ is not None else None
+    except (TypeError, ValueError):
+        raise HTTPException(400, "fill values must be numbers")
+    if entry is None and exit_ is None:
+        raise HTTPException(400, "provide real_entry_value and/or real_exit_value")
+    record_real_fill(position_id, entry=entry, exit_=exit_)
+    return get_structure(position_id)
+
+
+@app.get("/options/target-accuracy")
+async def options_target_accuracy() -> dict[str, Any]:
+    """How sharp are the AI's price targets, measured on aged decisions —
+    the butterfly pilot's gate. Cached for 7 days (expensive to compute)."""
+    import json as _json
+    from engine.live.settings import _get_raw, _set_raw
+    cached = _get_raw("options_target_accuracy_cache")
+    if cached:
+        try:
+            data = _json.loads(cached)
+            if (data.get("computed_at") or "") >= \
+                    (datetime.utcnow() - timedelta(days=7)).isoformat():
+                return data
+        except (ValueError, TypeError):
+            pass
+    from engine.live.options.butterfly import target_accuracy
+    result = await target_accuracy()
+    result["computed_at"] = datetime.utcnow().isoformat()
+    _set_raw("options_target_accuracy_cache", _json.dumps(result))
+    return result
+
+
+@app.get("/options/season-report")
+async def options_season_report() -> dict[str, Any]:
+    """The season report, generated fresh from the live tables."""
+    from engine.live.options.season_report import generate_season_report
+    return generate_season_report()
 
 
 # --------------- Options: Strategy Allocator (Phase 5) ---------------

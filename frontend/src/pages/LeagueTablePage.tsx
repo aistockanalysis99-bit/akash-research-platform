@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Trophy, PlayCircle } from "lucide-react";
+import { Activity, FileDown, Trophy, PlayCircle } from "lucide-react";
 import { api } from "@/lib/api";
 import { Badge, Button, Card, ErrorBox, Loading, PageTitle, Spinner } from "@/components/ui";
 import { cn } from "@/lib/utils";
@@ -90,6 +90,8 @@ export default function LeagueTablePage() {
         </Card>
       )}
 
+      <ProDeskStrip />
+
       {/* Report Card — the Layer-2 evidence base */}
       <div className="flex items-center gap-3 mb-2 flex-wrap">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400">
@@ -167,6 +169,56 @@ export default function LeagueTablePage() {
         </>
       )}
     </div>
+  );
+}
+
+function ProDeskStrip() {
+  const greeks = useQuery({ queryKey: ["optGreeks"], queryFn: api.optionsGreeks });
+  const slip = useQuery({ queryKey: ["optSlippage"], queryFn: api.optionsSlippage });
+  const report = useMutation({
+    mutationFn: api.optionsSeasonReport,
+    onSuccess: (d) => {
+      const blob = new Blob([d.markdown], { type: "text/markdown" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `options-season-report-${d.generated_at.slice(0, 10)}.md`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    },
+  });
+  const g = greeks.data;
+  const s = slip.data;
+  return (
+    <Card className="mb-8 border-line/70">
+      <div className="flex items-center gap-2 mb-2 flex-wrap">
+        <Activity className="h-4 w-4 text-brand" />
+        <span className="font-bold text-white text-sm">Pro desk</span>
+        <div className="flex-1" />
+        <Button variant="outline" onClick={() => report.mutate()} disabled={report.isPending}>
+          {report.isPending ? <Spinner /> : <FileDown className="h-4 w-4" />}
+          Season report (.md)
+        </Button>
+      </div>
+      <div className="flex items-baseline gap-5 flex-wrap text-sm text-gray-300">
+        <span>
+          Book: net <b className="stat-num">{g?.totals.delta ?? "—"}</b> deltas ·
+          theta <b className="stat-num">{g?.totals.theta ?? "—"}</b> $/day ·
+          vega <b className="stat-num">{g?.totals.vega ?? "—"}</b> $/IV-pt
+          {g && g.unmarked.length > 0 && (
+            <span className="text-gray-500"> ({g.unmarked.length} unmarked)</span>
+          )}
+        </span>
+        <span className="text-gray-400">
+          Fill quality: {s?.fills_recorded
+            ? <>{s.fills_recorded} real fills · median slippage{" "}
+                <b className={s.upgrade_recommended ? "text-warn" : "text-pos"}>
+                  {s.median_slippage_pct}%
+                </b>
+                {s.upgrade_recommended && " → live-data upgrade earns its cost"}</>
+            : "no real fills recorded yet — log them when you trade to measure the delayed-data cost"}
+        </span>
+      </div>
+    </Card>
   );
 }
 

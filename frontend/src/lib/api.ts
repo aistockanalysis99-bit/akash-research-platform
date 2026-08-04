@@ -315,6 +315,22 @@ export const api = {
                     conviction?: number | null } | null;
     }>(`/options/wheels/${wheelId}/suggest`),
 
+  // Options: Pro Desk (Phase 6)
+  optionsGreeks: () =>
+    get<{
+      totals: { delta: number; theta: number; vega: number };
+      per_symbol: Record<string, { delta: number; theta: number; vega: number }>;
+      positions_counted: number; unmarked: string[]; note: string;
+    }>("/options/greeks"),
+  optionsSlippage: () =>
+    get<{
+      families: Record<string, { fills: number; median_slippage_pct: number }>;
+      fills_recorded: number; median_slippage_pct?: number | null;
+      upgrade_trigger_pct: number; upgrade_recommended: boolean; note: string;
+    }>("/options/slippage"),
+  optionsSeasonReport: () =>
+    get<{ markdown: string; generated_at: string }>("/options/season-report"),
+
   // Options: Returns Engine (Phase 2)
   optionsLeague: () =>
     get<{
