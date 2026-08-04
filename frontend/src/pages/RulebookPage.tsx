@@ -14,7 +14,7 @@ const STATUS_STYLE: Record<Strategy["status"], string> = {
 };
 const STATUS_LABEL: Record<Strategy["status"], string> = {
   live: "LIVE",
-  paper: "PAPER — building",
+  paper: "PAPER — earning its record",
   planned: "PLANNED",
 };
 
