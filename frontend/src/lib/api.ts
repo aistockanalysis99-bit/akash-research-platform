@@ -250,6 +250,14 @@ export const api = {
         max_loss?: number; breakevens?: number[]; pop_est?: number | null;
         return_on_risk_pct?: number | null; annualized_pct?: number | null;
         dte?: number; min_oi?: number; max_leg_spread_pct?: number | null;
+        // income fields (R3 CSP / R4 covered call)
+        premium?: number; premium_usd_per_contract?: number;
+        shares_held?: number; qty_max?: number;
+        monthly_yield_pct?: number | null; if_called_return_pct?: number | null;
+        cash_secured_usd?: number; effective_basis?: number;
+        discount_to_spot_pct?: number; ai_target?: number | null;
+        ai_entry?: number; conviction?: number | null; oi?: number;
+        delta?: number | null;
         legs?: { side: number; contract_type: string; strike: number;
                  expiry: string; qty: number; price: number;
                  delta?: number | null; oi?: number;

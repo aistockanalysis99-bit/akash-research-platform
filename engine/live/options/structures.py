@@ -59,11 +59,14 @@ def ensure_tables() -> None:
         conn.execute("CREATE INDEX IF NOT EXISTS idx_multi_legs_pos "
                      "ON options_multi_legs(position_id)")
         # lightweight migrations
-        try:
-            conn.execute("ALTER TABLE options_multi_positions "
-                         "ADD COLUMN exit_alerted INTEGER DEFAULT 0")
-        except Exception:  # noqa: BLE001 — column already exists
-            pass
+        for col, decl in (("exit_alerted", "INTEGER DEFAULT 0"),
+                          ("stock_covered", "INTEGER DEFAULT 0"),
+                          ("coverage_alerted", "INTEGER DEFAULT 0")):
+            try:
+                conn.execute(f"ALTER TABLE options_multi_positions "
+                             f"ADD COLUMN {col} {decl}")
+            except Exception:  # noqa: BLE001 — column already exists
+                pass
         conn.commit()
         _ensured = True
     finally:
@@ -72,6 +75,52 @@ def ensure_tables() -> None:
 
 class StructureError(ValueError):
     """Raised when a structure violates the rulebook (e.g. unbounded risk)."""
+
+
+def _committed_covered_shares(symbol: str) -> int:
+    """Shares already backing OPEN covered calls on this symbol."""
+    ensure_tables()
+    conn = get_connection()
+    try:
+        r = conn.execute(
+            "SELECT COALESCE(SUM(l.qty),0)*100 AS n FROM options_multi_legs l "
+            "JOIN options_multi_positions p ON p.id=l.position_id "
+            "WHERE p.status='open' AND p.stock_covered=1 "
+            "AND UPPER(p.symbol)=? AND l.side<0 AND l.contract_type='call'",
+            (symbol.upper(),)).fetchone()
+        return int(r["n"] or 0)
+    finally:
+        conn.close()
+
+
+def _verify_stock_coverage(symbol: str, contracts: int) -> None:
+    """A covered call is only 'covered' if the fund ACTUALLY holds the shares
+    — IN AGGREGATE. Verified here, inside the gate, against the live
+    portfolio minus shares already committed to open covered calls on the
+    same symbol; otherwise tracking the same card twice would book more
+    short calls than the holding backs, each passing individually
+    (review HIGH). 1 contract = 100 shares."""
+    needed = contracts * 100
+    held = 0.0
+    try:
+        from ..portfolio import VirtualPortfolio
+        p = VirtualPortfolio()
+        try:
+            for pos in p.list_open():
+                if (pos.get("instrument_type") or "stock") == "stock" \
+                        and pos["symbol"].upper() == symbol.upper():
+                    held += float(pos.get("units") or 0)
+        finally:
+            p.close_conn()
+    except Exception as e:  # noqa: BLE001
+        raise StructureError(f"could not verify share coverage: {e}")
+    committed = _committed_covered_shares(symbol)
+    free = held - committed
+    if free < needed:
+        raise StructureError(
+            f"covered call needs {needed} free {symbol.upper()} shares — "
+            f"portfolio holds {held:.0f}, {committed} already committed to "
+            f"open covered calls, {max(free, 0):.0f} free. Refused.")
 
 
 def _validate_covered(legs: list[dict[str, Any]], cash_secured: bool) -> None:
@@ -111,26 +160,52 @@ def _validate_covered(legs: list[dict[str, Any]], cash_secured: bool) -> None:
 
 def create_structure(strategy_key: str, symbol: str, legs: list[dict[str, Any]],
                      *, cash_secured: bool = False,
+                     stock_covered: bool = False,
+                     capital_override: Optional[float] = None,
                      earnings_date: Optional[str] = None,
                      exit_deadline: Optional[str] = None,
                      notes: str = "") -> int:
     """Create an open paper structure. Legs must carry entry `price` (and
-    ideally `delta`). Refuses unbounded-risk structures outright."""
+    ideally `delta`). Refuses unbounded-risk structures outright.
+
+    `stock_covered` is the NARROW covered-call exception: exactly one short
+    call leg, and the gate itself verifies the portfolio holds 100 shares per
+    contract before accepting. `capital_override` (per share-set, like
+    entry_value) sets the honest capital denominator — for a covered call
+    that's the stock value backing it, since the option leg alone would
+    otherwise look like free money."""
     if not legs or len(legs) > 4:
         raise StructureError("a structure needs 1-4 legs")
     for leg in legs:
         if leg.get("price") is None:
             raise StructureError(f"leg {leg.get('contract_type')} "
                                  f"{leg.get('strike')} has no price")
+    if cash_secured and stock_covered:
+        raise StructureError("a structure is cash_secured OR stock_covered, "
+                             "never both")
 
-    _validate_covered(legs, cash_secured)
+    if stock_covered:
+        shorts = [l for l in legs if l["side"] < 0]
+        if len(legs) != 1 or not shorts \
+                or shorts[0]["contract_type"] != "call":
+            raise StructureError("stock_covered applies only to a single "
+                                 "short call")
+        _verify_stock_coverage(symbol, int(shorts[0].get("qty", 1)))
+    else:
+        _validate_covered(legs, cash_secured)
+
     entry_value = rm.package_value(legs)
     stats = rm.payoff_stats(legs, entry_value)
-    if stats["unbounded_loss"] and not cash_secured:
+    if stats["unbounded_loss"] and not (cash_secured or stock_covered):
         raise StructureError(
             "structure has UNLIMITED loss potential (naked short exposure) — "
             "refused by the defined-risk rule. Add a protective long leg.")
-    if cash_secured:
+    if stock_covered:
+        if not capital_override or capital_override <= 0:
+            raise StructureError("covered call requires capital_override = "
+                                 "backing stock value per share-set")
+        capital = round(capital_override, 4)
+    elif cash_secured:
         shorts = [l for l in legs if l["side"] < 0]
         if len(legs) != 1 or not shorts or shorts[0]["contract_type"] != "put":
             raise StructureError("cash_secured applies only to a single short put")
@@ -147,6 +222,9 @@ def create_structure(strategy_key: str, symbol: str, legs: list[dict[str, Any]],
                - date.today()).days
     except ValueError:
         pass
+    if dte is not None and dte < 0:
+        raise StructureError("legs are already expired — refusing to open "
+                             "(stale card or bad expiry)")
     income = -entry_value if entry_value < 0 else None  # credit received
     quoted_ann = (rm.annualized_yield_pct(income, capital, dte)
                   if income and dte else None)
@@ -159,15 +237,15 @@ def create_structure(strategy_key: str, symbol: str, legs: list[dict[str, Any]],
                 (strategy_key, symbol, status, entry_date, entry_value,
                  capital_at_risk, max_profit, max_loss, breakevens, pop_est,
                  quoted_annualized_pct, dte_at_entry, earnings_date,
-                 exit_deadline, cash_secured, current_value, pnl_usd,
-                 pnl_pct_on_risk, notes, created_at)
-            VALUES (?,?,'open',?,?,?,?,?,?,?,?,?,?,?,?,?,0,0,?,?)
+                 exit_deadline, cash_secured, stock_covered, current_value,
+                 pnl_usd, pnl_pct_on_risk, notes, created_at)
+            VALUES (?,?,'open',?,?,?,?,?,?,?,?,?,?,?,?,?,?,0,0,?,?)
             """, (strategy_key, symbol.upper(), date.today().isoformat(),
                   entry_value, capital, stats["max_profit"], stats["max_loss"],
                   json.dumps(stats["breakevens"]), rm.pop_estimate_pct(legs),
                   quoted_ann, dte, earnings_date, exit_deadline,
-                  1 if cash_secured else 0, entry_value, notes,
-                  datetime.utcnow().isoformat()))
+                  1 if cash_secured else 0, 1 if stock_covered else 0,
+                  entry_value, notes, datetime.utcnow().isoformat()))
         pos_id = int(cur.lastrowid)
         for leg in legs:
             conn.execute("""
@@ -405,6 +483,68 @@ async def check_exit_alerts(notify: bool = True) -> int:
             try:
                 conn.execute("UPDATE options_multi_positions SET "
                              "exit_alerted=1 WHERE id=?", (a["id"],))
+                conn.commit()
+            finally:
+                conn.close()
+            sent += 1
+    return sent
+
+
+async def check_coverage_alerts(notify: bool = True) -> int:
+    """Daily watchdog: a covered call is only covered while the shares are
+    still held. If the equity side sold/trimmed the backing position, the
+    short call is now effectively naked — alert ONCE (flag only after
+    confirmed delivery), never auto-close. Review HIGH: without this, a
+    stock_covered flag set at creation would stay true forever."""
+    open_cc = [p for p in list_structures("open")
+               if p.get("stock_covered") and not p.get("coverage_alerted")]
+    if not open_cc:
+        return 0
+    pending = []
+    for pos in open_cc:
+        qty = sum(int(l.get("qty", 1)) for l in pos["legs"] if l["side"] < 0)
+        # Exclude this position's own commitment from the aggregate check:
+        # verify the holding still covers EVERYTHING currently open.
+        try:
+            _verify_stock_coverage(pos["symbol"], 0)
+            still_ok = True
+        except StructureError:
+            still_ok = False
+        if still_ok:
+            continue
+        pending.append({
+            "id": pos["id"], "symbol": pos["symbol"],
+            "text": (f"🚨 {pos['symbol']} covered call #{pos['id']} has LOST "
+                     f"its share backing — the portfolio no longer holds "
+                     f"enough {pos['symbol']} to cover {qty} contract(s). "
+                     f"The short call is now effectively naked.\n"
+                     f"Suggestion: close the call in your account (and mark "
+                     f"it closed here) or restore the shares. Nothing was "
+                     f"changed — your call."),
+        })
+    if not pending:
+        return 0
+    if not notify:
+        return 0
+    sent = 0
+    try:
+        from ..telegram import telegram as _telegram
+        client = _telegram()
+    except Exception as e:  # noqa: BLE001
+        log.warning("coverage alerts: telegram unavailable: %s", e)
+        return 0
+    for a in pending:
+        try:
+            ok = await client.send_message(a["text"], kind="options_alert",
+                                           symbol=a["symbol"])
+        except Exception as e:  # noqa: BLE001
+            log.warning("coverage alert send failed for #%d: %s", a["id"], e)
+            ok = False
+        if ok:
+            conn = get_connection()
+            try:
+                conn.execute("UPDATE options_multi_positions SET "
+                             "coverage_alerted=1 WHERE id=?", (a["id"],))
                 conn.commit()
             finally:
                 conn.close()

@@ -1553,13 +1553,23 @@ async def options_board_track(payload: dict[str, Any]) -> dict[str, Any]:
     """Track a board card as a paper position. Straddle cards route to the
     existing straddle tracker; condor cards open a multi-leg structure."""
     card_id = int(payload.get("board_id") or 0)
-    contracts = max(1, int(payload.get("contracts") or 1))
+    # Server-side bound, matching the UI: a fat-fingered or scripted 1,000-lot
+    # paper position pollutes the league table just the same.
+    contracts = min(100, max(1, int(payload.get("contracts") or 1)))
     if not card_id:
         raise HTTPException(400, "board_id required")
-    from engine.live.options.board import get_card
+    from engine.live.options.board import get_board, get_card
     card = get_card(card_id)
     if not card:
         raise HTTPException(404, "board card not found")
+    # Stale-card replay guard: prices, gates, and earnings checks are only as
+    # fresh as the board run that built the card. Old boards stay readable
+    # for history but are never trackable.
+    latest = get_board().get("board_date")
+    if latest and card.get("board_date") != latest:
+        raise HTTPException(400, f"this card is from the {card.get('board_date')} "
+                                 f"board — rebuild/refresh the board and track "
+                                 f"today's card instead")
 
     if card["strategy_key"] == "long_straddle":
         from engine.live.options.positions import track_candidate
@@ -1592,6 +1602,31 @@ async def options_board_track(payload: dict[str, Any]) -> dict[str, Any]:
                 earnings_date=card.get("earnings_date"),
                 exit_deadline=deadline,
                 notes=f"board {card.get('rules_fired')}")
+        except StructureError as e:
+            raise HTTPException(400, str(e))
+        return {"position_id": pos_id, "kind": "structure"}
+
+    if card["strategy_key"] in ("cash_secured_put", "covered_call"):
+        from engine.live.options.structures import StructureError, create_structure
+        legs = [{**l, "qty": int(l.get("qty", 1)) * contracts}
+                for l in (card.get("legs") or [])]
+        try:
+            if card["strategy_key"] == "cash_secured_put":
+                pos_id = create_structure(
+                    "cash_secured_put", card["symbol"], legs,
+                    cash_secured=True,
+                    notes=f"board {card.get('rules_fired')}")
+            else:
+                # capital = backing stock value per share-set (qty × spot);
+                # share coverage is re-verified inside the gate itself.
+                qty = sum(int(l.get("qty", 1)) for l in legs)
+                spot = float(card.get("spot") or 0)
+                if spot <= 0:
+                    raise HTTPException(400, "card has no spot price")
+                pos_id = create_structure(
+                    "covered_call", card["symbol"], legs,
+                    stock_covered=True, capital_override=qty * spot,
+                    notes=f"board {card.get('rules_fired')}")
         except StructureError as e:
             raise HTTPException(400, str(e))
         return {"position_id": pos_id, "kind": "structure"}

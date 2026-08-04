@@ -184,11 +184,14 @@ async def _job_mark_structures() -> None:
     straddle mark), then deadline exit suggestions (e.g. condors the morning
     after earnings)."""
     try:
-        from .options.structures import check_exit_alerts, mark_structures
+        from .options.structures import (check_coverage_alerts,
+                                         check_exit_alerts, mark_structures)
         res = await mark_structures()
         n = await check_exit_alerts(notify=True)
+        nc = await check_coverage_alerts(notify=True)
         _last_runs["mark_structures"] = {
-            "at": datetime.utcnow().isoformat(), **res, "exit_alerts": n}
+            "at": datetime.utcnow().isoformat(), **res, "exit_alerts": n,
+            "coverage_alerts": nc}
     except Exception as e:  # noqa: BLE001
         log.exception("scheduler: structure mark failed: %s", e)
 

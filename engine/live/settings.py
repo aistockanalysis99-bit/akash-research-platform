@@ -253,6 +253,28 @@ def get_options_condor_min_iv_rank() -> float:
     return _get_float("options_condor_min_iv_rank", 60.0, 0.0, 100.0)
 
 
+def get_options_income_min_dte() -> int:
+    """Income trades (R3 CSP / R4 covered call): minimum days to expiry."""
+    return _get_int("options_income_min_dte", 21, 7, 90)
+
+
+def get_options_income_max_dte() -> int:
+    """Income trades: maximum days to expiry."""
+    return _get_int("options_income_max_dte", 45, 14, 120)
+
+
+def get_options_cc_target_delta() -> float:
+    """Covered call (R4): target |delta| for the sold call (~0.25-0.30 band;
+    ≈ 70-75% chance of keeping the shares). AI target overrides upward."""
+    return _get_float("options_cc_target_delta", 0.27, 0.10, 0.45)
+
+
+def get_options_csp_target_delta() -> float:
+    """Cash-secured put (R3): target |delta| for the sold put. AI entry level
+    overrides downward (never promise to buy above the AI's own entry)."""
+    return _get_float("options_csp_target_delta", 0.25, 0.10, 0.45)
+
+
 # ---- Scheduler accessors ------------------------------------------------- #
 
 
@@ -323,6 +345,10 @@ def get_all() -> dict[str, Any]:
             "condor_wing_pct":     {"value": get_options_condor_wing_pct(),      "env_default": 3.0},
             "condor_min_cheapness": {"value": get_options_condor_min_cheapness(), "env_default": 1.25},
             "condor_min_iv_rank":  {"value": get_options_condor_min_iv_rank(),   "env_default": 60.0},
+            "income_min_dte":      {"value": get_options_income_min_dte(),       "env_default": 21},
+            "income_max_dte":      {"value": get_options_income_max_dte(),       "env_default": 45},
+            "cc_target_delta":     {"value": get_options_cc_target_delta(),      "env_default": 0.27},
+            "csp_target_delta":    {"value": get_options_csp_target_delta(),     "env_default": 0.25},
         },
         "scheduler": {
             "enabled":           {"value": get_scheduler_enabled(),  "env_default": ENABLE_SCHEDULER},
@@ -365,6 +391,10 @@ SETTABLE_KEYS = {
     "options_condor_wing_pct",
     "options_condor_min_cheapness",
     "options_condor_min_iv_rank",
+    "options_income_min_dte",
+    "options_income_max_dte",
+    "options_cc_target_delta",
+    "options_csp_target_delta",
     # scheduler
     "enable_scheduler",
     "scheduler_timezone",

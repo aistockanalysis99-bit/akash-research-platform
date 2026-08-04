@@ -20,6 +20,8 @@ export default function StrategyBoardPage() {
   const cards = q.data?.cards || [];
   const straddles = cards.filter((c) => c.strategy_key === "long_straddle");
   const condors = cards.filter((c) => c.strategy_key === "iron_condor");
+  const csps = cards.filter((c) => c.strategy_key === "cash_secured_put");
+  const ccs = cards.filter((c) => c.strategy_key === "covered_call");
 
   return (
     <div>
@@ -71,7 +73,68 @@ export default function StrategyBoardPage() {
           {straddles.map((c) => <StraddleCard key={c.id} c={c} />)}
         </BoardSection>
       )}
+
+      {ccs.length > 0 && (
+        <BoardSection
+          title={`Covered calls — rent out held stock (${ccs.length})`}
+          hint="Income on shares the fund already owns; strikes never below the AI's target. Skips earnings weeks."
+        >
+          {ccs.map((c) => <IncomeCard key={c.id} c={c} kind="cc" />)}
+        </BoardSection>
+      )}
+
+      {csps.length > 0 && (
+        <BoardSection
+          title={`Cash-secured puts — get paid to place the AI's buy order (${csps.length})`}
+          hint="Only on AI BUY conviction ≥7, struck at or below the AI's own entry. Skips earnings weeks."
+        >
+          {csps.map((c) => <IncomeCard key={c.id} c={c} kind="csp" />)}
+        </BoardSection>
+      )}
     </div>
+  );
+}
+
+function IncomeCard({ c, kind }: { c: BoardCard; kind: "cc" | "csp" }) {
+  const prem = c.premium_usd_per_contract || 0;
+  return (
+    <Card className={cn("border-l-4", kind === "cc" ? "border-warn/50" : "border-brand/50")}>
+      <div className="flex items-center gap-2 flex-wrap mb-2">
+        <span className="text-lg font-bold font-mono">{c.symbol}</span>
+        <span className="text-sm text-gray-400">
+          {kind === "cc"
+            ? `sell the $${c.strike} call · exp ${c.expiry} (${c.dte}d)`
+            : `sell the $${c.strike} put (cash-secured) · exp ${c.expiry} (${c.dte}d)`}
+        </span>
+        <Badge className={kind === "cc"
+          ? "border-warn/40 bg-warn/10 text-warn"
+          : "border-brand/40 bg-brand/10 text-brand"}>
+          {kind === "cc" ? `${c.shares_held} shares backing` : "cash secured"}
+        </Badge>
+      </div>
+
+      <RulesFired rules={c.rules_fired} />
+
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
+        <Stat label="Collect" value={`$${prem.toLocaleString(undefined, { maximumFractionDigits: 0 })}/contract`} cls="text-pos" />
+        {kind === "cc" ? (
+          <>
+            <Stat label="Rent / month" value={c.monthly_yield_pct != null ? `≈${c.monthly_yield_pct}%` : "—"} />
+            <Stat label="If called away" value={c.if_called_return_pct != null ? `+${c.if_called_return_pct}%` : "—"} />
+            <Stat label="Annualized" value={c.annualized_pct != null ? `${c.annualized_pct}%` : "—"} />
+          </>
+        ) : (
+          <>
+            <Stat label="Cash secured" value={c.cash_secured_usd != null ? `$${c.cash_secured_usd.toLocaleString()}` : "—"} />
+            <Stat label="Annualized on cash" value={c.annualized_pct != null ? `${c.annualized_pct}%` : "—"} />
+            <Stat label="Basis if assigned" value={c.effective_basis != null ? `$${c.effective_basis} (−${c.discount_to_spot_pct}%)` : "—"} />
+          </>
+        )}
+      </div>
+
+      <div className="text-xs text-gray-500 mb-3">{c.exit_rule}</div>
+      <TrackControl boardId={c.id} invalidate={["optBoard", "optStructures"]} />
+    </Card>
   );
 }
 

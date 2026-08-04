@@ -83,8 +83,8 @@ def rulebook() -> list[dict[str, Any]]:
         {
             "key": "cash_secured_put",
             "name": "R3 · Cash-Secured Put",
-            "status": "planned",
-            "phase": "Phase 3 (income layer)",
+            "status": "paper",
+            "phase": "Phase 3 (income layer — paper)",
             "direction": "bullish income",
             "risk_type": "cash-secured — capital = strike − credit",
             "pools": ["C (ownership list: AI BUY ≥7 only)"],
@@ -96,8 +96,9 @@ def rulebook() -> list[dict[str, Any]]:
             "entry_conditions": [
                 "AI conviction ≥ 7 (BUY)",
                 "strike at or below the AI's entry level",
-                "30–45 days to expiry · not through an earnings date",
-                "target |Δ| ≈ 0.20–0.30",
+                f"{s.get_options_income_min_dte()}–{s.get_options_income_max_dte()} "
+                f"days to expiry · never through an earnings date",
+                f"target |Δ| ≈ {s.get_options_csp_target_delta():.2f}",
             ],
             "structure": "sell 1 OTM put, fully cash-secured",
             "exit_rules": ["let expire / roll suggestion at 21 DTE",
@@ -108,8 +109,8 @@ def rulebook() -> list[dict[str, Any]]:
         {
             "key": "covered_call",
             "name": "R4 · Covered Call",
-            "status": "planned",
-            "phase": "Phase 3 (income layer)",
+            "status": "paper",
+            "phase": "Phase 3 (income layer — paper)",
             "direction": "income on held stock",
             "risk_type": "covered — short call backed by 100 held shares",
             "pools": ["C (the fund's actual holdings)"],
@@ -117,9 +118,11 @@ def rulebook() -> list[dict[str, Any]]:
                       "above the AI's price target — if called away, that's a "
                       "sale at the AI's own target. Skips earnings weeks."),
             "entry_conditions": [
-                "position held in the portfolio (100-share lots)",
-                "strike ≥ AI target, or |Δ| ≈ 0.25–0.30",
-                "no earnings inside the expiry · ex-dividend awareness",
+                "position held in the portfolio (100-share lots) — share "
+                "coverage re-verified at creation, in code",
+                f"strike ≥ AI target, or |Δ| ≈ {s.get_options_cc_target_delta():.2f}",
+                f"{s.get_options_income_min_dte()}–{s.get_options_income_max_dte()} "
+                f"days out · no earnings inside the expiry",
             ],
             "structure": "sell 1 OTM call per 100 shares held",
             "exit_rules": ["expire & repeat · called away = sold at AI target"],
