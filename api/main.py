@@ -1606,6 +1606,18 @@ async def options_board_track(payload: dict[str, Any]) -> dict[str, Any]:
             raise HTTPException(400, str(e))
         return {"position_id": pos_id, "kind": "structure"}
 
+    if card["strategy_key"] in ("bull_put_spread", "bear_call_spread"):
+        from engine.live.options.structures import StructureError, create_structure
+        legs = [{**l, "qty": int(l.get("qty", 1)) * contracts}
+                for l in (card.get("legs") or [])]
+        try:
+            pos_id = create_structure(
+                card["strategy_key"], card["symbol"], legs,
+                notes=f"board {card.get('rules_fired')}")
+        except StructureError as e:
+            raise HTTPException(400, str(e))
+        return {"position_id": pos_id, "kind": "structure"}
+
     if card["strategy_key"] in ("cash_secured_put", "covered_call"):
         from engine.live.options.structures import StructureError, create_structure
         legs = [{**l, "qty": int(l.get("qty", 1)) * contracts}
@@ -1738,6 +1750,30 @@ async def options_condor_backtest(symbol: str, refresh: bool = False,
         result["transient"] = True
     result["computed_at"] = datetime.utcnow().isoformat()
     return result
+
+
+# --------------- Options: Strategy Allocator (Phase 5) ---------------
+
+
+@app.get("/options/allocator/{symbol}")
+async def options_allocator(symbol: str) -> dict[str, Any]:
+    """Which structure fits this symbol's current signals, ranked by our own
+    realized record (prior order until a family has 5 closed trades)."""
+    from engine.live.options.allocator import rank_structures
+    from engine.live.options.income import ai_levels, pool_c
+    from engine.live.options.store import latest_candidates
+    sym = symbol.upper()
+    holdings = {h["symbol"]: h["shares"] for h in pool_c()["holdings"]}
+    cand = next((c for c in latest_candidates()
+                 if c["symbol"].upper() == sym), None)
+    ctx = {
+        "holding_shares": holdings.get(sym, 0),
+        "ai": ai_levels(sym) or {},
+        "earnings_days": (cand or {}).get("days_to_earnings"),
+        "cheapness": (cand or {}).get("cheapness"),
+    }
+    return {"symbol": sym, "context": ctx,
+            "ranking": rank_structures(sym, ctx)}
 
 
 # --------------- Options: Wheel (Phase 4) ---------------

@@ -304,6 +304,143 @@ async def _income_cards() -> tuple[list[dict], list[dict]]:
     return csp_cards, cc_cards
 
 
+MAX_SPREAD_BUILDS = 4
+
+
+async def _spread_cards() -> tuple[list[dict], list[dict]]:
+    """R5 bull puts (BUY ≥7 with a parsed stop) + R6 bear calls (AVOID/SELL
+    with a parsed invalidation level). Fresh decisions only (45d, same rule
+    as the income layer). No parseable level → no card, never a guess."""
+    from ...data.fmp_client import FMPClient
+    from ..data.fmp_research import FMPResearchClient
+    from .income import ai_levels
+    from .spreads import build_bear_call, build_bull_put
+
+    bulls: list[dict] = []
+    bears: list[dict] = []
+    try:
+        from datetime import timedelta
+        from api.ai_jobs import list_decisions_on_disk
+        stale_before = (date.today() - timedelta(days=45)).isoformat()
+        newest: dict[str, dict] = {}
+        for r in list_decisions_on_disk():
+            sym = (r.get("symbol") or "").upper()
+            if sym and (sym not in newest
+                        or (r.get("date") or "") > newest[sym]["date"]):
+                newest[sym] = r
+        cand_bull, cand_bear = [], []
+        for sym, r in newest.items():
+            if (r.get("date") or "") < stale_before:
+                continue
+            lv = ai_levels(sym)
+            if not lv or not lv.get("stop"):
+                continue
+            decision = (lv.get("decision") or r.get("decision") or "").upper()
+            if decision in ("AVOID", "SELL"):
+                cand_bear.append((sym, lv))
+            elif (lv.get("conviction") or 0) >= 7:
+                cand_bull.append((sym, lv))
+    except Exception as e:  # noqa: BLE001
+        log.warning("board: spread candidate sweep failed: %s", e)
+        return [], []
+
+    if not cand_bull and not cand_bear:
+        return [], []
+    async with FMPClient() as fmp, PolygonOptionsClient() as poly:
+        research = FMPResearchClient(fmp)
+        for sym, lv in cand_bull[:MAX_SPREAD_BUILDS]:
+            try:
+                bars = await fmp.fetch_daily(sym)
+                if bars is None or bars.empty:
+                    continue
+                spot = float(bars["close"].iloc[-1])
+                from .spreads import build_bull_put as _bp
+                s = await _bp(poly, research, sym, spot, float(lv["stop"]))
+            except Exception as e:  # noqa: BLE001
+                log.warning("board: bull put %s failed: %s", sym, e)
+                continue
+            if not s.get("ok"):
+                log.info("board: bull put %s skipped — %s", sym, s.get("reason"))
+                continue
+            bulls.append({**s,
+                          "rules_fired": [
+                              f"AI BUY conviction {lv.get('conviction')} "
+                              f"({lv.get('date')})",
+                              f"short strike ${s['short_strike']} ≤ AI stop "
+                              f"${lv['stop']:,.2f}",
+                              "no earnings inside expiry"],
+                          "conviction": lv.get("conviction"),
+                          "exit_rule": "suggestion: take profit at ~50-60% of "
+                                       "the credit; close if the AI verdict "
+                                       "flips"})
+        for sym, lv in cand_bear[:MAX_SPREAD_BUILDS]:
+            try:
+                bars = await fmp.fetch_daily(sym)
+                if bars is None or bars.empty:
+                    continue
+                spot = float(bars["close"].iloc[-1])
+                s = await build_bear_call(poly, research, sym, spot,
+                                          float(lv["stop"]))
+            except Exception as e:  # noqa: BLE001
+                log.warning("board: bear call %s failed: %s", sym, e)
+                continue
+            if not s.get("ok"):
+                log.info("board: bear call %s skipped — %s", sym, s.get("reason"))
+                continue
+            bears.append({**s,
+                          "rules_fired": [
+                              f"AI verdict {lv.get('decision')} ({lv.get('date')})",
+                              f"short strike ${s['short_strike']} ≥ AI "
+                              f"invalidation ${lv['stop']:,.2f}",
+                              "no earnings inside expiry"],
+                          "exit_rule": "suggestion: take profit at ~50-60% of "
+                                       "the credit; close if the AI verdict "
+                                       "flips"})
+    return bulls, bears
+
+
+def _annotate_allocator(all_cards: dict[str, list[dict]]) -> None:
+    """When one symbol fires MULTIPLE strategies, rank them and stamp each
+    card with the allocator's verdict — the board explains which structure
+    fits best and on what basis (our record vs prior)."""
+    from .allocator import rank_structures
+    from .income import ai_levels, pool_c
+    try:
+        holdings = {h["symbol"]: h["shares"] for h in pool_c()["holdings"]}
+    except Exception:  # noqa: BLE001
+        holdings = {}
+    by_symbol: dict[str, list[tuple[str, dict]]] = {}
+    for key, cards in all_cards.items():
+        for c in cards:
+            by_symbol.setdefault(c["symbol"], []).append((key, c))
+    for sym, entries in by_symbol.items():
+        if len(entries) < 2:
+            continue
+        # Earnings context is a SYMBOL fact but only event-family cards carry
+        # it — scan all of the symbol's cards, not just whichever sorted first,
+        # or a condor card behind a CC card loses its allocator badge.
+        days = next((c.get("days_to_earnings") for _, c in entries
+                     if c.get("days_to_earnings") is not None), None)
+        cheap = next((c.get("cheapness") for _, c in entries
+                      if c.get("cheapness") is not None), None)
+        ctx = {"holding_shares": holdings.get(sym, 0),
+               "ai": ai_levels(sym) or {},
+               "earnings_days": days,
+               "cheapness": cheap}
+        try:
+            ranking = rank_structures(sym, ctx)
+        except Exception as e:  # noqa: BLE001
+            log.warning("allocator ranking %s failed: %s", sym, e)
+            continue
+        pos = {r["key"]: r for r in ranking}
+        for key, c in entries:
+            if key in pos:
+                c["allocator"] = {"rank": pos[key]["rank"],
+                                  "of": len(ranking),
+                                  "why": pos[key]["why"],
+                                  "basis": pos[key]["basis"]}
+
+
 async def generate_board(notify: bool = True) -> dict[str, Any]:
     """Evaluate all active strategy families against today's data."""
     # Event strategies (R1/R2) need scanner data; income (R3/R4) does NOT —
@@ -321,6 +458,15 @@ async def generate_board(notify: bool = True) -> dict[str, Any]:
     except Exception as e:  # noqa: BLE001
         log.warning("board: income evaluators failed: %s", e)
         r3, r4 = [], []
+    try:
+        r5, r6 = await _spread_cards()
+    except Exception as e:  # noqa: BLE001
+        log.warning("board: spread evaluators failed: %s", e)
+        r5, r6 = [], []
+
+    _annotate_allocator({"long_straddle": r1, "iron_condor": r2,
+                         "cash_secured_put": r3, "covered_call": r4,
+                         "bull_put_spread": r5, "bear_call_spread": r6})
 
     # Rebuild semantics: this run REPLACES the date's board. Without the
     # delete, a same-day rerun leaves ghost cards for symbols that no longer
@@ -345,22 +491,29 @@ async def generate_board(notify: bool = True) -> dict[str, Any]:
         _save_card(board_date, "cash_secured_put", card["symbol"], card)
     for card in r4:
         _save_card(board_date, "covered_call", card["symbol"], card)
+    for card in r5:
+        _save_card(board_date, "bull_put_spread", card["symbol"], card)
+    for card in r6:
+        _save_card(board_date, "bear_call_spread", card["symbol"], card)
 
-    if notify and (r1 or r2 or r3 or r4):
-        await _send_digest(board_date, r1, r2, r3, r4)
-    log.info("board %s: %d straddle, %d condor, %d CSP, %d CC card(s) "
-             "(pool %d, candidates %d)",
-             board_date, len(r1), len(r2), len(r3), len(r4),
+    if notify and (r1 or r2 or r3 or r4 or r5 or r6):
+        await _send_digest(board_date, r1, r2, r3, r4, r5, r6)
+    log.info("board %s: %d straddle, %d condor, %d CSP, %d CC, %d bull-put, "
+             "%d bear-call card(s) (pool %d, candidates %d)",
+             board_date, len(r1), len(r2), len(r3), len(r4), len(r5), len(r6),
              len(pool), len(cands or []))
     return {"board_date": board_date, "straddle_cards": len(r1),
             "condor_cards": len(r2), "csp_cards": len(r3),
-            "cc_cards": len(r4)}
+            "cc_cards": len(r4), "bull_put_cards": len(r5),
+            "bear_call_cards": len(r6)}
 
 
 async def _send_digest(board_date: str, r1: list[dict], r2: list[dict],
                        r3: Optional[list[dict]] = None,
-                       r4: Optional[list[dict]] = None) -> None:
-    r3, r4 = r3 or [], r4 or []
+                       r4: Optional[list[dict]] = None,
+                       r5: Optional[list[dict]] = None,
+                       r6: Optional[list[dict]] = None) -> None:
+    r3, r4, r5, r6 = r3 or [], r4 or [], r5 or [], r6 or []
     try:
         from ..telegram import telegram as _telegram
         client = _telegram()
@@ -394,6 +547,18 @@ async def _send_digest(board_date: str, r1: list[dict], r2: list[dict],
                 f"collect ≈${c['premium_usd_per_contract']:,.0f} "
                 f"({c['annualized_pct']}% annualized on the cash). Assigned = "
                 f"buy at {c['discount_to_spot_pct']}% below today's price.")
+        for c in r5[:3]:
+            lines.append(
+                f"📈 {c['symbol']} BULL PUT SPREAD — collect "
+                f"≈${(c['credit'] or 0) * 100:,.0f} betting it holds above the "
+                f"AI's own stop (${c['short_strike']}). Worst case "
+                f"${abs(c['max_loss'] or 0) * 100:,.0f}, ≈{c.get('pop_est') or '—'}% odds.")
+        for c in r6[:3]:
+            lines.append(
+                f"📉 {c['symbol']} BEAR CALL SPREAD — the AVOID verdict earns: "
+                f"≈${(c['credit'] or 0) * 100:,.0f} unless it rallies past "
+                f"${c['short_strike']}. Worst case "
+                f"${abs(c['max_loss'] or 0) * 100:,.0f}.")
         lines.append("")
         lines.append("Defined-risk, paper-first, nothing trades automatically — "
                      "open Options → Board to review and track.")

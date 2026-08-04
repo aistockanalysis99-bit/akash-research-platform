@@ -162,8 +162,8 @@ def rulebook() -> list[dict[str, Any]]:
         {
             "key": "bull_put_spread",
             "name": "R5 · Bull Put Spread",
-            "status": "planned",
-            "phase": "Phase 5 (spreads + allocator)",
+            "status": "paper",
+            "phase": "Phase 5 (spreads + allocator — paper)",
             "direction": "bullish, defined risk",
             "risk_type": "credit — max loss = width − credit",
             "pools": ["C (AI BUY ≥7)"],
@@ -178,8 +178,8 @@ def rulebook() -> list[dict[str, Any]]:
         {
             "key": "bear_call_spread",
             "name": "R6 · Bear Call Spread",
-            "status": "planned",
-            "phase": "Phase 5 (spreads + allocator)",
+            "status": "paper",
+            "phase": "Phase 5 (spreads + allocator — paper)",
             "direction": "bearish, defined risk",
             "risk_type": "credit — max loss = width − credit",
             "pools": ["C (AI AVOID verdicts)"],

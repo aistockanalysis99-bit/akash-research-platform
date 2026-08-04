@@ -258,6 +258,10 @@ export const api = {
         discount_to_spot_pct?: number; ai_target?: number | null;
         ai_entry?: number; conviction?: number | null; oi?: number;
         delta?: number | null;
+        // spread fields (R5 bull put / R6 bear call)
+        level?: number; short_strike?: number; long_strike?: number;
+        // allocator annotation (multi-strategy symbols)
+        allocator?: { rank: number; of: number; why: string; basis: string };
         legs?: { side: number; contract_type: string; strike: number;
                  expiry: string; qty: number; price: number;
                  delta?: number | null; oi?: number;

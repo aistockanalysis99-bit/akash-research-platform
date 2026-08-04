@@ -22,6 +22,8 @@ export default function StrategyBoardPage() {
   const condors = cards.filter((c) => c.strategy_key === "iron_condor");
   const csps = cards.filter((c) => c.strategy_key === "cash_secured_put");
   const ccs = cards.filter((c) => c.strategy_key === "covered_call");
+  const bullPuts = cards.filter((c) => c.strategy_key === "bull_put_spread");
+  const bearCalls = cards.filter((c) => c.strategy_key === "bear_call_spread");
 
   return (
     <div>
@@ -91,7 +93,64 @@ export default function StrategyBoardPage() {
           {csps.map((c) => <IncomeCard key={c.id} c={c} kind="csp" />)}
         </BoardSection>
       )}
+
+      {bullPuts.length > 0 && (
+        <BoardSection
+          title={`Bull put spreads — premium against the AI's stop (${bullPuts.length})`}
+          hint="Defined risk: wins unless the stock falls through the level the AI itself said breaks the thesis."
+        >
+          {bullPuts.map((c) => <SpreadCard key={c.id} c={c} bullish />)}
+        </BoardSection>
+      )}
+
+      {bearCalls.length > 0 && (
+        <BoardSection
+          title={`Bear call spreads — the AVOID verdict earns (${bearCalls.length})`}
+          hint="Defined risk: wins unless the stock rallies past the AI's invalidation level."
+        >
+          {bearCalls.map((c) => <SpreadCard key={c.id} c={c} bullish={false} />)}
+        </BoardSection>
+      )}
     </div>
+  );
+}
+
+function AllocatorBadge({ c }: { c: BoardCard }) {
+  if (!c.allocator) return null;
+  return (
+    <div className={cn("text-xs rounded-lg px-3 py-1.5 mb-3 border",
+      c.allocator.rank === 1
+        ? "border-brand/40 bg-brand/10 text-brand"
+        : "border-line/60 bg-bg-hover/40 text-gray-400")}>
+      🧭 Allocator: #{c.allocator.rank} of {c.allocator.of} for {c.symbol} — {c.allocator.why}
+      <span className="text-gray-500"> ({c.allocator.basis})</span>
+    </div>
+  );
+}
+
+function SpreadCard({ c, bullish }: { c: BoardCard; bullish: boolean }) {
+  const credit = (c.credit || 0) * 100;
+  const maxLoss = Math.abs(c.max_loss || 0) * 100;
+  return (
+    <Card className={cn("border-l-4", bullish ? "border-pos/50" : "border-neg/50")}>
+      <div className="flex items-center gap-2 flex-wrap mb-2">
+        <span className="text-lg font-bold font-mono">{c.symbol}</span>
+        <span className="text-sm text-gray-400">
+          sell ${c.short_strike}{bullish ? "P" : "C"} / buy ${c.long_strike}{bullish ? "P" : "C"} · exp {c.expiry} ({c.dte}d)
+        </span>
+        <Badge className="border-brand/40 bg-brand/10 text-brand">defined risk</Badge>
+      </div>
+      <AllocatorBadge c={c} />
+      <RulesFired rules={c.rules_fired} />
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
+        <Stat label="Collect" value={`$${credit.toLocaleString(undefined, { maximumFractionDigits: 0 })}`} cls="text-pos" />
+        <Stat label="Worst case" value={`-$${maxLoss.toLocaleString(undefined, { maximumFractionDigits: 0 })}`} cls="text-neg" />
+        <Stat label="Odds (est.)" value={c.pop_est != null ? `≈${c.pop_est}%` : "—"} />
+        <Stat label="Return on risk" value={c.return_on_risk_pct != null ? `${c.return_on_risk_pct}%` : "—"} />
+      </div>
+      <div className="text-xs text-gray-500 mb-3">{c.exit_rule}</div>
+      <TrackControl boardId={c.id} invalidate={["optBoard", "optStructures"]} />
+    </Card>
   );
 }
 
