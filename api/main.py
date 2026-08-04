@@ -1963,9 +1963,12 @@ async def telegram_test(payload: Optional[dict[str, Any]] = None) -> dict[str, A
         "Akash Research Platform — Telegram test message. "
         "If you can read this, the bot is wired correctly."
     )
+    # kind controls ROUTING: options-family kinds (options_*, strategy_board)
+    # go to the separate options group when one is configured.
+    kind = str((payload or {}).get("kind") or "manual")[:40]
     client = telegram()
-    ok = await client.send_message(text, kind="manual")
-    return {"sent": ok, "configured": client.enabled}
+    ok = await client.send_message(text, kind=kind)
+    return {"sent": ok, "configured": client.enabled, "kind": kind}
 
 
 @app.get("/telegram/log")

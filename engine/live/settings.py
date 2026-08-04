@@ -275,6 +275,16 @@ def get_options_csp_target_delta() -> float:
     return _get_float("options_csp_target_delta", 0.25, 0.10, 0.45)
 
 
+def get_options_telegram_chat_id() -> str:
+    """Separate Telegram group for ALL options messages (same bot). Empty =
+    options messages go to the main chat like everything else. Settings
+    override beats the TELEGRAM_OPTIONS_CHAT_ID env default, so the group
+    can be changed from the UI without a redeploy."""
+    from ..config import TELEGRAM_OPTIONS_CHAT_ID
+    raw = _get_raw("options_telegram_chat_id")
+    return (raw if raw is not None else TELEGRAM_OPTIONS_CHAT_ID).strip()
+
+
 # ---- Scheduler accessors ------------------------------------------------- #
 
 
@@ -345,6 +355,7 @@ def get_all() -> dict[str, Any]:
             "condor_wing_pct":     {"value": get_options_condor_wing_pct(),      "env_default": 3.0},
             "condor_min_cheapness": {"value": get_options_condor_min_cheapness(), "env_default": 1.25},
             "condor_min_iv_rank":  {"value": get_options_condor_min_iv_rank(),   "env_default": 60.0},
+            "telegram_chat_id":    {"value": get_options_telegram_chat_id(),     "env_default": ""},
             "income_min_dte":      {"value": get_options_income_min_dte(),       "env_default": 21},
             "income_max_dte":      {"value": get_options_income_max_dte(),       "env_default": 45},
             "cc_target_delta":     {"value": get_options_cc_target_delta(),      "env_default": 0.27},
@@ -395,6 +406,7 @@ SETTABLE_KEYS = {
     "options_income_max_dte",
     "options_cc_target_delta",
     "options_csp_target_delta",
+    "options_telegram_chat_id",
     # scheduler
     "enable_scheduler",
     "scheduler_timezone",

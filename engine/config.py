@@ -69,6 +69,10 @@ VIRTUAL_MAX_GROSS_PCT: float = float(os.getenv("VIRTUAL_MAX_GROSS_PCT", "1.0"))
 # Phase 4 — Telegram + Scheduler
 TELEGRAM_BOT_TOKEN: str = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID: str = os.getenv("TELEGRAM_CHAT_ID", "")
+# Optional separate group for ALL options-related messages (same bot).
+# Empty = everything goes to the main chat. Also settable live from the UI
+# (settings key options_telegram_chat_id overrides this env default).
+TELEGRAM_OPTIONS_CHAT_ID: str = os.getenv("TELEGRAM_OPTIONS_CHAT_ID", "")
 
 # Set ENABLE_SCHEDULER=true in .env to auto-run morning + evening cycles.
 # Default is off — manual mode for testing.
