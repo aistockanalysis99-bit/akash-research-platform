@@ -23,11 +23,15 @@ import PipelineBakeoffPage from "./pages/PipelineBakeoffPage";
 import OptionsScannerPage from "./pages/OptionsScannerPage";
 import OptionsPositionsPage from "./pages/OptionsPositionsPage";
 import OptionsBacktestPage from "./pages/OptionsBacktestPage";
+import LoginPage from "./pages/LoginPage";
+import ProtectedRoute from "./auth/ProtectedRoute";
 
 export default function App() {
   return (
     <Routes>
-      <Route element={<Layout />}>
+      <Route path="/login" element={<LoginPage />} />
+      <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}
+>
         {/* Guide + What's New (cross-cutting) */}
         <Route path="/guide" element={<GuidePage />} />
         <Route path="/whats-new" element={<WhatsNewPage />} />

@@ -28,6 +28,10 @@ import io
 import json
 import threading
 import uuid
+
+from api.auth.auth import authenticate_user                    #newone
+from api.auth.security import create_access_token             #newone
+
 from datetime import datetime, timezone
 from typing import Any, Optional
 
@@ -1530,6 +1534,32 @@ async def profile_delete(symbol: str) -> dict[str, bool]:
         raise HTTPException(404, f"no profile for {symbol}")
     path.unlink()
     return {"deleted": True}
+
+
+
+@app.post("/login")
+async def login(payload: dict):
+    email = payload.get("email")
+    password = payload.get("password")
+
+    user = authenticate_user(email, password)
+
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+
+    token = create_access_token(
+        {
+            "email": user["email"],
+            "role": user["role"]
+        }
+    )
+
+    return {
+        "token": token,
+        "role": user["role"],
+        "email": user["email"]
+    }
+
 
 
 @app.get("/health")

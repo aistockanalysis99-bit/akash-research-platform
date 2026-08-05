@@ -17,3 +17,7 @@ anthropic>=0.40.0
 requests>=2.32.0
 # zoneinfo data for APScheduler timezones on Linux
 tzdata>=2024.1
+
+
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4

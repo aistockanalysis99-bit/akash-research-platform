@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "email": "admin@akash.ai",
+    "password": "admin123",
+    "role": "admin"
+  },
+  {
+    "id": 2,
+    "email": "guest@akash.ai",
+    "password": "guest123",
+    "role": "guest"
+  }
+]

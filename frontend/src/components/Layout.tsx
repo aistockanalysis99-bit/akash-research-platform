@@ -1,6 +1,9 @@
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { BookOpen, Sparkles } from "lucide-react";
+import { useAuth } from "../auth/AuthContext";
+import { useNavigate } from "react-router-dom";
+
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
@@ -55,6 +58,8 @@ const SECTIONS: {
 
 // Map a pathname to its owning section.
 function sectionForPath(path: string): string {
+
+
   if (
     path.startsWith("/analyze") ||
     path.startsWith("/decisions") ||
@@ -78,6 +83,8 @@ function sectionForPath(path: string): string {
 }
 
 export default function Layout() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const { pathname } = useLocation();
   const activeSection = sectionForPath(pathname);
   const section = SECTIONS.find((s) => s.name === activeSection)!;
@@ -158,6 +165,23 @@ export default function Layout() {
                 API {health.data?.status ?? "…"}
               </span>
             </div>
+
+            <div className="flex items-center gap-2 text-sm text-gray-400">
+              <span>{user?.email}</span>
+              <span className="px-2 py-1 rounded bg-blue-600 text-white">
+                {user?.role}
+              </span>
+            </div>
+
+            <button
+              onClick={() => {
+                logout();
+                navigate("/login", { replace: true });
+              }}
+              className="px-3 py-1.5 text-sm font-semibold rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors"
+            >
+              Logout
+            </button>
           </div>
         </div>
         {/* Row 2: sub-nav for the active section (hidden on the standalone Guide page) */}
