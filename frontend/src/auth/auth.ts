@@ -1,4 +1,4 @@
-const API_URL = "http://127.0.0.1:8000";
+const API_URL = import.meta.env.VITE_API_URL;
 
 export interface LoginResponse {
   token: string;
@@ -51,4 +51,25 @@ export function getEmail() {
 
 export function isLoggedIn() {
   return !!localStorage.getItem("token");
+}
+
+export async function googleLogin(credential: string) {
+  const response = await fetch(
+    `${API_URL}/auth/google`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        credential,
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Google login failed");
+  }
+
+  return response.json();
 }

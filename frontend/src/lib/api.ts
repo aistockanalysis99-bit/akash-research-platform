@@ -12,6 +12,7 @@ import type {
   RunRow,
   Scorecard,
   SchedulerStatus,
+  StructurePosition,
   TelegramLogRow,
   WatchlistItem,
 } from "./types";
@@ -195,6 +196,187 @@ export const api = {
     }>(`/options/backtest/${symbol}` +
       `?refresh=${opts?.refresh ? "true" : "false"}` +
       (opts?.entryDays ? `&entry_days=${opts.entryDays}` : "")),
+
+  // Options: Strategy Board foundations (Phase 0)
+  optionsRulebook: () =>
+    get<{
+      strategies: {
+        key: string; name: string; status: "live" | "paper" | "planned";
+        phase: string; direction: string; risk_type: string; pools: string[];
+        plain: string; entry_conditions: string[]; structure: string;
+        exit_rules: string[]; return_metrics: string[];
+      }[];
+      governance: string[];
+      pool_b: {
+        symbol: string; asof?: string; spot?: number | null;
+        expiry?: string | null; atm_oi?: number | null;
+        spread_pct?: number | null; qualified: number; note?: string;
+      }[];
+      league: Record<string, {
+        trades: number; win_rate_pct?: number | null; total_pnl_usd: number;
+        avg_return_on_risk_pct?: number | null; worst_trade_usd?: number | null;
+      }>;
+    }>("/options/rulebook"),
+  optionsPoolBRefresh: () =>
+    post<{ measured: number; qualified: number }>("/options/pool-b/refresh"),
+
+  // Options: multi-leg paper structures (condors, spreads, …)
+  optionsStructures: () =>
+    get<{
+      open: StructurePosition[]; closed: StructurePosition[];
+      league: Record<string, { trades: number; win_rate_pct?: number | null;
+        total_pnl_usd: number; avg_return_on_risk_pct?: number | null;
+        worst_trade_usd?: number | null }>;
+    }>("/options/structures"),
+  optionsStructuresRefresh: () =>
+    post<{ marked: number }>("/options/structures/refresh"),
+  optionsStructureClose: (id: number, reason = "manual") =>
+    post<StructurePosition>(`/options/structure/${id}/close`, { reason }),
+
+  // Options: Strategy Board (Phase 1)
+  optionsBoard: () =>
+    get<{
+      board_date: string | null;
+      cards: {
+        id: number; strategy_key: string; symbol: string;
+        rules_fired?: string[]; exit_rule?: string;
+        earnings_date?: string; days_to_earnings?: number; expiry?: string;
+        // straddle mirror fields
+        candidate_id?: number; strike?: number; straddle_cost?: number;
+        cheapness?: number; dual_signal?: number;
+        implied_move_pct?: number; hist_median_move_pct?: number;
+        // condor fields
+        spot?: number; credit?: number; max_profit?: number | null;
+        max_loss?: number; breakevens?: number[]; pop_est?: number | null;
+        return_on_risk_pct?: number | null; annualized_pct?: number | null;
+        dte?: number; min_oi?: number; max_leg_spread_pct?: number | null;
+        // income fields (R3 CSP / R4 covered call)
+        premium?: number; premium_usd_per_contract?: number;
+        shares_held?: number; qty_max?: number;
+        monthly_yield_pct?: number | null; if_called_return_pct?: number | null;
+        cash_secured_usd?: number; effective_basis?: number;
+        discount_to_spot_pct?: number; ai_target?: number | null;
+        ai_entry?: number; conviction?: number | null; oi?: number;
+        delta?: number | null;
+        // spread fields (R5 bull put / R6 bear call)
+        level?: number; short_strike?: number; long_strike?: number;
+        // allocator annotation (multi-strategy symbols)
+        allocator?: { rank: number; of: number; why: string; basis: string };
+        legs?: { side: number; contract_type: string; strike: number;
+                 expiry: string; qty: number; price: number;
+                 delta?: number | null; oi?: number;
+                 spread_pct?: number | null }[];
+      }[];
+    }>("/options/board"),
+  optionsBoardRefresh: (notify = false) =>
+    post<{ board_date: string | null; straddle_cards?: number;
+           condor_cards?: number; note?: string }>(
+      "/options/board/refresh", { notify }),
+  optionsBoardTrack: (boardId: number, contracts: number) =>
+    post<{ position_id: number; kind: string }>(
+      "/options/board/track", { board_id: boardId, contracts }),
+
+  // Options: The Wheel (Phase 4)
+  optionsWheels: () =>
+    get<{
+      wheels: {
+        id: number; symbol: string; state: string; qty: number;
+        capital_per_share?: number | null; assigned_price?: number | null;
+        premiums_net?: number | null; exit_price?: number | null;
+        cycle_roi_pct?: number | null; effective_basis?: number | null;
+        started_at?: string; completed_at?: string | null; notes?: string;
+        legs: {
+          id: number; wheel_id: number; seq: number; kind: string;
+          strike: number; expiry: string; premium: number; qty: number;
+          outcome?: string | null; close_price?: number | null;
+          opened_at?: string; closed_at?: string | null;
+        }[];
+      }[];
+    }>("/options/wheels"),
+  optionsWheelStart: (symbol: string, qty = 1) =>
+    post<unknown>("/options/wheels", { symbol, qty }),
+  optionsWheelLeg: (wheelId: number, kind: string, strike: number,
+                    expiry: string, premium: number) =>
+    post<unknown>(`/options/wheels/${wheelId}/leg`,
+      { kind, strike, expiry, premium }),
+  optionsWheelResolve: (wheelId: number, legId: number, outcome: string,
+                        closePrice?: number) =>
+    post<unknown>(`/options/wheels/${wheelId}/leg/${legId}/resolve`,
+      { outcome, close_price: closePrice }),
+  optionsWheelSuggest: (wheelId: number) =>
+    get<{
+      state: string; kind?: "csp" | "cc"; note?: string;
+      suggestion?: {
+        ok: boolean; reason?: string; strike?: number; expiry?: string;
+        premium?: number; premium_usd_per_contract?: number;
+        annualized_pct?: number | null;
+      } | null;
+      ai_levels?: { entry?: number | null; target?: number | null;
+                    conviction?: number | null } | null;
+    }>(`/options/wheels/${wheelId}/suggest`),
+
+  // Options: Pro Desk (Phase 6)
+  optionsGreeks: () =>
+    get<{
+      totals: { delta: number; theta: number; vega: number };
+      per_symbol: Record<string, { delta: number; theta: number; vega: number }>;
+      positions_counted: number; unmarked: string[]; note: string;
+    }>("/options/greeks"),
+  optionsSlippage: () =>
+    get<{
+      families: Record<string, { fills: number; median_slippage_pct: number }>;
+      fills_recorded: number; median_slippage_pct?: number | null;
+      upgrade_trigger_pct: number; upgrade_recommended: boolean; note: string;
+    }>("/options/slippage"),
+  optionsSeasonReport: () =>
+    get<{ markdown: string; generated_at: string }>("/options/season-report"),
+
+  // Options: Returns Engine (Phase 2)
+  optionsLeague: () =>
+    get<{
+      rows: {
+        key: string; name: string; status: string;
+        trades: number; win_rate_pct?: number | null;
+        avg_return_on_risk_pct?: number | null; total_pnl_usd: number;
+        worst_trade_usd?: number | null;
+        open_count: number; open_capital: number;
+      }[];
+    }>("/options/league"),
+  optionsReportCard: () =>
+    get<{
+      symbols_covered: number; symbols_errored: number;
+      events_priced: number; qualifying_events: number;
+      qualifying_win_rate_pct?: number | null;
+      qualifying_avg_pnl_pct?: number | null;
+      avg_implied_vs_actual?: number | null;
+      leaders: { symbol: string; qualifying_events?: number | null;
+                 win_rate_pct?: number | null;
+                 avg_pnl_pct?: number | null }[];
+      generated_at: string;
+    }>("/options/report-card"),
+  optionsReportCardRun: (limit = 5) =>
+    post<{ batch_done: number; batch_failed: number;
+           coverage: number; universe: number }>(
+      "/options/report-card/run", { limit }),
+  optionsCondorBacktest: (symbol: string, refresh = false) =>
+    get<{
+      symbol: string; entry_days: number; computed_at?: string;
+      error?: string; note?: string;
+      summary?: {
+        events_simulated: number; events_priced: number;
+        rule_fired_events: number;
+        fired_win_rate_pct?: number | null;
+        fired_avg_return_on_risk_pct?: number | null;
+        all_avg_return_on_risk_pct?: number | null;
+      };
+      events?: {
+        earnings_date: string; error?: string | null;
+        credit?: number; max_loss?: number; cheapness?: number | null;
+        implied_move_pct?: number; actual_move_pct?: number | null;
+        inside_range?: boolean | null; trade_pnl_usd?: number;
+        return_on_risk_pct?: number; would_fire?: boolean;
+      }[];
+    }>(`/options/condor-backtest/${symbol}?refresh=${refresh ? "true" : "false"}`),
 
   // Settings (portfolio + scheduler)
   getSettings: () =>

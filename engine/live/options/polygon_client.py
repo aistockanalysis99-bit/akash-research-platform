@@ -124,21 +124,38 @@ class PolygonOptionsClient:
 
     async def strikes_available(self, underlying: str, expiry: str) -> list[float]:
         """All strikes listed for one expiry. Tries expired=true first (the
-        common case for backtests over past events), falls back to false."""
+        common case for backtests over past events), falls back to false.
+
+        Paginated + strike-sorted: the default ticker sort orders all calls
+        before all puts, so a single 250-row page silently truncated the top
+        of the strike range on large chains (review finding). Each page is
+        defensively re-filtered because Polygon's reference cursor has been
+        observed dropping filters on continuation pages."""
         for expired_flag in ("true", "false"):
-            j = await self._get(
-                "/v3/reference/options/contracts",
-                {
-                    "underlying_ticker": underlying.upper(),
-                    "expiration_date": expiry,
-                    "expired": expired_flag,
-                    "limit": 250,
-                },
-            )
-            strikes = sorted({float(r["strike_price"]) for r in (j.get("results") or [])
-                              if r.get("strike_price") is not None})
+            strikes: set[float] = set()
+            url = "/v3/reference/options/contracts"
+            params: Optional[dict] = {
+                "underlying_ticker": underlying.upper(),
+                "expiration_date": expiry,
+                "expired": expired_flag,
+                "sort": "strike_price",
+                "order": "asc",
+                "limit": 1000,
+            }
+            for _ in range(4):  # pagination guard
+                j = await self._get(url, params)
+                for r in (j.get("results") or []):
+                    if (r.get("strike_price") is not None
+                            and r.get("expiration_date") == expiry
+                            and (r.get("underlying_ticker") or "").upper()
+                            == underlying.upper()):
+                        strikes.add(float(r["strike_price"]))
+                nxt = j.get("next_url")
+                if not nxt:
+                    break
+                url, params = nxt, None
             if strikes:
-                return strikes
+                return sorted(strikes)
         return []
 
     async def historical_leg_bars(self, underlying: str, expiry: str,
@@ -157,9 +174,16 @@ class PolygonOptionsClient:
         return j.get("results") or []
 
     @staticmethod
-    def nearest_bar_close(bars: list[dict], on_or_before_date: str) -> Optional[float]:
+    def nearest_bar_close(bars: list[dict], on_or_before_date: str,
+                          not_before_date: Optional[str] = None) -> Optional[float]:
         """Closing price of the bar nearest to (and not after) the target date.
         Options trade thinly — the exact date often has no print.
+
+        `not_before_date` (inclusive floor) makes the lookup REFUSE bars from
+        before a boundary instead of silently walking back to them. Backtests
+        use it for exit marks: without a floor, a leg that never printed after
+        the earnings event would be "exited" at its stale pre-print close —
+        the documented skip/zero rules could never trigger (review finding).
 
         Polygon daily-bar timestamps (`t`) are epoch-MILLISECONDS anchored at
         00:00 US/Eastern, i.e. 04:00-05:00 UTC on that same calendar day. We
@@ -180,6 +204,8 @@ class PolygonOptionsClient:
                 continue
             day = _dt.fromtimestamp(t / 1000, _tz.utc).strftime("%Y-%m-%d")
             if day > on_or_before_date:
+                continue
+            if not_before_date is not None and day < not_before_date:
                 continue
             if best_day is None or day > best_day:
                 best_day, best = day, b

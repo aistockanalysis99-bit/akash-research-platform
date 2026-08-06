@@ -208,3 +208,49 @@ export interface OptionPosition {
   final_pnl_pct?: number;
   notes?: string;
 }
+
+/** Multi-leg paper structure (condor, spread, CSP, …) — options_multi_positions. */
+export interface StructureLeg {
+  id: number;
+  position_id: number;
+  side: number;               // +1 long, -1 short
+  contract_type: string;      // "call" | "put"
+  strike: number;
+  expiry: string;
+  qty: number;
+  entry_price?: number | null;
+  current_price?: number | null;
+  entry_delta?: number | null;
+  current_delta?: number | null;
+}
+
+export interface StructurePosition {
+  id: number;
+  strategy_key: string;
+  symbol: string;
+  status: string;             // "open" | "closed"
+  entry_date?: string;
+  entry_value?: number;       // +debit / -credit per share-set
+  capital_at_risk?: number;
+  max_profit?: number | null;
+  max_loss?: number;
+  breakevens?: number[];
+  pop_est?: number | null;
+  quoted_annualized_pct?: number | null;
+  dte_at_entry?: number | null;
+  earnings_date?: string | null;
+  exit_deadline?: string | null;
+  cash_secured?: number;
+  current_value?: number | null;
+  pnl_usd?: number | null;
+  pnl_pct_on_risk?: number | null;
+  last_marked?: string | null;
+  exit_alerted?: number;
+  exit_date?: string | null;
+  exit_value?: number | null;
+  exit_reason?: string | null;
+  final_pnl_usd?: number | null;
+  final_pnl_pct_on_risk?: number | null;
+  notes?: string;
+  legs: StructureLeg[];
+}

@@ -24,6 +24,18 @@ log = logging.getLogger(__name__)
 TELEGRAM_API = "https://api.telegram.org/bot{token}/sendMessage"
 MAX_MESSAGE_LEN = 4000  # Telegram limit is 4096, leave headroom
 
+# Message kinds that belong to the OPTIONS side of the platform. When a
+# separate options group is configured (settings key options_telegram_chat_id
+# or env TELEGRAM_OPTIONS_CHAT_ID), these — and only these — route there.
+# Everything else (stock verdicts, morning briefings, errors) stays in the
+# main chat. Same bot either way.
+OPTIONS_KINDS_PREFIX = "options"          # options_digest/_alert/_exit/_weekly
+OPTIONS_KINDS_EXACT = {"strategy_board"}  # the evening board digest
+
+
+def _is_options_kind(kind: str) -> bool:
+    return kind.startswith(OPTIONS_KINDS_PREFIX) or kind in OPTIONS_KINDS_EXACT
+
 
 class TelegramClient:
     """Async outbound-only Telegram client."""
@@ -53,14 +65,29 @@ class TelegramClient:
         code should not be coupled to delivery reliability.
         """
         truncated = text[:MAX_MESSAGE_LEN]
-        if not self.enabled:
+
+        # Route options-family messages to their own group when configured.
+        # Resolved per send (not per client) so a settings change from the UI
+        # takes effect on the very next message, no restart needed.
+        target_chat = self.chat_id
+        if _is_options_kind(kind):
+            try:
+                from . import settings as live_settings
+                options_chat = live_settings.get_options_telegram_chat_id()
+                if options_chat:
+                    target_chat = options_chat
+            except Exception as e:  # noqa: BLE001 — routing must never block a send
+                log.warning("telegram: options-chat lookup failed, using "
+                            "main chat: %s", e)
+
+        if not (self.token and target_chat):
             self._log(kind, symbol, truncated, success=False,
                        error="not_configured")
             log.info("telegram: skipping — token/chat_id not set")
             return False
 
         url = TELEGRAM_API.format(token=self.token)
-        payload: dict = {"chat_id": self.chat_id, "text": truncated}
+        payload: dict = {"chat_id": target_chat, "text": truncated}
         if parse_mode:
             payload["parse_mode"] = parse_mode
 

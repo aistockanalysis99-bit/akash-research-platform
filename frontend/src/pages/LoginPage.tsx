@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import { login, saveToken } from "../auth/auth";
+import {login,saveToken, googleLogin,} from "../auth/auth";
 import { useAuth } from "../auth/AuthContext";
+import { GoogleLogin } from "@react-oauth/google";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -186,17 +187,29 @@ export default function LoginPage() {
 
           </div>
 
-          <button
-            type="button"
-            disabled
-            className="w-full py-3 rounded-lg border border-gray-700 text-gray-400 cursor-not-allowed"
-          >
-            Continue with Google
-            <br />
-            <span className="text-xs">
-              Coming Soon
-            </span>
-          </button>
+          <div className="flex justify-center">
+            <GoogleLogin
+                onSuccess={async (credentialResponse) => {
+                    try {
+                        if (!credentialResponse.credential) return;
+
+                        const data = await googleLogin(credentialResponse.credential);
+
+                        saveToken(data);
+
+                        setAuthUser(data.email, data.role);
+
+                        navigate("/");
+                        } catch (err) {
+                        console.error(err);
+                        setError("Google login failed");
+                        }
+                }}
+                onError={() => {
+                    setError("Google login failed");
+                }}
+            />
+          </div>
 
         </form>
 

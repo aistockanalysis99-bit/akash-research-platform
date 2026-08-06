@@ -29,10 +29,16 @@ import json
 import threading
 import uuid
 
-from api.auth.auth import authenticate_user                    #newone
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+from api.auth.auth import authenticate_user, get_users                   #newone
 from api.auth.security import create_access_token             #newone
 
 from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Query
@@ -78,6 +84,9 @@ from .schemas import (
     StrategyParamsSchema,
     TradeSchema,
 )
+
+from google.oauth2 import id_token
+from google.auth.transport import requests
 
 log = get_logger("api.main")
 
@@ -1358,19 +1367,12 @@ async def options_candidates() -> list[dict[str, Any]]:
     return latest_candidates()
 
 
-@app.post("/options/track")
-async def options_track(payload: dict[str, Any]) -> dict[str, Any]:
-    """Track a scanner candidate as a paper straddle position."""
-    candidate_id = int(payload.get("candidate_id") or 0)
-    contracts = max(1, int(payload.get("contracts") or 1))
-    if not candidate_id:
-        raise HTTPException(400, "candidate_id required")
+def _enforce_straddle_sleeve_caps(cand: dict[str, Any], contracts: int) -> None:
+    """Options-sleeve caps (0 = OFF) — enforced on EVERY path that opens a
+    straddle paper position (scanner track AND board track), kept entirely
+    separate from equity cash."""
     from engine.live import settings as live_settings
-    from engine.live.options.store import get_candidate, open_sleeve
-    cand = get_candidate(candidate_id)
-    if not cand or not cand.get("straddle_cost"):
-        raise HTTPException(400, "candidate not found or not priceable")
-    # Options-sleeve caps (0 = OFF) — kept entirely separate from equity cash.
+    from engine.live.options.store import open_sleeve
     sleeve = open_sleeve()
     max_conc = live_settings.get_options_max_concurrent()
     if max_conc and sleeve["count"] >= max_conc:
@@ -1383,6 +1385,20 @@ async def options_track(payload: dict[str, Any]) -> dict[str, Any]:
                                  f"${sleeve['capital'] + add_cost:,.0f}, over your "
                                  f"${max_cap:,.0f} cap — reduce contracts or raise "
                                  f"the cap in settings")
+
+
+@app.post("/options/track")
+async def options_track(payload: dict[str, Any]) -> dict[str, Any]:
+    """Track a scanner candidate as a paper straddle position."""
+    candidate_id = int(payload.get("candidate_id") or 0)
+    contracts = max(1, int(payload.get("contracts") or 1))
+    if not candidate_id:
+        raise HTTPException(400, "candidate_id required")
+    from engine.live.options.store import get_candidate
+    cand = get_candidate(candidate_id)
+    if not cand or not cand.get("straddle_cost"):
+        raise HTTPException(400, "candidate not found or not priceable")
+    _enforce_straddle_sleeve_caps(cand, contracts)
     from engine.live.options.positions import track_candidate
     pos_id = track_candidate(candidate_id, contracts)
     if pos_id is None:
@@ -1422,14 +1438,20 @@ async def options_backtest(symbol: str, refresh: bool = False,
     from engine.live.options.store import load_backtest, save_backtest
     if not refresh:
         cached = load_backtest(symbol)
-        if cached:
+        # Error / zero-priced rows are transient failures — cache miss.
+        if cached and not cached.get("error") \
+                and (cached.get("summary") or {}).get("events_priced", 0) > 0:
             return cached
     from engine.live.options.backtest import backtest_symbol
     try:
         result = await backtest_symbol(symbol, entry_days=entry_days)
     except Exception as e:  # noqa: BLE001
         raise HTTPException(500, f"backtest failed: {str(e)[:200]}")
-    save_backtest(symbol, entry_days, result)
+    if not result.get("error") \
+            and (result.get("summary") or {}).get("events_priced", 0) > 0:
+        save_backtest(symbol, entry_days, result)
+    else:
+        result["transient"] = True
     result["computed_at"] = datetime.utcnow().isoformat()
     return result
 
@@ -1445,6 +1467,506 @@ async def options_position_close(position_id: int,
     return pos
 
 
+# --------------- Options: Strategy Board foundations (Phase 0) ---------------
+
+
+@app.get("/options/rulebook")
+async def options_rulebook() -> dict[str, Any]:
+    """The complete strategy rulebook with live parameter values, governance
+    rules, Pool B membership, and the realized league table."""
+    from engine.live.options.pools import list_pool_b
+    from engine.live.options.registry import GOVERNANCE, rulebook
+    from engine.live.options.store import league_record as straddle_record
+    from engine.live.options.structures import family_stats
+    league = family_stats()
+    # R1 straddles predate the multi-leg table — merge their record in so the
+    # one strategy that IS live can show a realized row.
+    straddle = straddle_record()
+    if straddle:
+        league.setdefault("long_straddle", straddle)
+    return {
+        "strategies": rulebook(),
+        "governance": GOVERNANCE,
+        "pool_b": list_pool_b(),
+        "league": league,
+    }
+
+
+@app.post("/options/pool-b/refresh")
+async def options_pool_b_refresh() -> dict[str, Any]:
+    """Re-measure Pool B liquidity now (also runs Mondays 08:10 ET)."""
+    from engine.config import POLYGON_API_KEY
+    if not POLYGON_API_KEY:
+        raise HTTPException(400, "POLYGON_API_KEY not configured on the server")
+    from engine.live.options.pools import refresh_pool_b
+    try:
+        return await refresh_pool_b()
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(500, f"pool refresh failed: {str(e)[:200]}")
+
+
+@app.get("/options/structures")
+async def options_structures(status: Optional[str] = None) -> dict[str, Any]:
+    """Multi-leg paper structures (condors, spreads, …) + per-family stats."""
+    from engine.live.options.structures import family_stats, list_structures
+    return {
+        "open": list_structures("open"),
+        "closed": list_structures("closed", limit=100) if status != "open" else [],
+        "league": family_stats(),
+    }
+
+
+@app.post("/options/structures/refresh")
+async def options_structures_refresh() -> dict[str, Any]:
+    """Re-price all open multi-leg structures now."""
+    from engine.live.options.structures import mark_structures
+    try:
+        return await mark_structures()
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(500, f"structure refresh failed: {str(e)[:200]}")
+
+
+@app.post("/options/structure/{position_id}/close")
+async def options_structure_close(position_id: int,
+                                  payload: Optional[dict[str, Any]] = None) -> dict[str, Any]:
+    from engine.live.options.structures import close_structure
+    reason = (payload or {}).get("reason", "manual")
+    pos = await close_structure(position_id, reason=reason)
+    if pos is None:
+        raise HTTPException(404, "structure not found or already closed")
+    return pos
+
+
+# --------------- Options: Strategy Board (Phase 1) ---------------
+
+
+@app.get("/options/board")
+async def options_board() -> dict[str, Any]:
+    """Latest Strategy Board — one card per (strategy, symbol) that fired."""
+    from engine.live.options.board import get_board
+    return get_board()
+
+
+@app.post("/options/board/refresh")
+async def options_board_refresh(payload: Optional[dict[str, Any]] = None) -> dict[str, Any]:
+    """Rebuild the board from the latest scan now (also runs 17:05 ET)."""
+    from engine.config import POLYGON_API_KEY
+    if not POLYGON_API_KEY:
+        raise HTTPException(400, "POLYGON_API_KEY not configured on the server")
+    from engine.live.options.board import generate_board
+    notify = bool((payload or {}).get("notify", False))
+    try:
+        return await generate_board(notify=notify)
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(500, f"board build failed: {str(e)[:200]}")
+
+
+@app.post("/options/board/track")
+async def options_board_track(payload: dict[str, Any]) -> dict[str, Any]:
+    """Track a board card as a paper position. Straddle cards route to the
+    existing straddle tracker; condor cards open a multi-leg structure."""
+    card_id = int(payload.get("board_id") or 0)
+    # Server-side bound, matching the UI: a fat-fingered or scripted 1,000-lot
+    # paper position pollutes the league table just the same.
+    contracts = min(100, max(1, int(payload.get("contracts") or 1)))
+    if not card_id:
+        raise HTTPException(400, "board_id required")
+    from engine.live.options.board import get_board, get_card
+    card = get_card(card_id)
+    if not card:
+        raise HTTPException(404, "board card not found")
+    # Stale-card replay guard: prices, gates, and earnings checks are only as
+    # fresh as the board run that built the card. Old boards stay readable
+    # for history but are never trackable.
+    latest = get_board().get("board_date")
+    if latest and card.get("board_date") != latest:
+        raise HTTPException(400, f"this card is from the {card.get('board_date')} "
+                                 f"board — rebuild/refresh the board and track "
+                                 f"today's card instead")
+
+    if card["strategy_key"] == "long_straddle":
+        from engine.live.options.positions import track_candidate
+        from engine.live.options.store import get_candidate
+        cand = get_candidate(int(card.get("candidate_id") or 0))
+        if not cand or not cand.get("straddle_cost"):
+            raise HTTPException(400, "candidate no longer trackable — rerun the scan")
+        _enforce_straddle_sleeve_caps(cand, contracts)
+        pos_id = track_candidate(int(cand["id"]), contracts)
+        if pos_id is None:
+            raise HTTPException(400, "candidate no longer trackable — rerun the scan")
+        return {"position_id": pos_id, "kind": "straddle"}
+
+    if card["strategy_key"] == "iron_condor":
+        from datetime import datetime, timedelta
+        from zoneinfo import ZoneInfo
+        from engine.live.options.structures import StructureError, create_structure
+        legs = [{**l, "qty": int(l.get("qty", 1)) * contracts}
+                for l in (card.get("legs") or [])]
+        deadline = None
+        if card.get("earnings_date"):
+            from datetime import date as _date
+            ed = _date.fromisoformat(card["earnings_date"])
+            deadline = datetime.combine(
+                ed + timedelta(days=1), datetime.min.time().replace(hour=10),
+                tzinfo=ZoneInfo("America/New_York")).isoformat()
+        try:
+            pos_id = create_structure(
+                "iron_condor", card["symbol"], legs,
+                earnings_date=card.get("earnings_date"),
+                exit_deadline=deadline,
+                notes=f"board {card.get('rules_fired')}")
+        except StructureError as e:
+            raise HTTPException(400, str(e))
+        return {"position_id": pos_id, "kind": "structure"}
+
+    if card["strategy_key"] in ("bull_put_spread", "bear_call_spread"):
+        from engine.live.options.structures import StructureError, create_structure
+        legs = [{**l, "qty": int(l.get("qty", 1)) * contracts}
+                for l in (card.get("legs") or [])]
+        try:
+            pos_id = create_structure(
+                card["strategy_key"], card["symbol"], legs,
+                notes=f"board {card.get('rules_fired')}")
+        except StructureError as e:
+            raise HTTPException(400, str(e))
+        return {"position_id": pos_id, "kind": "structure"}
+
+    if card["strategy_key"] in ("cash_secured_put", "covered_call"):
+        from engine.live.options.structures import StructureError, create_structure
+        legs = [{**l, "qty": int(l.get("qty", 1)) * contracts}
+                for l in (card.get("legs") or [])]
+        try:
+            if card["strategy_key"] == "cash_secured_put":
+                pos_id = create_structure(
+                    "cash_secured_put", card["symbol"], legs,
+                    cash_secured=True,
+                    notes=f"board {card.get('rules_fired')}")
+            else:
+                # capital = backing stock value per share-set (qty × spot);
+                # share coverage is re-verified inside the gate itself.
+                qty = sum(int(l.get("qty", 1)) for l in legs)
+                spot = float(card.get("spot") or 0)
+                if spot <= 0:
+                    raise HTTPException(400, "card has no spot price")
+                pos_id = create_structure(
+                    "covered_call", card["symbol"], legs,
+                    stock_covered=True, capital_override=qty * spot,
+                    notes=f"board {card.get('rules_fired')}")
+        except StructureError as e:
+            raise HTTPException(400, str(e))
+        return {"position_id": pos_id, "kind": "structure"}
+
+    raise HTTPException(400, f"tracking not implemented for "
+                             f"{card['strategy_key']}")
+
+
+# --------------- Options: Returns Engine (Phase 2) ---------------
+
+
+@app.get("/options/league")
+async def options_league() -> dict[str, Any]:
+    """The Strategy League Table: realized record per family + open exposure.
+    Return axis everywhere: % on capital at risk."""
+    from engine.live.options.registry import rulebook
+    from engine.live.options.store import league_record, list_positions, open_sleeve
+    from engine.live.options.structures import family_stats, list_structures
+
+    realized = family_stats()
+    straddle = league_record()
+    if straddle:
+        realized.setdefault("long_straddle", straddle)
+    from engine.live.options.wheel import wheel_league_row
+    wheel_row = wheel_league_row()
+    if wheel_row:
+        realized["wheel"] = wheel_row
+
+    open_structs = list_structures("open")
+    open_by_family: dict[str, dict[str, float]] = {}
+    for p in open_structs:
+        fam = open_by_family.setdefault(p["strategy_key"],
+                                        {"count": 0, "capital": 0.0})
+        fam["count"] += 1
+        fam["capital"] += (p.get("capital_at_risk") or 0) * 100
+    sleeve = open_sleeve()
+    if sleeve["count"]:
+        open_by_family["long_straddle"] = {"count": sleeve["count"],
+                                           "capital": sleeve["capital"]}
+    else:
+        open_by_family.setdefault("long_straddle", {"count": len(list_positions("open")),
+                                                    "capital": sleeve["capital"]})
+
+    rows = []
+    for strat in rulebook():
+        key = strat["key"]
+        r = realized.get(key) or {}
+        o = open_by_family.get(key) or {"count": 0, "capital": 0.0}
+        rows.append({
+            "key": key, "name": strat["name"], "status": strat["status"],
+            "trades": r.get("trades", 0),
+            "win_rate_pct": r.get("win_rate_pct"),
+            "avg_return_on_risk_pct": r.get("avg_return_on_risk_pct"),
+            "total_pnl_usd": r.get("total_pnl_usd", 0.0),
+            "worst_trade_usd": r.get("worst_trade_usd"),
+            "open_count": int(o["count"]),
+            "open_capital": round(o["capital"], 2),
+        })
+    return {"rows": rows}
+
+
+@app.get("/options/report-card")
+async def options_report_card() -> dict[str, Any]:
+    """Aggregate Layer-2 evidence across every cached straddle backtest."""
+    from engine.live.options.report_card import aggregate_report_card
+    return aggregate_report_card()
+
+
+@app.post("/options/report-card/run")
+async def options_report_card_run(payload: Optional[dict[str, Any]] = None) -> dict[str, Any]:
+    """Run a small coverage batch now (nightly job does 20 at 03:30 ET)."""
+    from engine.config import POLYGON_API_KEY
+    if not POLYGON_API_KEY:
+        raise HTTPException(400, "POLYGON_API_KEY not configured on the server")
+    from engine.live.options.report_card import run_report_card_batch
+    limit = min(10, max(1, int((payload or {}).get("limit") or 5)))
+    try:
+        return await run_report_card_batch(limit=limit)
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(500, f"report card batch failed: {str(e)[:200]}")
+
+
+@app.get("/options/condor-backtest/{symbol}")
+async def options_condor_backtest(symbol: str, refresh: bool = False,
+                                  entry_days: int = 5) -> dict[str, Any]:
+    """R2's Layer 2: historical condor simulation on real option prices."""
+    from engine.config import POLYGON_API_KEY
+    if not POLYGON_API_KEY:
+        raise HTTPException(400, "POLYGON_API_KEY not configured on the server")
+    from engine.live.options.store import (load_strategy_backtest,
+                                           save_strategy_backtest)
+    if not refresh:
+        cached = load_strategy_backtest("iron_condor", symbol)
+        # An error or zero-priced cache row is usually a transient failure
+        # (FMP down, Polygon 429 storm) — treat as a miss, never serve forever.
+        if cached and not cached.get("error") \
+                and (cached.get("summary") or {}).get("events_priced", 0) > 0:
+            return cached
+    from engine.live.options.condor_backtest import condor_backtest_symbol
+    try:
+        result = await condor_backtest_symbol(symbol, entry_days=entry_days)
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(500, f"condor backtest failed: {str(e)[:200]}")
+    trustworthy = (not result.get("error")
+                   and (result.get("summary") or {}).get("events_priced", 0) > 0)
+    if trustworthy:
+        save_strategy_backtest("iron_condor", symbol, result)
+    else:
+        result["transient"] = True
+    result["computed_at"] = datetime.utcnow().isoformat()
+    return result
+
+
+# --------------- Options: Pro Desk (Phase 6) ---------------
+
+
+@app.get("/options/greeks")
+async def options_greeks() -> dict[str, Any]:
+    """Portfolio-level Greeks across open multi-leg structures (last mark)."""
+    from engine.live.options.structures import greeks_rollup
+    return greeks_rollup()
+
+
+@app.get("/options/slippage")
+async def options_slippage() -> dict[str, Any]:
+    """Paper-mid vs real-fill quality — the live-data upgrade metric."""
+    from engine.live.options.structures import slippage_report
+    return slippage_report()
+
+
+@app.post("/options/structure/{position_id}/fill")
+async def options_structure_fill(position_id: int,
+                                 payload: dict[str, Any]) -> dict[str, Any]:
+    """Record the broker's REAL fill (per share-set, signed like entry_value:
+    negative = credit received). Slippage vs paper decides the data upgrade."""
+    from engine.live.options.structures import get_structure, record_real_fill
+    pos = get_structure(position_id)
+    if not pos:
+        raise HTTPException(404, "structure not found")
+    entry = payload.get("real_entry_value")
+    exit_ = payload.get("real_exit_value")
+    try:
+        entry = float(entry) if entry is not None else None
+        exit_ = float(exit_) if exit_ is not None else None
+    except (TypeError, ValueError):
+        raise HTTPException(400, "fill values must be numbers")
+    if entry is None and exit_ is None:
+        raise HTTPException(400, "provide real_entry_value and/or real_exit_value")
+    record_real_fill(position_id, entry=entry, exit_=exit_)
+    return get_structure(position_id)
+
+
+@app.get("/options/target-accuracy")
+async def options_target_accuracy() -> dict[str, Any]:
+    """How sharp are the AI's price targets, measured on aged decisions —
+    the butterfly pilot's gate. Cached for 7 days (expensive to compute)."""
+    import json as _json
+    from engine.live.settings import _get_raw, _set_raw
+    cached = _get_raw("options_target_accuracy_cache")
+    if cached:
+        try:
+            data = _json.loads(cached)
+            if (data.get("computed_at") or "") >= \
+                    (datetime.utcnow() - timedelta(days=7)).isoformat():
+                return data
+        except (ValueError, TypeError):
+            pass
+    from engine.live.options.butterfly import target_accuracy
+    result = await target_accuracy()
+    result["computed_at"] = datetime.utcnow().isoformat()
+    _set_raw("options_target_accuracy_cache", _json.dumps(result))
+    return result
+
+
+@app.get("/options/season-report")
+async def options_season_report() -> dict[str, Any]:
+    """The season report, generated fresh from the live tables."""
+    from engine.live.options.season_report import generate_season_report
+    return generate_season_report()
+
+
+# --------------- Options: Strategy Allocator (Phase 5) ---------------
+
+
+@app.get("/options/allocator/{symbol}")
+async def options_allocator(symbol: str) -> dict[str, Any]:
+    """Which structure fits this symbol's current signals, ranked by our own
+    realized record (prior order until a family has 5 closed trades)."""
+    from engine.live.options.allocator import rank_structures
+    from engine.live.options.income import ai_levels, pool_c
+    from engine.live.options.store import latest_candidates
+    sym = symbol.upper()
+    holdings = {h["symbol"]: h["shares"] for h in pool_c()["holdings"]}
+    cand = next((c for c in latest_candidates()
+                 if c["symbol"].upper() == sym), None)
+    ctx = {
+        "holding_shares": holdings.get(sym, 0),
+        "ai": ai_levels(sym) or {},
+        "earnings_days": (cand or {}).get("days_to_earnings"),
+        "cheapness": (cand or {}).get("cheapness"),
+    }
+    return {"symbol": sym, "context": ctx,
+            "ranking": rank_structures(sym, ctx)}
+
+
+# --------------- Options: Wheel (Phase 4) ---------------
+
+
+@app.get("/options/wheels")
+async def options_wheels(active: bool = False) -> dict[str, Any]:
+    from engine.live.options.wheel import list_wheels
+    return {"wheels": list_wheels(active_only=active)}
+
+
+@app.post("/options/wheels")
+async def options_wheel_start(payload: dict[str, Any]) -> dict[str, Any]:
+    from engine.live.options.wheel import WheelError, get_wheel, start_wheel
+    symbol = (payload.get("symbol") or "").strip().upper()
+    if not symbol:
+        raise HTTPException(400, "symbol required")
+    qty = min(100, max(1, int(payload.get("qty") or 1)))
+    try:
+        wid = start_wheel(symbol, qty, notes=payload.get("notes") or "")
+    except WheelError as e:
+        raise HTTPException(400, str(e))
+    return get_wheel(wid)
+
+
+@app.post("/options/wheels/{wheel_id}/leg")
+async def options_wheel_leg(wheel_id: int, payload: dict[str, Any]) -> dict[str, Any]:
+    from engine.live.options.wheel import WheelError, get_wheel, open_leg
+    try:
+        strike = float(payload.get("strike") or 0)
+        premium = float(payload.get("premium") or 0)
+    except (TypeError, ValueError):
+        raise HTTPException(400, "strike and premium must be numbers")
+    try:
+        open_leg(wheel_id, (payload.get("kind") or "").lower(),
+                 strike, str(payload.get("expiry") or ""), premium,
+                 payload.get("qty"))
+    except WheelError as e:
+        raise HTTPException(400, str(e))
+    return get_wheel(wheel_id)
+
+
+@app.post("/options/wheels/{wheel_id}/leg/{leg_id}/resolve")
+async def options_wheel_resolve(wheel_id: int, leg_id: int,
+                                payload: dict[str, Any]) -> dict[str, Any]:
+    from engine.live.options.wheel import WheelError, resolve_leg
+    try:
+        return resolve_leg(wheel_id, leg_id,
+                           (payload.get("outcome") or "").lower(),
+                           payload.get("close_price"))
+    except WheelError as e:
+        raise HTTPException(400, str(e))
+
+
+@app.post("/options/wheels/{wheel_id}/abandon")
+async def options_wheel_abandon(wheel_id: int,
+                                payload: Optional[dict[str, Any]] = None) -> dict[str, Any]:
+    from engine.live.options.wheel import WheelError, abandon_wheel
+    exit_price = (payload or {}).get("exit_price")
+    if exit_price is not None:
+        try:
+            exit_price = float(exit_price)
+        except (TypeError, ValueError):
+            raise HTTPException(400, "exit_price must be a number")
+    try:
+        return abandon_wheel(wheel_id, exit_price=exit_price)
+    except WheelError as e:
+        raise HTTPException(400, str(e))
+
+
+@app.get("/options/wheels/{wheel_id}/suggest")
+async def options_wheel_suggest(wheel_id: int) -> dict[str, Any]:
+    """Next-action suggestion for the wheel's current state, priced live via
+    the income builders with the AI's levels."""
+    from engine.config import POLYGON_API_KEY
+    if not POLYGON_API_KEY:
+        raise HTTPException(400, "POLYGON_API_KEY not configured on the server")
+    from engine.data.fmp_client import FMPClient
+    from engine.live.data.fmp_research import FMPResearchClient
+    from engine.live.options.income import ai_levels, build_covered_call, build_csp
+    from engine.live.options.polygon_client import PolygonOptionsClient
+    from engine.live.options.wheel import WheelError, get_wheel
+    try:
+        w = get_wheel(wheel_id)
+    except WheelError as e:
+        raise HTTPException(404, str(e))
+    if w["state"] not in ("CASH", "HOLDING"):
+        return {"state": w["state"],
+                "suggestion": None,
+                "note": "resolve the open leg first — suggestions apply to "
+                        "resting states only"}
+    lv = ai_levels(w["symbol"]) or {}
+    async with FMPClient() as fmp, PolygonOptionsClient() as poly:
+        research = FMPResearchClient(fmp)
+        bars = await fmp.fetch_daily(w["symbol"])
+        if bars is None or bars.empty:
+            raise HTTPException(500, "no price data")
+        spot = float(bars["close"].iloc[-1])
+        if w["state"] == "CASH":
+            sug = await build_csp(poly, research, w["symbol"], spot,
+                                  float(lv.get("entry") or spot),
+                                  lv.get("conviction"))
+            kind = "csp"
+        else:
+            sug = await build_covered_call(poly, research, w["symbol"],
+                                           (w["qty"] or 1) * 100, spot,
+                                           lv.get("target"))
+            kind = "cc"
+    return {"state": w["state"], "kind": kind, "suggestion": sug,
+            "ai_levels": lv or None}
+
+
 # --------------- Telegram (Phase 4) ---------------
 
 
@@ -1454,9 +1976,12 @@ async def telegram_test(payload: Optional[dict[str, Any]] = None) -> dict[str, A
         "Akash Research Platform — Telegram test message. "
         "If you can read this, the bot is wired correctly."
     )
+    # kind controls ROUTING: options-family kinds (options_*, strategy_board)
+    # go to the separate options group when one is configured.
+    kind = str((payload or {}).get("kind") or "manual")[:40]
     client = telegram()
-    ok = await client.send_message(text, kind="manual")
-    return {"sent": ok, "configured": client.enabled}
+    ok = await client.send_message(text, kind=kind)
+    return {"sent": ok, "configured": client.enabled, "kind": kind}
 
 
 @app.get("/telegram/log")
@@ -1558,6 +2083,48 @@ async def login(payload: dict):
         "token": token,
         "role": user["role"],
         "email": user["email"]
+    }
+    
+    
+@app.post("/auth/google")
+async def google_login(payload: dict):
+    credential = payload.get("credential")
+
+    if not credential:
+        raise HTTPException(status_code=400, detail="Credential missing")
+
+    try:
+        google_user = id_token.verify_oauth2_token(
+            credential,
+            requests.Request(),
+            os.getenv("GOOGLE_CLIENT_ID")
+        )
+
+        email = google_user["email"]
+
+    except Exception:
+        raise HTTPException(status_code=401, detail="Invalid Google Token")
+
+    users = get_users()
+
+    role = "guest"
+
+    for user in users:
+        if user["email"] == email:
+            role = user["role"]
+            break
+
+    token = create_access_token(
+        {
+            "email": email,
+            "role": role,
+        }
+    )
+
+    return {
+        "token": token,
+        "email": email,
+        "role": role,
     }
 
 

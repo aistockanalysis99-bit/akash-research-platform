@@ -39,8 +39,12 @@ const SECTIONS: {
     name: "Options",
     base: "options",
     items: [
+      { label: "Board", to: "/options/board" },
       { label: "Scanner", to: "/options" },
       { label: "Positions", to: "/options/positions" },
+      { label: "Wheel", to: "/options/wheel" },
+      { label: "League", to: "/options/league" },
+      { label: "Rulebook", to: "/options/rulebook" },
     ],
   },
   {
@@ -191,7 +195,7 @@ export default function Layout() {
             <NavLink
               key={it.to}
               to={it.to}
-              end={it.to === "/"}
+              end={it.to === "/" || it.to === "/options"}
               className={({ isActive }) =>
                 cn(
                   "px-3 py-1 text-sm rounded-md whitespace-nowrap transition-colors",

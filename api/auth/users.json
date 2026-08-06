@@ -10,5 +10,17 @@
     "email": "guest@akash.ai",
     "password": "guest123",
     "role": "guest"
+  },
+  {
+    "id": 3,
+    "email": "divyanshchouhan923@gmail.com",
+    "password": "divyansh123",
+    "role": "admin"
+  },
+  {
+    "id": 4,
+    "email": "devanshduggad999@gmail.com",
+    "password": "devansh123",
+    "role": "admin"
   }
 ]

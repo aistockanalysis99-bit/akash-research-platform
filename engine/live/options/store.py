@@ -72,6 +72,12 @@ def ensure_tables() -> None:
                 computed_at TEXT,
                 result_json TEXT
             )""")
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS options_strategy_backtests (
+                strategy_key TEXT, symbol TEXT,
+                computed_at TEXT, result_json TEXT,
+                PRIMARY KEY (strategy_key, symbol)
+            )""")
         # ---- lightweight migrations (columns added after initial ship) ---- #
         for table, col, decl in (
             ("options_candidates", "iv_percentile", "REAL"),
@@ -99,6 +105,64 @@ def save_backtest(symbol: str, entry_days: int, result: dict[str, Any]) -> None:
         conn.commit()
     finally:
         conn.close()
+
+
+def save_strategy_backtest(strategy_key: str, symbol: str,
+                           result: dict[str, Any]) -> None:
+    ensure_tables()
+    conn = get_connection()
+    try:
+        conn.execute(
+            "INSERT OR REPLACE INTO options_strategy_backtests VALUES (?,?,?,?)",
+            (strategy_key, symbol.upper(), datetime.utcnow().isoformat(),
+             json.dumps(result)))
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def load_strategy_backtest(strategy_key: str,
+                           symbol: str) -> Optional[dict[str, Any]]:
+    ensure_tables()
+    conn = get_connection()
+    try:
+        r = conn.execute(
+            "SELECT computed_at, result_json FROM options_strategy_backtests "
+            "WHERE strategy_key=? AND symbol=?",
+            (strategy_key, symbol.upper())).fetchone()
+    finally:
+        conn.close()
+    if not r:
+        return None
+    result = json.loads(r["result_json"])
+    result["computed_at"] = r["computed_at"]
+    return result
+
+
+def all_backtest_summaries() -> list[dict[str, Any]]:
+    """Every cached straddle backtest's summary — the Report Card's raw
+    material. Returns [{symbol, computed_at, summary…}] without event detail."""
+    ensure_tables()
+    conn = get_connection()
+    try:
+        rows = conn.execute(
+            "SELECT symbol, computed_at, result_json FROM options_backtests"
+        ).fetchall()
+    finally:
+        conn.close()
+    out = []
+    for r in rows:
+        try:
+            res = json.loads(r["result_json"])
+        except (TypeError, ValueError):
+            continue
+        if res.get("error"):
+            out.append({"symbol": r["symbol"], "computed_at": r["computed_at"],
+                        "error": res["error"]})
+            continue
+        out.append({"symbol": r["symbol"], "computed_at": r["computed_at"],
+                    **(res.get("summary") or {})})
+    return out
 
 
 def load_backtest(symbol: str) -> Optional[dict[str, Any]]:
@@ -312,6 +376,34 @@ def update_position(position_id: int, fields: dict[str, Any]) -> None:
         conn.commit()
     finally:
         conn.close()
+
+
+def league_record() -> Optional[dict[str, Any]]:
+    """The straddle family's realized record in the SHARED league-table shape
+    (see structures.family_stats), so R1 appears alongside the multi-leg
+    strategies. Straddles are debit trades, so P&L % on premium IS P&L % on
+    capital at risk — the two axes coincide and are directly comparable."""
+    ensure_tables()
+    conn = get_connection()
+    try:
+        rows = conn.execute(
+            "SELECT final_pnl_usd, final_pnl_pct FROM options_positions "
+            "WHERE status='closed' AND final_pnl_usd IS NOT NULL").fetchall()
+    finally:
+        conn.close()
+    if not rows:
+        return None
+    pnls = [r["final_pnl_usd"] for r in rows]
+    pcts = [r["final_pnl_pct"] for r in rows if r["final_pnl_pct"] is not None]
+    wins = [p for p in pnls if p > 0]
+    return {
+        "trades": len(pnls),
+        "win_rate_pct": round(len(wins) / len(pnls) * 100),
+        "total_pnl_usd": round(sum(pnls), 2),
+        "avg_return_on_risk_pct": (round(sum(pcts) / len(pcts), 1)
+                                   if pcts else None),
+        "worst_trade_usd": round(min(pnls), 2),
+    }
 
 
 def stats() -> dict[str, Any]:

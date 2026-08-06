@@ -151,15 +151,121 @@ async def _job_options_morning() -> None:
 
 
 async def _job_options_final_alert() -> None:
-    """Final pre-deadline exit warning (14:45 ET, fresh values, no digest)."""
+    """Final pre-deadline exit warning (14:45 ET, fresh values, no digest).
+    Covers BOTH families: straddles and multi-leg structures — the intraday
+    backstop so a deadline passed after the 09:20 sweep still alerts today."""
     try:
         from .options.positions import check_exit_alerts, mark_open_positions
         await mark_open_positions(notify=False)
         n = await check_exit_alerts(notify=True)
+        from .options.structures import check_exit_alerts as structure_alerts
+        ns = await structure_alerts(notify=True)
         _last_runs["options_final_alert"] = {
-            "at": datetime.utcnow().isoformat(), "exit_alerts": n}
+            "at": datetime.utcnow().isoformat(), "exit_alerts": n,
+            "structure_exit_alerts": ns}
     except Exception as e:  # noqa: BLE001
         log.exception("scheduler: options final alert failed: %s", e)
+
+
+async def _job_pool_b_refresh() -> None:
+    """Weekly re-qualification of the Pool B liquidity list (Mon 08:10 ET,
+    fresh overnight OI). Membership is earned by measured liquidity."""
+    try:
+        from .options.pools import refresh_pool_b
+        res = await refresh_pool_b()
+        _last_runs["pool_b_refresh"] = {
+            "at": datetime.utcnow().isoformat(), **res}
+    except Exception as e:  # noqa: BLE001
+        log.exception("scheduler: pool B refresh failed: %s", e)
+
+
+async def _job_mark_structures() -> None:
+    """Morning mark for multi-leg paper structures (09:20 ET, after the
+    straddle mark), then deadline exit suggestions (e.g. condors the morning
+    after earnings)."""
+    try:
+        from .options.structures import (check_coverage_alerts,
+                                         check_exit_alerts, mark_structures)
+        res = await mark_structures()
+        n = await check_exit_alerts(notify=True)
+        nc = await check_coverage_alerts(notify=True)
+        from .options.wheel import expiry_day_suggestions
+        nw = await expiry_day_suggestions(notify=True)
+        _last_runs["mark_structures"] = {
+            "at": datetime.utcnow().isoformat(), **res, "exit_alerts": n,
+            "coverage_alerts": nc, "wheel_suggestions": nw}
+    except Exception as e:  # noqa: BLE001
+        log.exception("scheduler: structure mark failed: %s", e)
+
+
+async def _job_strategy_board() -> None:
+    """Evening Strategy Board build (17:05 ET, after the 16:45 scan)."""
+    try:
+        from .options.board import generate_board
+        res = await generate_board(notify=True)
+        _last_runs["strategy_board"] = {
+            "at": datetime.utcnow().isoformat(), **res}
+    except Exception as e:  # noqa: BLE001
+        log.exception("scheduler: strategy board failed: %s", e)
+
+
+async def _job_report_card_sweep() -> None:
+    """Overnight Report Card coverage batch (03:30 ET Tue–Sat): backtests ~20
+    uncovered S&P 500 symbols, paced. Full-index evidence accumulates over
+    weeks without competing for the daytime API budget."""
+    try:
+        from .options.report_card import run_report_card_batch
+        res = await run_report_card_batch(limit=20)
+        _last_runs["report_card_sweep"] = {
+            "at": datetime.utcnow().isoformat(), **res}
+    except Exception as e:  # noqa: BLE001
+        log.exception("scheduler: report card sweep failed: %s", e)
+
+
+async def _job_options_weekly() -> None:
+    """Friday options scorecard (16:30 ET): league table + week's boards +
+    open exposure + report-card coverage, in plain English on Telegram."""
+    try:
+        from .options.report_card import aggregate_report_card
+        from .options.store import league_record, list_positions
+        from .options.structures import family_stats, list_structures
+        from .telegram import telegram as _telegram
+
+        league = family_stats()
+        straddle = league_record()
+        if straddle:
+            league.setdefault("long_straddle", straddle)
+        rc = aggregate_report_card()
+        open_straddles = list_positions("open")
+        open_structs = list_structures("open")
+
+        lines = ["📊 Options weekly scorecard", ""]
+        if league:
+            for key, s in league.items():
+                nm = key.replace("_", " ")
+                lines.append(
+                    f"{nm}: {s['trades']} closed · {s.get('win_rate_pct') or 0}% "
+                    f"winners · total ${s['total_pnl_usd']:+,.0f} (paper)")
+        else:
+            lines.append("No closed paper trades yet — the record starts "
+                         "with the first tracked exit.")
+        lines.append(f"Open now: {len(open_straddles)} straddle(s), "
+                     f"{len(open_structs)} structure(s).")
+        if rc["symbols_covered"]:
+            lines.append(
+                f"Evidence base: {rc['events_priced']} historical earnings "
+                f"events across {rc['symbols_covered']} stocks"
+                + (f" · qualifying trades won {rc['qualifying_win_rate_pct']}%"
+                   f" (avg {rc['qualifying_avg_pnl_pct']:+.1f}%)"
+                   if rc.get("qualifying_win_rate_pct") is not None else "")
+                + ".")
+        lines.append("")
+        lines.append("Everything paper unless you traded it — full detail on "
+                     "the League page.")
+        await _telegram().send_message("\n".join(lines), kind="options_weekly")
+        _last_runs["options_weekly"] = {"at": datetime.utcnow().isoformat()}
+    except Exception as e:  # noqa: BLE001
+        log.exception("scheduler: options weekly scorecard failed: %s", e)
 
 
 # --------------------------------------------------------------------------- #
@@ -230,6 +336,41 @@ def start_scheduler(force: bool = False) -> None:
         CronTrigger(hour=9, minute=15, day_of_week="mon-fri", timezone=tz),
         id="options_morning",
         name="Options: mark positions + exit-day alerts",
+        replace_existing=True,
+    )
+    sched.add_job(
+        _job_pool_b_refresh,
+        CronTrigger(hour=8, minute=10, day_of_week="mon", timezone=tz),
+        id="pool_b_refresh",
+        name="Options: weekly Pool B liquidity re-qualification",
+        replace_existing=True,
+    )
+    sched.add_job(
+        _job_strategy_board,
+        CronTrigger(hour=17, minute=5, day_of_week="mon-fri", timezone=tz),
+        id="strategy_board",
+        name="Options: evening Strategy Board build",
+        replace_existing=True,
+    )
+    sched.add_job(
+        _job_report_card_sweep,
+        CronTrigger(hour=3, minute=30, day_of_week="tue-sat", timezone=tz),
+        id="report_card_sweep",
+        name="Options: overnight Report Card coverage batch",
+        replace_existing=True,
+    )
+    sched.add_job(
+        _job_options_weekly,
+        CronTrigger(hour=16, minute=30, day_of_week="fri", timezone=tz),
+        id="options_weekly",
+        name="Options: Friday scorecard",
+        replace_existing=True,
+    )
+    sched.add_job(
+        _job_mark_structures,
+        CronTrigger(hour=9, minute=20, day_of_week="mon-fri", timezone=tz),
+        id="mark_structures",
+        name="Options: mark multi-leg structures",
         replace_existing=True,
     )
     sched.add_job(
