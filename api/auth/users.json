@@ -2,25 +2,25 @@
   {
     "id": 1,
     "email": "admin@akash.ai",
-    "password": "admin123",
+    "password": "$2b$12$LUmTsDnbw3OSLn1Uv2i8gOn1X4rv1o8b9bcxOgMKgwwCm4gJVX7mi",
     "role": "admin"
   },
   {
     "id": 2,
     "email": "guest@akash.ai",
-    "password": "guest123",
+    "password": "$2b$12$1U7x7JK9vQCMj5uWU0cW5.cq9DhcGeMZugcc0ddcymFqQlMaTaq8y",
     "role": "guest"
   },
   {
     "id": 3,
     "email": "divyanshchouhan923@gmail.com",
-    "password": "divyansh123",
+    "password": "$2b$12$s7E7To7CrhqNjuKjU1CO9O1Fk7umcrQmeplzw5g9G3X.EOsDngsQu",
     "role": "admin"
   },
   {
     "id": 4,
     "email": "devanshduggad999@gmail.com",
-    "password": "devansh123",
+    "password": "$2b$12$C2ULXjUxXFrzuYXDLYrECe7V2dvSoqd4CC00kVfU0Y6D6gy2UDKMG",
     "role": "admin"
   }
 ]

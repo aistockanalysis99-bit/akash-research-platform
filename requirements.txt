@@ -19,9 +19,7 @@ requests>=2.32.0
 tzdata>=2024.1
 
 
+# --- auth (sign-in) ---
 python-jose[cryptography]>=3.3.0
-passlib[bcrypt]>=1.7.4
-
-
-google-auth
+bcrypt>=4.1.0
 google-auth>=2.35.0

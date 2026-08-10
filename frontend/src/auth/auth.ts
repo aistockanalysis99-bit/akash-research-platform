@@ -1,4 +1,10 @@
-const API_URL = import.meta.env.VITE_API_URL;
+// Use the SAME base the rest of the app uses (api.ts) — the login calls were
+// hitting VITE_API_URL, a variable nothing else sets, so the login/Google
+// requests went to an undefined host. VITE_API_BASE with the "/api" dev
+// fallback matches every other API call.
+const API_URL =
+  (import.meta.env.VITE_API_BASE as string | undefined)?.replace(/\/$/, "") ||
+  "/api";
 
 export interface LoginResponse {
   token: string;

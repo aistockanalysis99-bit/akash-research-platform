@@ -30,14 +30,10 @@ import threading
 import uuid
 
 import os
-from dotenv import load_dotenv
 
-load_dotenv()
+from api.auth.auth import authenticate_user, get_users
+from api.auth.security import create_access_token
 
-from api.auth.auth import authenticate_user, get_users                   #newone
-from api.auth.security import create_access_token             #newone
-
-from datetime import datetime, timezone
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
@@ -84,9 +80,6 @@ from .schemas import (
     StrategyParamsSchema,
     TradeSchema,
 )
-
-from google.oauth2 import id_token
-from google.auth.transport import requests
 
 log = get_logger("api.main")
 
@@ -2093,15 +2086,23 @@ async def google_login(payload: dict):
     if not credential:
         raise HTTPException(status_code=400, detail="Credential missing")
 
+    # Imported lazily: a missing/broken google-auth package must not crash the
+    # whole API at import time — only this one endpoint should degrade.
+    try:
+        from google.auth.transport import requests as google_requests
+        from google.oauth2 import id_token
+    except ImportError:
+        raise HTTPException(status_code=503,
+                            detail="Google sign-in not available on the server")
+
+    client_id = os.getenv("GOOGLE_CLIENT_ID")
+    if not client_id:
+        raise HTTPException(status_code=503,
+                            detail="Google sign-in not configured (GOOGLE_CLIENT_ID)")
     try:
         google_user = id_token.verify_oauth2_token(
-            credential,
-            requests.Request(),
-            os.getenv("GOOGLE_CLIENT_ID")
-        )
-
+            credential, google_requests.Request(), client_id)
         email = google_user["email"]
-
     except Exception:
         raise HTTPException(status_code=401, detail="Invalid Google Token")
 
