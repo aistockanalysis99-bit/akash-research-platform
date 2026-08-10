@@ -22,5 +22,11 @@
     "email": "devanshduggad999@gmail.com",
     "password": "$2b$12$C2ULXjUxXFrzuYXDLYrECe7V2dvSoqd4CC00kVfU0Y6D6gy2UDKMG",
     "role": "admin"
+  },
+  {
+  "id": 5,
+  "email": "aistockanalysis99@gmail.com",
+  "password": "$2b$12$7FSaY1KQb4o1pzqZcNwonuDClMv3eiFQRpDfHsuR8vVvYYFiamUKW",
+  "role": "admin"
   }
 ]
