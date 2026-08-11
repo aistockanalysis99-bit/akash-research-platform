@@ -45,6 +45,7 @@ const SECTIONS: {
       { label: "Wheel", to: "/options/wheel" },
       { label: "League", to: "/options/league" },
       { label: "Rulebook", to: "/options/rulebook" },
+      { label: "Double Calendar", to: "/options/double-calendar" },
     ],
   },
   {
