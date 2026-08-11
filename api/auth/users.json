@@ -28,5 +28,11 @@
   "email": "aistockanalysis99@gmail.com",
   "password": "$2b$12$7FSaY1KQb4o1pzqZcNwonuDClMv3eiFQRpDfHsuR8vVvYYFiamUKW",
   "role": "admin"
-  }
+  },
+  {
+  "id": 6,
+  "email": "banalyst2012@gmail.com",
+  "password": "$2b$12$Si991t5hZ7qYWmgF5q0/3eJz9rZmkZlKn1TRAb6tN22ZpSru4g/dm",
+  "role": "admin"
+}
 ]
