@@ -16,6 +16,7 @@ import type {
   TelegramLogRow,
   WatchlistItem,
 } from "./types";
+import type { Backtest1YResponse } from "./simulatorTypes";
 
 // In dev + single-service prod, Vite/FastAPI handle "/api".
 // On Vercel (frontend split from backend), set VITE_API_BASE to the Render
@@ -777,4 +778,9 @@ export const api = {
   paramSave: (name: string, params: Record<string, unknown>) =>
     post<{ name: string; params: Record<string, unknown> }>("/params/save", { name, params }),
   paramDelete: (name: string) => del<unknown>(`/params/${name}`),
+
+  simulator: {
+    backtest1Y: (refresh = false) =>
+      get<Backtest1YResponse>(`/simulator/backtest-1y${refresh ? "?refresh=true" : ""}`),
+  },
 };

@@ -33,6 +33,7 @@ import DoubleCalendarPage from "./pages/DoubleCalendarPage";
 import PairsPage from "./pages/PairsPage";
 import SetupsPage from "./pages/SetupsPage";
 import SetupDetailPage from "./pages/SetupDetailPage";
+import BacktestDashboardPage from "./pages/BacktestDashboardPage";
 
 export default function App() {
   return (
@@ -75,6 +76,8 @@ export default function App() {
         <Route path="/options/wheel" element={<WheelPage />} />
         {/* Backtesting section */}
         <Route path="/backtest" element={<BacktestPage />} />
+        <Route path="/backtest-dashboard" element={<BacktestDashboardPage />} />
+        <Route path="/backtest/dashboard" element={<BacktestDashboardPage />} />
         <Route path="/runs" element={<RunsPage />} />
         <Route path="/runs/:runId" element={<RunDetailPage />} />
         <Route path="/compare" element={<ComparePage />} />

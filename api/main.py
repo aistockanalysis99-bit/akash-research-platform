@@ -130,6 +130,11 @@ async def shutdown() -> None:
         pass
 
 
+# --------------- 1-Year Backtest Dashboard Router ---------------
+from api.simulator_router import router as simulator_router
+app.include_router(simulator_router, prefix="/simulator", tags=["simulator"])
+
+
 # --------------- Universe ---------------
 
 @app.get("/universes")
