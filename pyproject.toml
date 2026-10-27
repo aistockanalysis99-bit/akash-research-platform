@@ -24,6 +24,10 @@ dependencies = [
     # Phase 4 — Telegram + scheduler
     "apscheduler>=3.10.0",
     "tzdata>=2024.1",
+    # Statistical arbitrage & pair trading
+    "statsmodels>=0.14.0",
+    "scipy>=1.11.0",
+    "yfinance>=0.2.35",
 ]
 
 [project.optional-dependencies]
