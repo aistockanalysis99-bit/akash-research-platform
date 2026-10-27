@@ -2,37 +2,43 @@
   {
     "id": 1,
     "email": "admin@akash.ai",
-    "password": "$2b$12$LUmTsDnbw3OSLn1Uv2i8gOn1X4rv1o8b9bcxOgMKgwwCm4gJVX7mi",
+    "password": "$2b$12$wRTl8c4HwRzCAPvZewlPu.yki6rKIsbF.JGZDeXsJ3.IzCrrLD8oq",
     "role": "admin"
   },
   {
     "id": 2,
+    "email": "admin",
+    "password": "$2b$12$wRTl8c4HwRzCAPvZewlPu.yki6rKIsbF.JGZDeXsJ3.IzCrrLD8oq",
+    "role": "admin"
+  },
+  {
+    "id": 3,
     "email": "guest@akash.ai",
     "password": "$2b$12$1U7x7JK9vQCMj5uWU0cW5.cq9DhcGeMZugcc0ddcymFqQlMaTaq8y",
     "role": "guest"
   },
   {
-    "id": 3,
+    "id": 4,
     "email": "divyanshchouhan923@gmail.com",
     "password": "$2b$12$s7E7To7CrhqNjuKjU1CO9O1Fk7umcrQmeplzw5g9G3X.EOsDngsQu",
     "role": "admin"
   },
   {
-    "id": 4,
+    "id": 5,
     "email": "devanshduggad999@gmail.com",
     "password": "$2b$12$C2ULXjUxXFrzuYXDLYrECe7V2dvSoqd4CC00kVfU0Y6D6gy2UDKMG",
     "role": "admin"
   },
   {
-  "id": 5,
-  "email": "aistockanalysis99@gmail.com",
-  "password": "$2b$12$7FSaY1KQb4o1pzqZcNwonuDClMv3eiFQRpDfHsuR8vVvYYFiamUKW",
-  "role": "admin"
+    "id": 6,
+    "email": "aistockanalysis99@gmail.com",
+    "password": "$2b$12$7FSaY1KQb4o1pzqZcNwonuDClMv3eiFQRpDfHsuR8vVvYYFiamUKW",
+    "role": "admin"
   },
   {
-  "id": 6,
-  "email": "banalyst2012@gmail.com",
-  "password": "$2b$12$Si991t5hZ7qYWmgF5q0/3eJz9rZmkZlKn1TRAb6tN22ZpSru4g/dm",
-  "role": "admin"
-}
+    "id": 7,
+    "email": "banalyst2012@gmail.com",
+    "password": "$2b$12$Si991t5hZ7qYWmgF5q0/3eJz9rZmkZlKn1TRAb6tN22ZpSru4g/dm",
+    "role": "admin"
+  }
 ]

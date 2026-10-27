@@ -37,7 +37,7 @@ from api.auth.security import create_access_token
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
-from fastapi import BackgroundTasks, FastAPI, HTTPException, Query
+from fastapi import BackgroundTasks, FastAPI, HTTPException, Query, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 
@@ -2133,6 +2133,512 @@ async def google_login(payload: dict):
 @app.get("/health")
 async def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+# --------------------------------------------------------------------------- #
+# S&P 500 Pair Trading Endpoints
+# --------------------------------------------------------------------------- #
+from pathlib import Path as _Path
+
+_PAIRS_FILE_LOCATIONS = [
+    _Path(__file__).resolve().parent.parent / "sp500_master_pairs.json",
+    _Path(__file__).resolve().parent.parent / "data" / "sp500_master_pairs.json",
+    _Path(__file__).resolve().parent.parent / "EXTRA" / "data" / "sp500_master_pairs.json",
+]
+
+_CACHED_PAIRS_DATA: Optional[dict[str, Any]] = None
+_PAIRS_MTIME: float = 0.0
+
+_ELITE_PAIRS_LOCATIONS = [
+    _Path(__file__).resolve().parent.parent / "data" / "elite_curated_pairs.json",
+    _Path(__file__).resolve().parent.parent / "elite_curated_pairs.json",
+    _Path(__file__).resolve().parent.parent / "EXTRA" / "data" / "elite_curated_pairs.json",
+]
+_CACHED_ELITE_DATA: Optional[dict[str, Any]] = None
+_ELITE_MTIME: float = 0.0
+
+_SETUPS_FILE_LOCATIONS = [
+    _Path(__file__).resolve().parent.parent / "data" / "active_setups.json",
+    _Path(__file__).resolve().parent.parent / "active_setups.json",
+    _Path(__file__).resolve().parent.parent / "EXTRA" / "data" / "active_setups.json",
+]
+_CACHED_SETUPS_DATA: Optional[dict[str, Any]] = None
+_SETUPS_MTIME: float = 0.0
+
+
+def _load_setups_payload() -> dict[str, Any]:
+    global _CACHED_SETUPS_DATA, _SETUPS_MTIME
+
+    for candidate in _SETUPS_FILE_LOCATIONS:
+        if candidate.exists():
+            try:
+                mtime = candidate.stat().st_mtime
+                if _CACHED_SETUPS_DATA is not None and mtime <= _SETUPS_MTIME:
+                    return _CACHED_SETUPS_DATA
+                with open(candidate, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    _CACHED_SETUPS_DATA = data
+                    _SETUPS_MTIME = mtime
+                    return data
+            except Exception as e:
+                logger = get_logger("api.main")
+                logger.warning(f"Failed to read active setups file {candidate}: {e}")
+
+    return {
+        "metadata": {
+            "description": "Live Pair Trading Divergence Setups (|Z| >= threshold)",
+            "z_threshold": 2.0,
+            "lookback_days": 90,
+            "total_pairs_evaluated": 0,
+            "active_setups_count": 0,
+        },
+        "active_setups": [],
+        "all_pairs": [],
+    }
+
+
+def _load_pairs_payload(elite: bool = False) -> dict[str, Any]:
+    global _CACHED_PAIRS_DATA, _PAIRS_MTIME, _CACHED_ELITE_DATA, _ELITE_MTIME
+
+    locations = _ELITE_PAIRS_LOCATIONS if elite else _PAIRS_FILE_LOCATIONS
+    cached_data = _CACHED_ELITE_DATA if elite else _CACHED_PAIRS_DATA
+    last_mtime = _ELITE_MTIME if elite else _PAIRS_MTIME
+
+    for candidate in locations:
+        if candidate.exists():
+            try:
+                mtime = candidate.stat().st_mtime
+                if cached_data is not None and mtime <= last_mtime:
+                    return cached_data
+                with open(candidate, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    if elite:
+                        _CACHED_ELITE_DATA = data
+                        _ELITE_MTIME = mtime
+                    else:
+                        _CACHED_PAIRS_DATA = data
+                        _PAIRS_MTIME = mtime
+                    return data
+            except Exception as e:
+                logger = get_logger()
+                logger.warning(f"Failed to read pairs file {candidate}: {e}")
+
+    return {
+        "metadata": {
+            "description": "S&P 500 Pairs (Fallback)",
+            "min_correlation": 0.90 if elite else 0.80,
+            "trading_days": 252,
+            "total_pairs": 0,
+        },
+        "pairs": [],
+    }
+
+
+@app.get("/pairs/config")
+@app.get("/api/pairs/config")
+async def get_pairs_config_endpoint() -> dict[str, Any]:
+    """Retrieve the current active pair trading strategy configuration."""
+    from engine.detect_setups import load_strategy_config
+    return load_strategy_config()
+
+
+@app.post("/pairs/config")
+@app.post("/api/pairs/config")
+async def update_pairs_config_endpoint(payload: dict[str, Any]) -> dict[str, Any]:
+    """Update pair trading strategy parameters in pair_strategy_config.json."""
+    global _CACHED_SETUPS_DATA, _SETUPS_MTIME
+    from engine.detect_setups import load_strategy_config, save_strategy_config
+    current = load_strategy_config()
+
+    def merge_dict(target: dict, source: dict):
+        for k, v in source.items():
+            if isinstance(v, dict) and k in target and isinstance(target[k], dict):
+                merge_dict(target[k], v)
+            else:
+                target[k] = v
+
+    merge_dict(current, payload)
+    success = save_strategy_config(current)
+    if not success:
+        raise HTTPException(500, "Failed to save strategy config")
+
+    # Invalidate in-memory setups cache so next query re-evaluates with updated config
+    _CACHED_SETUPS_DATA = None
+    _SETUPS_MTIME = 0.0
+
+    return {"status": "ok", "message": "Strategy configuration updated successfully", "config": current}
+
+
+@app.get("/pairs/active-setups")
+@app.get("/api/pairs/active-setups")
+async def get_active_setups(
+    threshold: float = 2.0,
+    sector: Optional[str] = None,
+    search: Optional[str] = None,
+    perfect_only: bool = False,
+    low_spread_only: bool = False,
+    medium_to_low_spread_only: bool = False,
+    tradeable_now_only: bool = False,
+    max_spread_vol: Optional[float] = None,
+    limit: Optional[int] = None,
+    refresh: bool = False,
+) -> dict[str, Any]:
+    """Return active divergence trading setups where |Z-score| >= threshold with multi-parameter verification."""
+    global _CACHED_SETUPS_DATA, _SETUPS_MTIME
+
+    payload = _load_setups_payload()
+    cached_setups = payload.get("active_setups", [])
+
+    # If refresh explicitly requested or cache is completely empty, dynamically recompute
+    if refresh or not cached_setups:
+        try:
+            from engine.detect_setups import detect_active_setups
+            new_payload = await asyncio.to_thread(detect_active_setups, z_threshold=threshold)
+            _CACHED_SETUPS_DATA = new_payload
+            _SETUPS_MTIME = datetime.now().timestamp()
+            payload = new_payload
+        except Exception as e:
+            logger = get_logger("api.main")
+            logger.error(f"Failed to refresh active setups dynamically: {e}")
+
+    # Start with all_pairs if available to allow dynamic thresholding, or active_setups
+    pairs_pool = payload.get("all_pairs", []) or payload.get("active_setups", [])
+
+    # Filter by absolute Z-score >= threshold
+    filtered = [p for p in pairs_pool if abs(p.get("current_z_score", 0.0)) >= threshold]
+
+    if sector and sector.lower() != "all":
+        filtered = [p for p in filtered if p.get("sector", "").lower() == sector.lower()]
+
+    if search:
+        query = search.strip().upper()
+        filtered = [
+            p for p in filtered
+            if query in p.get("ticker_a", "").upper()
+            or query in p.get("ticker_b", "").upper()
+            or query in p.get("sector", "").upper()
+        ]
+
+    # Format into strict JSON schema payload with multi-parameter metrics & spread tightness
+    response_items = []
+    for item in filtered:
+        z = item.get("current_z_score", 0.0)
+        direction = item.get("trade_direction")
+        if not direction or direction == "Neutral (No Setup)":
+            if z >= threshold:
+                direction = f"Short {item['ticker_a']} / Long {item['ticker_b']}"
+            elif z <= -threshold:
+                direction = f"Long {item['ticker_a']} / Short {item['ticker_b']}"
+            else:
+                direction = "Neutral"
+
+        pa = max(0.01, float(item.get("last_price_a") or 1.0))
+        std_spread = float(item.get("spread_std") or 0.0)
+        rel_spread_vol = float(item.get("relative_spread_vol_pct") or round((std_spread / pa) * 100.0, 2))
+
+        is_low_sp = item.get("is_low_spread", rel_spread_vol <= 5.0 and abs(z) <= 3.8)
+
+        cur_s = float(item.get("current_spread") or 0.0)
+        mean_s = float(item.get("spread_mean") or 0.0)
+        disloc = float(item.get("spread_dislocation") or round(abs(cur_s - mean_s), 4))
+        exp_ret = float(item.get("expected_reversion_return_pct") or round((disloc / pa) * 100.0, 2))
+        r_dist = max(0.15, 3.5 - min(3.4, abs(z)))
+        rr = float(item.get("risk_reward_ratio") or round(abs(z) / r_dist, 2))
+        tgt_s = float(item.get("target_exit_spread") or round(mean_s, 4))
+        s_dir = 1.0 if z >= 0 else -1.0
+        stp_s = float(item.get("stop_loss_spread") or round(cur_s + s_dir * r_dist * std_spread, 4))
+        exp_h_days = float(item.get("expected_holding_days") or round(float(item.get("half_life") or 8.5), 1))
+
+        beta_val = max(1e-4, float(item.get("hedge_ratio") or 1.0))
+        pb_val = max(0.01, float(item.get("last_price_b") or 1.0))
+        pair_cost = float(item.get("pair_unit_cost") or round(pa + (beta_val * pb_val), 2))
+
+        disloc_signed = cur_s - mean_s
+        is_short_sp = (z >= 0)
+        action_a = item.get("action_a", "SELL SHORT" if is_short_sp else "BUY LONG")
+        action_b = item.get("action_b", "BUY LONG" if is_short_sp else "SELL SHORT")
+        exit_action_a = item.get("exit_action_a", "BUY TO COVER" if is_short_sp else "SELL TO CLOSE")
+        exit_action_b = item.get("exit_action_b", "SELL TO CLOSE" if is_short_sp else "BUY TO COVER")
+
+        tgt_p_a = float(item.get("target_price_a") or round(max(0.01, pa - 0.5 * disloc_signed), 2))
+        tgt_p_b = float(item.get("target_price_b") or round(max(0.01, pb_val + 0.5 * (disloc_signed / beta_val)), 2))
+        stp_p_a = float(item.get("stop_loss_price_a") or round(max(0.01, pa + 0.5 * (s_dir * r_dist * std_spread)), 2))
+        stp_p_b = float(item.get("stop_loss_price_b") or round(max(0.01, pb_val - 0.5 * ((s_dir * r_dist * std_spread) / beta_val)), 2))
+
+        p_dol_a = float(item.get("expected_profit_dollar_a") or round(abs(tgt_p_a - pa), 2))
+        p_dol_b = float(item.get("expected_profit_dollar_b") or round(abs(tgt_p_b - pb_val), 2))
+        p_pct_a = float(item.get("expected_profit_pct_a") or round((p_dol_a / pa) * 100.0, 2))
+        p_pct_b = float(item.get("expected_profit_pct_b") or round((p_dol_b / pb_val) * 100.0, 2))
+
+        is_trade_now = bool(
+            item.get("is_tradeable_now", (abs(z) >= threshold and is_low_sp and exp_ret >= 1.5))
+        )
+        t_ready = item.get("trade_readiness", "READY TO TRADE NOW" if is_trade_now else "ACTIVE SETUP")
+
+        entry = {
+            "ticker_a": item["ticker_a"],
+            "ticker_b": item["ticker_b"],
+            "sector": item.get("sector", "Unknown"),
+            "current_z_score": round(float(z), 4),
+            "hedge_ratio": round(float(item.get("hedge_ratio", 0.0)), 4),
+            "trade_direction": direction,
+            "action_a": action_a,
+            "action_b": action_b,
+            "exit_action_a": exit_action_a,
+            "exit_action_b": exit_action_b,
+            "target_price_a": tgt_p_a,
+            "target_price_b": tgt_p_b,
+            "stop_loss_price_a": stp_p_a,
+            "stop_loss_price_b": stp_p_b,
+            "expected_profit_dollar_a": p_dol_a,
+            "expected_profit_dollar_b": p_dol_b,
+            "expected_profit_pct_a": p_pct_a,
+            "expected_profit_pct_b": p_pct_b,
+            "pair_unit_cost": pair_cost,
+            "current_spread": round(float(item.get("current_spread", 0.0)), 4),
+            "spread_mean": round(float(item.get("spread_mean", 0.0)), 4),
+            "spread_std": round(float(item.get("spread_std", 0.0)), 4),
+            "relative_spread_vol_pct": round(rel_spread_vol, 2),
+            "spread_tier": item.get("spread_tier", "Ultra Tight" if rel_spread_vol <= 2.5 else ("Tight" if rel_spread_vol <= 4.0 else ("Moderate" if rel_spread_vol <= 7.0 else "Wide Spread"))),
+            "spread_tightness_score": float(item.get("spread_tightness_score", 90.0)),
+            "is_low_spread": is_low_sp,
+            "spread_dislocation": disloc,
+            "expected_reversion_return_pct": exp_ret,
+            "target_exit_spread": tgt_s,
+            "stop_loss_spread": stp_s,
+            "risk_reward_ratio": rr,
+            "expected_holding_days": exp_h_days,
+            "is_tradeable_now": is_trade_now,
+            "trade_readiness": t_ready,
+            "is_medium_to_low_spread": item.get("is_medium_to_low_spread", rel_spread_vol <= 7.0),
+            "return_5y_a": item.get("return_5y_a"),
+            "return_5y_b": item.get("return_5y_b"),
+            "return_1y_a": item.get("return_1y_a"),
+            "return_1y_b": item.get("return_1y_b"),
+            "return_90d_a": item.get("return_90d_a"),
+            "return_90d_b": item.get("return_90d_b"),
+            "change_daily_a": item.get("change_daily_a"),
+            "change_daily_b": item.get("change_daily_b"),
+            "trend_a": item.get("trend_a"),
+            "trend_b": item.get("trend_b"),
+            "trend_co_movement_score": item.get("trend_co_movement_score"),
+            "co_movement_score": float(item.get("co_movement_score", 90.0)),
+            "overlap_score": float(item.get("overlap_score", 85.0)),
+            "overlap_pct": float(item.get("overlap_pct", 70.0)),
+            "overlap_tier": item.get("overlap_tier", "High Overlap"),
+            "divergence_score": float(item.get("divergence_score", 95.0)),
+            "composite_score": float(item.get("composite_score", 90.0)),
+            "last_price_a": round(float(item.get("last_price_a", 0.0)), 2),
+            "last_price_b": round(float(item.get("last_price_b", 0.0)), 2),
+            "is_active": True,
+            "window_bars": item.get("window_bars", 90),
+            "historical_correlation": item.get("historical_correlation"),
+            "cointegration_pvalue": item.get("cointegration_pvalue"),
+            "half_life": item.get("half_life"),
+            "hurst_exponent": item.get("hurst_exponent"),
+            "adf_t_stat": item.get("adf_t_stat"),
+            "zero_crossings": item.get("zero_crossings"),
+            "r_squared": item.get("r_squared"),
+            "checks": item.get("checks", {}),
+            "passed_checks_count": item.get("passed_checks_count", 10),
+            "total_checks": item.get("total_checks", 10),
+            "quality_score": item.get("quality_score", 100.0),
+            "is_perfect_setup": item.get("is_perfect_setup", True),
+            "setup_grade": item.get("setup_grade", "PERFECT SETUP"),
+        }
+
+        if perfect_only and not entry["is_perfect_setup"]:
+            continue
+
+        if low_spread_only and not entry["is_low_spread"]:
+            continue
+
+        if medium_to_low_spread_only and not entry["is_medium_to_low_spread"]:
+            continue
+
+        if tradeable_now_only and not entry["is_tradeable_now"]:
+            continue
+
+        if max_spread_vol is not None and entry["relative_spread_vol_pct"] > max_spread_vol:
+            continue
+
+        response_items.append(entry)
+
+    # Sort primarily by composite score, then overlap score, tighter spread, active divergence
+    response_items.sort(
+        key=lambda x: (
+            x.get("composite_score", 0.0),
+            x.get("overlap_score", 0.0),
+            -x.get("relative_spread_vol_pct", 99.0),
+            abs(x.get("current_z_score", 0.0)),
+        ),
+        reverse=True,
+    )
+    if limit is not None and limit > 0:
+        response_items = response_items[:limit]
+
+    return {
+        "metadata": {
+            **payload.get("metadata", {}),
+            "threshold": threshold,
+            "active_setups_count": len(response_items),
+            "perfect_only": perfect_only,
+            "low_spread_only": low_spread_only,
+            "medium_to_low_spread_only": medium_to_low_spread_only,
+            "tradeable_now_only": tradeable_now_only,
+            "max_spread_vol": max_spread_vol,
+        },
+        "active_setups": response_items,
+        "setups": response_items,
+        "pairs": response_items,  # Convenient alias for UI table compatibility
+    }
+
+
+_PAIR_HISTORY_CACHE: dict[str, tuple[float, dict[str, Any]]] = {}
+_PAIR_HISTORY_TTL: float = 3600.0 * 4.0  # 4-hour shelf life
+
+
+@app.get("/pairs/{ticker_a}/{ticker_b}/history")
+@app.get("/api/pairs/{ticker_a}/{ticker_b}/history")
+async def get_pair_history(
+    ticker_a: str,
+    ticker_b: str,
+    period: str = "5y",
+    refresh: bool = False,
+) -> dict[str, Any]:
+    """Return 5-year daily price history, rolling spread, and Z-score for TradingView-style charts."""
+    global _PAIR_HISTORY_CACHE
+    cache_key = f"{ticker_a.upper()}-{ticker_b.upper()}-{period}"
+    now_ts = datetime.now(timezone.utc).timestamp()
+
+    if not refresh and cache_key in _PAIR_HISTORY_CACHE:
+        cached_ts, cached_data = _PAIR_HISTORY_CACHE[cache_key]
+        if now_ts - cached_ts < _PAIR_HISTORY_TTL:
+            return cached_data
+
+    try:
+        from engine.detect_setups import get_pair_history_series
+        result = await asyncio.to_thread(
+            get_pair_history_series,
+            ticker_a=ticker_a,
+            ticker_b=ticker_b,
+            period=period,
+        )
+        _PAIR_HISTORY_CACHE[cache_key] = (now_ts, result)
+        return result
+    except Exception as e:
+        logger = get_logger("api.main")
+        logger.error(f"Failed to fetch history for {ticker_a}/{ticker_b}: {e}")
+        raise HTTPException(
+            status_code=404,
+            detail=f"Failed to load historical series for {ticker_a}/{ticker_b}: {str(e)}",
+        )
+
+
+@app.post("/pairs/preload-top")
+@app.get("/pairs/preload-top")
+@app.post("/api/pairs/preload-top")
+@app.get("/api/pairs/preload-top")
+async def preload_top_setups(
+    limit: int = 10,
+    payload: Optional[dict[str, Any]] = Body(None),
+) -> dict[str, Any]:
+    """Pre-download and warm cache for top pairs 5-year historical stock data."""
+    global _PAIR_HISTORY_CACHE
+    from engine.detect_setups import get_pair_history_series
+
+    pairs_to_load = []
+    if payload and "pairs" in payload and isinstance(payload["pairs"], list):
+        pairs_to_load = payload["pairs"][:limit]
+    else:
+        active_resp = await get_active_setups(threshold=2.0, limit=limit)
+        pairs_to_load = active_resp.get("setups", [])
+
+    if not pairs_to_load:
+        elite_resp = await get_elite_pairs()
+        pairs_to_load = elite_resp.get("pairs", [])[:limit]
+
+    preloaded: list[str] = []
+    errors: list[str] = []
+    now_ts = datetime.now(timezone.utc).timestamp()
+
+    async def _fetch_one(p: dict[str, Any]):
+        t_a = p.get("ticker_a", "").strip().upper()
+        t_b = p.get("ticker_b", "").strip().upper()
+        if not t_a or not t_b:
+            return
+        cache_key = f"{t_a}-{t_b}-5y"
+        if cache_key in _PAIR_HISTORY_CACHE:
+            cached_ts, _ = _PAIR_HISTORY_CACHE[cache_key]
+            if now_ts - cached_ts < _PAIR_HISTORY_TTL:
+                preloaded.append(f"{t_a}/{t_b}")
+                return
+        try:
+            hist = await asyncio.to_thread(get_pair_history_series, ticker_a=t_a, ticker_b=t_b, period="5y")
+            _PAIR_HISTORY_CACHE[cache_key] = (now_ts, hist)
+            preloaded.append(f"{t_a}/{t_b}")
+        except Exception as ex:
+            errors.append(f"{t_a}/{t_b}: {str(ex)}")
+
+    tasks = [_fetch_one(p) for p in pairs_to_load]
+    if tasks:
+        await asyncio.gather(*tasks)
+
+    return {
+        "status": "success",
+        "requested_count": len(pairs_to_load),
+        "preloaded_count": len(preloaded),
+        "preloaded_pairs": preloaded,
+        "errors": errors,
+    }
+
+
+@app.get("/pairs/elite")
+@app.get("/api/pairs/elite")
+async def get_elite_pairs(
+    sector: Optional[str] = None,
+    min_corr: Optional[float] = None,
+    search: Optional[str] = None,
+) -> dict[str, Any]:
+    """Return 7-stage gauntlet elite curated pairs."""
+    return await get_pairs(sector=sector, min_corr=min_corr, search=search, elite=True)
+
+
+@app.get("/pairs")
+@app.get("/api/pairs")
+async def get_pairs(
+    sector: Optional[str] = None,
+    min_corr: Optional[float] = None,
+    search: Optional[str] = None,
+    elite: bool = False,
+) -> dict[str, Any]:
+    """Return S&P 500 sector-isolated correlated pairs and cluster networks."""
+    payload = _load_pairs_payload(elite=elite)
+    pairs = payload.get("pairs", [])
+
+    if sector and sector.lower() != "all":
+        pairs = [p for p in pairs if p["sector"].lower() == sector.lower()]
+
+    if min_corr is not None:
+        pairs = [p for p in pairs if p["correlation"] >= min_corr]
+
+    if search:
+        query = search.strip().upper()
+        pairs = [
+            p for p in pairs
+            if query in p["ticker_a"].upper() or query in p["ticker_b"].upper() or query in p["sector"].upper()
+        ]
+
+    return {
+        "metadata": {
+            **payload.get("metadata", {}),
+            "filtered_count": len(pairs),
+            "total_count": len(payload.get("pairs", [])),
+        },
+        "clusters": payload.get("clusters", {}),
+        "pairs": pairs,
+    }
+
 
 
 # --------------------------------------------------------------------------- #

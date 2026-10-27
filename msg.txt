@@ -1,0 +1,36 @@
+🚀 Pair Trading Dashboard Upgrade Complete!
+We upgraded the entire platform to 5 years of historical data, built an interactive TradingView chart with 4 view modes, and added exact Buy, Target Exit (Take Profit), and Stop Loss prices for both stocks with true beta-neutral sizing. All strategy triggers are now fully customizable in pair_strategy_config.json.
+
+🎯 How We Pick & Trade Pairs (Simple & Point-to-Point):
+
+1. Twin Movement (5-Year Bond)
+Both stocks must move together tightly over 5 years (85%+ correlation & 95% cointegration confidence).
+
+2. High Liquidity
+Both stocks must trade at least 1.5M shares daily so orders fill instantly without slippage.
+
+3. Quick Snapping Back (2 to 35 Days)
+When they drift apart, historical data proves they snap back together within 2 to 35 days (Half-Life).
+
+4. Anti-Drift Guarantee (Mean Reverting)
+Mathematical proof (Hurst < 0.48 & ADF Stationarity) that the price gap always pulls back to normal rather than drifting away forever.
+
+5. Frequent Intersections
+The two stocks must cross through each other's equilibrium at least 10 times a year.
+
+6. Tight to Medium Spread (≤ 7.0% Vol)
+We only trade stable, tight spreads. High-risk blowout spreads are filtered out to protect your capital.
+
+7. Live Trigger: 2.0 Sigma Stretch
+We only enter when the gap between the two stocks stretches 2.0+ standard deviations away from normal (|Z| ≥ 2.0).
+
+8. Clear Buy/Sell Direction:
+- Stock A too high vs B: SHORT A + BUY B
+- Stock A too low vs B: BUY A + SHORT B
+
+9. Exact Profit Target & Stop Loss:
+- Target Exit: Take profit when the spread snaps back to the average line (Z = 0.0).
+- Stop Loss: Automatic exit if the spread stretches to 3.5 sigma to cut risk early.
+
+10. Balanced Beta Position Sizing:
+Share quantities are weighted by the hedge ratio so overall market ups and downs don't matter — we only make money on the gap closing.

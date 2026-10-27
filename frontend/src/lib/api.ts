@@ -47,6 +47,272 @@ const del = <T>(p: string) => req<T>(p, { method: "DELETE" });
 export const api = {
   health: () => get<Health>("/health"),
 
+  // Pairs Trading
+  pairs: (params?: { sector?: string; min_corr?: number; search?: string; elite?: boolean }) => {
+    const q = new URLSearchParams();
+    if (params?.sector) q.set("sector", params.sector);
+    if (params?.min_corr) q.set("min_corr", String(params.min_corr));
+    if (params?.search) q.set("search", params.search);
+    if (params?.elite) q.set("elite", "true");
+    const qs = q.toString();
+    return get<{
+      metadata: {
+        description: string;
+        min_correlation: number;
+        trading_days: number;
+        filtered_count: number;
+        total_count: number;
+      };
+      pairs: {
+        ticker_a: string;
+        ticker_b: string;
+        sector: string;
+        correlation: number;
+        cointegration_pvalue: number;
+        half_life?: number;
+        hurst_exponent?: number;
+        adf_t_stat?: number;
+        zero_crossings?: number;
+      }[];
+    }>(`/pairs${qs ? `?${qs}` : ""}`);
+  },
+
+  activeSetups: (params?: {
+    threshold?: number;
+    sector?: string;
+    search?: string;
+    perfect_only?: boolean;
+    low_spread_only?: boolean;
+    medium_to_low_spread_only?: boolean;
+    tradeable_now_only?: boolean;
+    max_spread_vol?: number;
+    limit?: number;
+    refresh?: boolean;
+  }) => {
+    const q = new URLSearchParams();
+    if (params?.threshold) q.set("threshold", String(params.threshold));
+    if (params?.sector) q.set("sector", params.sector);
+    if (params?.search) q.set("search", params.search);
+    if (params?.perfect_only) q.set("perfect_only", "true");
+    if (params?.low_spread_only) q.set("low_spread_only", "true");
+    if (params?.medium_to_low_spread_only) q.set("medium_to_low_spread_only", "true");
+    if (params?.tradeable_now_only) q.set("tradeable_now_only", "true");
+    if (params?.max_spread_vol !== undefined) q.set("max_spread_vol", String(params.max_spread_vol));
+    if (params?.limit) q.set("limit", String(params.limit));
+    if (params?.refresh) q.set("refresh", "true");
+    const qs = q.toString();
+    return get<{
+      metadata: {
+        description: string;
+        threshold: number;
+        lookback_days: number;
+        total_pairs_evaluated: number;
+        active_setups_count: number;
+        perfect_only?: boolean;
+        low_spread_only?: boolean;
+        medium_to_low_spread_only?: boolean;
+        tradeable_now_only?: boolean;
+        max_spread_vol?: number;
+        generated_at?: string;
+      };
+      setups: {
+        ticker_a: string;
+        ticker_b: string;
+        sector: string;
+        current_z_score: number;
+        hedge_ratio: number;
+        trade_direction: string;
+        action_a?: string;
+        action_b?: string;
+        exit_action_a?: string;
+        exit_action_b?: string;
+        target_price_a?: number;
+        target_price_b?: number;
+        stop_loss_price_a?: number;
+        stop_loss_price_b?: number;
+        expected_profit_dollar_a?: number;
+        expected_profit_dollar_b?: number;
+        expected_profit_pct_a?: number;
+        expected_profit_pct_b?: number;
+        pair_unit_cost?: number;
+        current_spread: number;
+        spread_mean: number;
+        spread_std: number;
+        relative_spread_vol_pct?: number;
+        spread_tier?: string;
+        spread_tightness_score?: number;
+        is_low_spread?: boolean;
+        is_medium_to_low_spread?: boolean;
+        return_5y_a?: number;
+        return_5y_b?: number;
+        return_1y_a?: number;
+        return_1y_b?: number;
+        return_90d_a?: number;
+        return_90d_b?: number;
+        change_daily_a?: number;
+        change_daily_b?: number;
+        trend_a?: string;
+        trend_b?: string;
+        trend_co_movement_score?: number;
+        spread_dislocation?: number;
+        expected_reversion_return_pct?: number;
+        target_exit_spread?: number;
+        stop_loss_spread?: number;
+        risk_reward_ratio?: number;
+        expected_holding_days?: number;
+        is_tradeable_now?: boolean;
+        trade_readiness?: string;
+        co_movement_score?: number;
+        overlap_score?: number;
+        overlap_pct?: number;
+        overlap_tier?: string;
+        divergence_score?: number;
+        composite_score?: number;
+        last_price_a: number;
+        last_price_b: number;
+        is_active: boolean;
+        window_bars: number;
+        historical_correlation?: number;
+        cointegration_pvalue?: number;
+        half_life?: number;
+        hurst_exponent?: number;
+        adf_t_stat?: number;
+        zero_crossings?: number;
+        r_squared?: number;
+        checks?: Record<string, boolean>;
+        passed_checks_count?: number;
+        total_checks?: number;
+        quality_score?: number;
+        is_perfect_setup?: boolean;
+        setup_grade?: string;
+      }[];
+      pairs: any[];
+    }>(`/pairs/active-setups${qs ? `?${qs}` : ""}`);
+  },
+
+  pairHistory: (tickerA: string, tickerB: string, period = "5y", refresh = false) => {
+    const qs = refresh ? `?period=${period}&refresh=true` : `?period=${period}`;
+    return get<{
+      ticker_a: string;
+      ticker_b: string;
+      sector: string;
+      hedge_ratio: number;
+      alpha: number;
+      current_z_score: number;
+      trade_direction: string;
+      action_a?: string;
+      action_b?: string;
+      exit_action_a?: string;
+      exit_action_b?: string;
+      target_price_a?: number;
+      target_price_b?: number;
+      stop_loss_price_a?: number;
+      stop_loss_price_b?: number;
+      expected_profit_dollar_a?: number;
+      expected_profit_dollar_b?: number;
+      expected_profit_pct_a?: number;
+      expected_profit_pct_b?: number;
+      pair_unit_cost?: number;
+      current_spread: number;
+      spread_mean: number;
+      spread_std: number;
+      relative_spread_vol_pct?: number;
+      spread_tier?: string;
+      is_low_spread?: boolean;
+      is_medium_to_low_spread?: boolean;
+      spread_dislocation?: number;
+      expected_reversion_return_pct?: number;
+      target_exit_spread?: number;
+      stop_loss_spread?: number;
+      risk_reward_ratio?: number;
+      expected_holding_days?: number;
+      is_tradeable_now?: boolean;
+      trade_readiness?: string;
+      last_price_a: number;
+      last_price_b: number;
+      return_5y_a?: number;
+      return_5y_b?: number;
+      return_1y_a?: number;
+      return_1y_b?: number;
+      return_90d_a?: number;
+      return_90d_b?: number;
+      change_daily_a?: number;
+      change_daily_b?: number;
+      trend_a?: string;
+      trend_b?: string;
+      trend_co_movement_score?: number;
+      total_bars: number;
+      default_view_days: number;
+      start_date_60d: string;
+      bars: {
+        date: string;
+        price_a: number;
+        price_b: number;
+        price_b_overlay?: number;
+        norm_a: number;
+        norm_b: number;
+        return_pct_a?: number;
+        return_pct_b?: number;
+        spread: number;
+        spread_mean: number;
+        spread_std: number;
+        z_score: number;
+        upper_threshold: number;
+        lower_threshold: number;
+        mean_line: number;
+      }[];
+      metadata: {
+        historical_correlation?: number;
+        cointegration_pvalue?: number;
+        half_life?: number;
+        hurst_exponent?: number;
+        adf_t_stat?: number;
+        zero_crossings?: number;
+        overlap_score?: number;
+        overlap_pct?: number;
+        overlap_tier?: string;
+        adv_a?: number;
+        adv_b?: number;
+        relative_spread_vol_pct?: number;
+        spread_tier?: string;
+        is_low_spread?: boolean;
+        is_medium_to_low_spread?: boolean;
+        return_5y_a?: number;
+        return_5y_b?: number;
+        return_1y_a?: number;
+        return_1y_b?: number;
+        return_90d_a?: number;
+        return_90d_b?: number;
+        change_daily_a?: number;
+        change_daily_b?: number;
+        trend_a?: string;
+        trend_b?: string;
+        trend_co_movement_score?: number;
+        spread_dislocation?: number;
+        expected_reversion_return_pct?: number;
+        target_exit_spread?: number;
+        stop_loss_spread?: number;
+        risk_reward_ratio?: number;
+        is_tradeable_now?: boolean;
+        trade_readiness?: string;
+        is_perfect_setup?: boolean;
+      };
+    }>(`/pairs/${tickerA}/${tickerB}/history${qs}`);
+  },
+
+  preloadTopSetups: (limit = 10, pairs?: { ticker_a: string; ticker_b: string }[]) =>
+    post<{
+      status: string;
+      requested_count: number;
+      preloaded_count: number;
+      preloaded_pairs: string[];
+      errors: string[];
+    }>("/pairs/preload-top", { limit, pairs }),
+
+  pairsConfig: () => get<Record<string, any>>("/pairs/config"),
+  pairsConfigSave: (payload: Record<string, any>) =>
+    post<{ status: string; message: string; config: Record<string, any> }>("/pairs/config", payload),
+
   // Portfolio
   portfolioSnapshot: () => get<PortfolioSnapshot>("/portfolio/snapshot"),
   portfolioOpen: () => get<Position[]>("/portfolio/open"),

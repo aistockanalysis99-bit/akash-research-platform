@@ -29,8 +29,10 @@ def authenticate_user(email: str, password: str):
     """Return the user dict on a correct email+password, else None."""
     if not email or not password:
         return None
+    clean_email = email.strip().lower()
     for user in get_users():
-        if user.get("email") != email:
+        user_email = str(user.get("email", "")).strip().lower()
+        if user_email != clean_email:
             continue
         stored = user.get("password") or ""
         if not stored.startswith("$2"):

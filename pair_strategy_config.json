@@ -1,0 +1,75 @@
+{
+  "version": "1.0.0",
+  "strategy_name": "Cointegrated Statistical Arbitrage Pairs Trading",
+  "description": "Configurable parameters for 5-year pair gauntlet filtering, live divergence setup detection, risk barriers, and beta-neutral execution.",
+  "divergence_triggers": {
+    "z_score_entry_threshold": 2.0,
+    "z_score_exit_target": 0.0,
+    "z_score_stop_loss_barrier": 3.5,
+    "lookback_days": 90,
+    "historical_period": "5y",
+    "min_valid_bars": 30
+  },
+  "gauntlet_screening_thresholds": {
+    "min_correlation": 0.85,
+    "max_cointegration_pvalue": 0.05,
+    "min_zero_crossings_per_year": 10,
+    "min_half_life_days": 2.0,
+    "max_half_life_days": 35.0,
+    "max_hurst_exponent": 0.48,
+    "max_adf_t_stat": -2.8,
+    "min_adv_shares": 1500000,
+    "min_r_squared": 0.35,
+    "min_overlap_score": 50.0
+  },
+  "spread_volatility_tiers": {
+    "max_allowed_spread_vol_pct": 7.0,
+    "ultra_tight_max_pct": 2.5,
+    "tight_max_pct": 4.5,
+    "medium_max_pct": 7.0,
+    "blowout_penalty_z_sigma": 3.8
+  },
+  "trade_readiness_conditions": {
+    "require_active_divergence": true,
+    "require_medium_to_low_spread": true,
+    "min_co_movement_score": 40.0,
+    "min_expected_reversion_return_pct": 1.5,
+    "min_risk_reward_ratio": 1.0,
+    "protective_risk_dist_floor_sigma": 0.15
+  },
+  "composite_scoring_weights": {
+    "overlap_weight": 0.35,
+    "co_movement_weight": 0.3,
+    "spread_tightness_weight": 0.2,
+    "divergence_weight": 0.15,
+    "prime_setup_min_score": 80.0,
+    "strong_setup_min_score": 70.0
+  },
+  "position_sizing": {
+    "model": "beta_neutral_units",
+    "default_capital_usd": 50000,
+    "capital_presets_usd": [
+      10000,
+      25000,
+      50000,
+      100000
+    ]
+  },
+  "ui_preferences": {
+    "default_chart_mode": "price",
+    "chart_modes": [
+      "price",
+      "spread",
+      "returns"
+    ],
+    "timeframe_presets": [
+      "60D",
+      "90D",
+      "1Y",
+      "3Y",
+      "5Y",
+      "ALL"
+    ],
+    "default_timeframe": "1Y"
+  }
+}

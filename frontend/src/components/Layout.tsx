@@ -23,6 +23,14 @@ const SECTIONS: {
     ],
   },
   {
+    name: "Pair Trading",
+    base: "pair-trading",
+    items: [
+      { label: "Pairs", to: "/pairs" },
+      { label: "Setups", to: "/setups" },
+    ],
+  },
+  {
     name: "AI Analysis",
     base: "ai",
     items: [
@@ -63,8 +71,12 @@ const SECTIONS: {
 
 // Map a pathname to its owning section.
 function sectionForPath(path: string): string {
-
-
+  if (
+    path.startsWith("/pairs") ||
+    path.startsWith("/pair-trading") ||
+    path.startsWith("/setups")
+  )
+    return "Pair Trading";
   if (
     path.startsWith("/analyze") ||
     path.startsWith("/decisions") ||

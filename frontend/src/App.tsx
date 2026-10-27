@@ -30,6 +30,9 @@ import StrategyBoardPage from "./pages/StrategyBoardPage";
 import LeagueTablePage from "./pages/LeagueTablePage";
 import WheelPage from "./pages/WheelPage";
 import DoubleCalendarPage from "./pages/DoubleCalendarPage";
+import PairsPage from "./pages/PairsPage";
+import SetupsPage from "./pages/SetupsPage";
+import SetupDetailPage from "./pages/SetupDetailPage";
 
 export default function App() {
   return (
@@ -45,6 +48,13 @@ export default function App() {
         <Route path="/watchlist" element={<WatchlistPage />} />
         <Route path="/watchlist/:symbol" element={<ProfileDetailPage />} />
         <Route path="/automation" element={<AutomationPage />} />
+        {/* Pair Trading section */}
+        <Route path="/setups" element={<SetupsPage />} />
+        <Route path="/setups/:tickerA/:tickerB" element={<SetupDetailPage />} />
+        <Route path="/pair-trading/setups" element={<SetupsPage />} />
+        <Route path="/pair-trading/setup/:tickerA/:tickerB" element={<SetupDetailPage />} />
+        <Route path="/pairs" element={<PairsPage />} />
+        <Route path="/pair-trading" element={<PairsPage />} />
         {/* AI Analysis section */}
         <Route path="/analyze" element={<AnalyzePage />} />
         <Route path="/decisions" element={<DecisionsPage />} />

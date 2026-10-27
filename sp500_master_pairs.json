@@ -1,0 +1,907 @@
+{
+  "metadata": {
+    "description": "S&P 500 Sector-Isolated Mathematically Proven Cointegrated Pairs",
+    "min_correlation": 0.9,
+    "max_cointegration_pvalue": 0.05,
+    "trading_days": 252,
+    "total_pairs": 128
+  },
+  "pairs": [
+    {
+      "ticker_a": "MTB",
+      "ticker_b": "PNC",
+      "sector": "Financials",
+      "correlation": 0.9894,
+      "cointegration_pvalue": 0.0021
+    },
+    {
+      "ticker_a": "FITB",
+      "ticker_b": "PNC",
+      "sector": "Financials",
+      "correlation": 0.9886,
+      "cointegration_pvalue": 0.0043
+    },
+    {
+      "ticker_a": "DELL",
+      "ticker_b": "HPE",
+      "sector": "Information Technology",
+      "correlation": 0.9859,
+      "cointegration_pvalue": 0.0098
+    },
+    {
+      "ticker_a": "BNY",
+      "ticker_b": "NTRS",
+      "sector": "Financials",
+      "correlation": 0.9849,
+      "cointegration_pvalue": 0.0327
+    },
+    {
+      "ticker_a": "FITB",
+      "ticker_b": "MTB",
+      "sector": "Financials",
+      "correlation": 0.9837,
+      "cointegration_pvalue": 0.0478
+    },
+    {
+      "ticker_a": "SNDK",
+      "ticker_b": "STX",
+      "sector": "Information Technology",
+      "correlation": 0.9817,
+      "cointegration_pvalue": 0.0123
+    },
+    {
+      "ticker_a": "HLT",
+      "ticker_b": "MAR",
+      "sector": "Consumer Discretionary",
+      "correlation": 0.9788,
+      "cointegration_pvalue": 0.001
+    },
+    {
+      "ticker_a": "BSX",
+      "ticker_b": "PODD",
+      "sector": "Health Care",
+      "correlation": 0.9786,
+      "cointegration_pvalue": 0.0364
+    },
+    {
+      "ticker_a": "FIX",
+      "ticker_b": "PWR",
+      "sector": "Industrials",
+      "correlation": 0.9785,
+      "cointegration_pvalue": 0.0235
+    },
+    {
+      "ticker_a": "DELL",
+      "ticker_b": "FTNT",
+      "sector": "Information Technology",
+      "correlation": 0.9763,
+      "cointegration_pvalue": 0.0044
+    },
+    {
+      "ticker_a": "KEYS",
+      "ticker_b": "LITE",
+      "sector": "Information Technology",
+      "correlation": 0.9757,
+      "cointegration_pvalue": 0.0027
+    },
+    {
+      "ticker_a": "PFG",
+      "ticker_b": "STT",
+      "sector": "Financials",
+      "correlation": 0.9739,
+      "cointegration_pvalue": 0.0079
+    },
+    {
+      "ticker_a": "FTNT",
+      "ticker_b": "HPE",
+      "sector": "Information Technology",
+      "correlation": 0.9735,
+      "cointegration_pvalue": 0.0061
+    },
+    {
+      "ticker_a": "OKE",
+      "ticker_b": "TRGP",
+      "sector": "Energy",
+      "correlation": 0.9724,
+      "cointegration_pvalue": 0.0197
+    },
+    {
+      "ticker_a": "BEN",
+      "ticker_b": "PFG",
+      "sector": "Financials",
+      "correlation": 0.9698,
+      "cointegration_pvalue": 0.0097
+    },
+    {
+      "ticker_a": "CRWD",
+      "ticker_b": "NTAP",
+      "sector": "Information Technology",
+      "correlation": 0.9695,
+      "cointegration_pvalue": 0.0029
+    },
+    {
+      "ticker_a": "NTRS",
+      "ticker_b": "PFG",
+      "sector": "Financials",
+      "correlation": 0.9671,
+      "cointegration_pvalue": 0.0217
+    },
+    {
+      "ticker_a": "BEN",
+      "ticker_b": "NTRS",
+      "sector": "Financials",
+      "correlation": 0.9668,
+      "cointegration_pvalue": 0.0205
+    },
+    {
+      "ticker_a": "DUK",
+      "ticker_b": "SO",
+      "sector": "Utilities",
+      "correlation": 0.9662,
+      "cointegration_pvalue": 0.0392
+    },
+    {
+      "ticker_a": "NTAP",
+      "ticker_b": "PANW",
+      "sector": "Information Technology",
+      "correlation": 0.9655,
+      "cointegration_pvalue": 0.0335
+    },
+    {
+      "ticker_a": "INTC",
+      "ticker_b": "SNDK",
+      "sector": "Information Technology",
+      "correlation": 0.9649,
+      "cointegration_pvalue": 0.0251
+    },
+    {
+      "ticker_a": "INTC",
+      "ticker_b": "STX",
+      "sector": "Information Technology",
+      "correlation": 0.9648,
+      "cointegration_pvalue": 0.0222
+    },
+    {
+      "ticker_a": "GL",
+      "ticker_b": "STT",
+      "sector": "Financials",
+      "correlation": 0.9624,
+      "cointegration_pvalue": 0.0204
+    },
+    {
+      "ticker_a": "BNY",
+      "ticker_b": "PFG",
+      "sector": "Financials",
+      "correlation": 0.9623,
+      "cointegration_pvalue": 0.0316
+    },
+    {
+      "ticker_a": "BEN",
+      "ticker_b": "IBKR",
+      "sector": "Financials",
+      "correlation": 0.9606,
+      "cointegration_pvalue": 0.0015
+    },
+    {
+      "ticker_a": "AMD",
+      "ticker_b": "FFIV",
+      "sector": "Information Technology",
+      "correlation": 0.9605,
+      "cointegration_pvalue": 0.0291
+    },
+    {
+      "ticker_a": "HPE",
+      "ticker_b": "TWLO",
+      "sector": "Information Technology",
+      "correlation": 0.9597,
+      "cointegration_pvalue": 0.0014
+    },
+    {
+      "ticker_a": "GS",
+      "ticker_b": "MS",
+      "sector": "Financials",
+      "correlation": 0.9597,
+      "cointegration_pvalue": 0.045
+    },
+    {
+      "ticker_a": "COHR",
+      "ticker_b": "JBL",
+      "sector": "Information Technology",
+      "correlation": 0.959,
+      "cointegration_pvalue": 0.0002
+    },
+    {
+      "ticker_a": "AME",
+      "ticker_b": "IEX",
+      "sector": "Industrials",
+      "correlation": 0.959,
+      "cointegration_pvalue": 0.0012
+    },
+    {
+      "ticker_a": "LRCX",
+      "ticker_b": "WDC",
+      "sector": "Information Technology",
+      "correlation": 0.959,
+      "cointegration_pvalue": 0.0014
+    },
+    {
+      "ticker_a": "FIX",
+      "ticker_b": "GEV",
+      "sector": "Industrials",
+      "correlation": 0.9578,
+      "cointegration_pvalue": 0.0358
+    },
+    {
+      "ticker_a": "CRWD",
+      "ticker_b": "HPE",
+      "sector": "Information Technology",
+      "correlation": 0.9574,
+      "cointegration_pvalue": 0.0144
+    },
+    {
+      "ticker_a": "BNY",
+      "ticker_b": "GL",
+      "sector": "Financials",
+      "correlation": 0.9564,
+      "cointegration_pvalue": 0.0136
+    },
+    {
+      "ticker_a": "GIS",
+      "ticker_b": "MKC",
+      "sector": "Consumer Staples",
+      "correlation": 0.956,
+      "cointegration_pvalue": 0.0052
+    },
+    {
+      "ticker_a": "AMD",
+      "ticker_b": "MRVL",
+      "sector": "Information Technology",
+      "correlation": 0.9559,
+      "cointegration_pvalue": 0.0427
+    },
+    {
+      "ticker_a": "JBL",
+      "ticker_b": "Q",
+      "sector": "Information Technology",
+      "correlation": 0.9557,
+      "cointegration_pvalue": 0.0012
+    },
+    {
+      "ticker_a": "GLW",
+      "ticker_b": "Q",
+      "sector": "Information Technology",
+      "correlation": 0.9552,
+      "cointegration_pvalue": 0.0011
+    },
+    {
+      "ticker_a": "GL",
+      "ticker_b": "PFG",
+      "sector": "Financials",
+      "correlation": 0.9551,
+      "cointegration_pvalue": 0.0261
+    },
+    {
+      "ticker_a": "NOW",
+      "ticker_b": "WDAY",
+      "sector": "Information Technology",
+      "correlation": 0.9549,
+      "cointegration_pvalue": 0.045
+    },
+    {
+      "ticker_a": "GL",
+      "ticker_b": "NTRS",
+      "sector": "Financials",
+      "correlation": 0.9539,
+      "cointegration_pvalue": 0.0113
+    },
+    {
+      "ticker_a": "FANG",
+      "ticker_b": "OKE",
+      "sector": "Energy",
+      "correlation": 0.9532,
+      "cointegration_pvalue": 0.0332
+    },
+    {
+      "ticker_a": "LVS",
+      "ticker_b": "WYNN",
+      "sector": "Consumer Discretionary",
+      "correlation": 0.9525,
+      "cointegration_pvalue": 0.0121
+    },
+    {
+      "ticker_a": "FFIV",
+      "ticker_b": "MU",
+      "sector": "Information Technology",
+      "correlation": 0.9519,
+      "cointegration_pvalue": 0.022
+    },
+    {
+      "ticker_a": "AME",
+      "ticker_b": "WAB",
+      "sector": "Industrials",
+      "correlation": 0.9515,
+      "cointegration_pvalue": 0.0116
+    },
+    {
+      "ticker_a": "COHR",
+      "ticker_b": "GLW",
+      "sector": "Information Technology",
+      "correlation": 0.9511,
+      "cointegration_pvalue": 0.0018
+    },
+    {
+      "ticker_a": "CSCO",
+      "ticker_b": "STX",
+      "sector": "Information Technology",
+      "correlation": 0.9484,
+      "cointegration_pvalue": 0.0237
+    },
+    {
+      "ticker_a": "HUM",
+      "ticker_b": "WST",
+      "sector": "Health Care",
+      "correlation": 0.9474,
+      "cointegration_pvalue": 0.0329
+    },
+    {
+      "ticker_a": "AMAT",
+      "ticker_b": "WDC",
+      "sector": "Information Technology",
+      "correlation": 0.947,
+      "cointegration_pvalue": 0.0113
+    },
+    {
+      "ticker_a": "CHD",
+      "ticker_b": "CL",
+      "sector": "Consumer Staples",
+      "correlation": 0.9467,
+      "cointegration_pvalue": 0.0204
+    },
+    {
+      "ticker_a": "CRWD",
+      "ticker_b": "TWLO",
+      "sector": "Information Technology",
+      "correlation": 0.9467,
+      "cointegration_pvalue": 0.0417
+    },
+    {
+      "ticker_a": "CSCO",
+      "ticker_b": "MU",
+      "sector": "Information Technology",
+      "correlation": 0.9465,
+      "cointegration_pvalue": 0.0189
+    },
+    {
+      "ticker_a": "BEN",
+      "ticker_b": "GL",
+      "sector": "Financials",
+      "correlation": 0.9465,
+      "cointegration_pvalue": 0.0434
+    },
+    {
+      "ticker_a": "KLAC",
+      "ticker_b": "WDC",
+      "sector": "Information Technology",
+      "correlation": 0.9461,
+      "cointegration_pvalue": 0.0001
+    },
+    {
+      "ticker_a": "IBKR",
+      "ticker_b": "NTRS",
+      "sector": "Financials",
+      "correlation": 0.9458,
+      "cointegration_pvalue": 0.0015
+    },
+    {
+      "ticker_a": "HII",
+      "ticker_b": "NOC",
+      "sector": "Industrials",
+      "correlation": 0.9452,
+      "cointegration_pvalue": 0.0047
+    },
+    {
+      "ticker_a": "COHR",
+      "ticker_b": "Q",
+      "sector": "Information Technology",
+      "correlation": 0.9444,
+      "cointegration_pvalue": 0.0029
+    },
+    {
+      "ticker_a": "DLR",
+      "ticker_b": "EQIX",
+      "sector": "Real Estate",
+      "correlation": 0.9441,
+      "cointegration_pvalue": 0.0128
+    },
+    {
+      "ticker_a": "DELL",
+      "ticker_b": "TWLO",
+      "sector": "Information Technology",
+      "correlation": 0.944,
+      "cointegration_pvalue": 0.0163
+    },
+    {
+      "ticker_a": "ILMN",
+      "ticker_b": "RVTY",
+      "sector": "Health Care",
+      "correlation": 0.942,
+      "cointegration_pvalue": 0.0403
+    },
+    {
+      "ticker_a": "NTAP",
+      "ticker_b": "TWLO",
+      "sector": "Information Technology",
+      "correlation": 0.9415,
+      "cointegration_pvalue": 0.0179
+    },
+    {
+      "ticker_a": "GWW",
+      "ticker_b": "IEX",
+      "sector": "Industrials",
+      "correlation": 0.9409,
+      "cointegration_pvalue": 0.0268
+    },
+    {
+      "ticker_a": "JBL",
+      "ticker_b": "WDC",
+      "sector": "Information Technology",
+      "correlation": 0.9409,
+      "cointegration_pvalue": 0.0326
+    },
+    {
+      "ticker_a": "LEN",
+      "ticker_b": "NKE",
+      "sector": "Consumer Discretionary",
+      "correlation": 0.9403,
+      "cointegration_pvalue": 0.0173
+    },
+    {
+      "ticker_a": "AME",
+      "ticker_b": "NDSN",
+      "sector": "Industrials",
+      "correlation": 0.9379,
+      "cointegration_pvalue": 0.017
+    },
+    {
+      "ticker_a": "CMS",
+      "ticker_b": "SRE",
+      "sector": "Utilities",
+      "correlation": 0.9369,
+      "cointegration_pvalue": 0.0006
+    },
+    {
+      "ticker_a": "IBKR",
+      "ticker_b": "STT",
+      "sector": "Financials",
+      "correlation": 0.9357,
+      "cointegration_pvalue": 0.0332
+    },
+    {
+      "ticker_a": "AIZ",
+      "ticker_b": "MET",
+      "sector": "Financials",
+      "correlation": 0.9344,
+      "cointegration_pvalue": 0.0245
+    },
+    {
+      "ticker_a": "FFIV",
+      "ticker_b": "TWLO",
+      "sector": "Information Technology",
+      "correlation": 0.9341,
+      "cointegration_pvalue": 0.046
+    },
+    {
+      "ticker_a": "FLEX",
+      "ticker_b": "WDC",
+      "sector": "Information Technology",
+      "correlation": 0.9324,
+      "cointegration_pvalue": 0.0188
+    },
+    {
+      "ticker_a": "BSX",
+      "ticker_b": "IDXX",
+      "sector": "Health Care",
+      "correlation": 0.932,
+      "cointegration_pvalue": 0.0007
+    },
+    {
+      "ticker_a": "BNY",
+      "ticker_b": "IBKR",
+      "sector": "Financials",
+      "correlation": 0.9316,
+      "cointegration_pvalue": 0.0496
+    },
+    {
+      "ticker_a": "AAPL",
+      "ticker_b": "FTNT",
+      "sector": "Information Technology",
+      "correlation": 0.9304,
+      "cointegration_pvalue": 0.0151
+    },
+    {
+      "ticker_a": "CNP",
+      "ticker_b": "SO",
+      "sector": "Utilities",
+      "correlation": 0.9303,
+      "cointegration_pvalue": 0.002
+    },
+    {
+      "ticker_a": "FAST",
+      "ticker_b": "NDSN",
+      "sector": "Industrials",
+      "correlation": 0.93,
+      "cointegration_pvalue": 0.0108
+    },
+    {
+      "ticker_a": "IEX",
+      "ticker_b": "UNP",
+      "sector": "Industrials",
+      "correlation": 0.9299,
+      "cointegration_pvalue": 0.0387
+    },
+    {
+      "ticker_a": "GLW",
+      "ticker_b": "JBL",
+      "sector": "Information Technology",
+      "correlation": 0.9297,
+      "cointegration_pvalue": 0.0476
+    },
+    {
+      "ticker_a": "DOC",
+      "ticker_b": "ESS",
+      "sector": "Real Estate",
+      "correlation": 0.9295,
+      "cointegration_pvalue": 0.0114
+    },
+    {
+      "ticker_a": "EXR",
+      "ticker_b": "PSA",
+      "sector": "Real Estate",
+      "correlation": 0.9293,
+      "cointegration_pvalue": 0.0267
+    },
+    {
+      "ticker_a": "IDXX",
+      "ticker_b": "PODD",
+      "sector": "Health Care",
+      "correlation": 0.929,
+      "cointegration_pvalue": 0.0028
+    },
+    {
+      "ticker_a": "JBL",
+      "ticker_b": "MPWR",
+      "sector": "Information Technology",
+      "correlation": 0.928,
+      "cointegration_pvalue": 0.0164
+    },
+    {
+      "ticker_a": "CNC",
+      "ticker_b": "ELV",
+      "sector": "Health Care",
+      "correlation": 0.9276,
+      "cointegration_pvalue": 0.0449
+    },
+    {
+      "ticker_a": "DPZ",
+      "ticker_b": "TSCO",
+      "sector": "Consumer Discretionary",
+      "correlation": 0.9272,
+      "cointegration_pvalue": 0.0471
+    },
+    {
+      "ticker_a": "MPWR",
+      "ticker_b": "Q",
+      "sector": "Information Technology",
+      "correlation": 0.9265,
+      "cointegration_pvalue": 0.0085
+    },
+    {
+      "ticker_a": "AMP",
+      "ticker_b": "RJF",
+      "sector": "Financials",
+      "correlation": 0.9264,
+      "cointegration_pvalue": 0.0367
+    },
+    {
+      "ticker_a": "IBKR",
+      "ticker_b": "PFG",
+      "sector": "Financials",
+      "correlation": 0.9257,
+      "cointegration_pvalue": 0.0077
+    },
+    {
+      "ticker_a": "CSCO",
+      "ticker_b": "SNDK",
+      "sector": "Information Technology",
+      "correlation": 0.9248,
+      "cointegration_pvalue": 0.0451
+    },
+    {
+      "ticker_a": "BE",
+      "ticker_b": "PWR",
+      "sector": "Industrials",
+      "correlation": 0.9242,
+      "cointegration_pvalue": 0.0231
+    },
+    {
+      "ticker_a": "EG",
+      "ticker_b": "TRV",
+      "sector": "Financials",
+      "correlation": 0.9237,
+      "cointegration_pvalue": 0.0022
+    },
+    {
+      "ticker_a": "KIM",
+      "ticker_b": "PSA",
+      "sector": "Real Estate",
+      "correlation": 0.9231,
+      "cointegration_pvalue": 0.0152
+    },
+    {
+      "ticker_a": "AAPL",
+      "ticker_b": "CRWD",
+      "sector": "Information Technology",
+      "correlation": 0.9225,
+      "cointegration_pvalue": 0.0053
+    },
+    {
+      "ticker_a": "CPRT",
+      "ticker_b": "LDOS",
+      "sector": "Industrials",
+      "correlation": 0.9225,
+      "cointegration_pvalue": 0.0306
+    },
+    {
+      "ticker_a": "BMY",
+      "ticker_b": "JNJ",
+      "sector": "Health Care",
+      "correlation": 0.922,
+      "cointegration_pvalue": 0.0268
+    },
+    {
+      "ticker_a": "A",
+      "ticker_b": "WAT",
+      "sector": "Health Care",
+      "correlation": 0.9218,
+      "cointegration_pvalue": 0.0455
+    },
+    {
+      "ticker_a": "CSCO",
+      "ticker_b": "INTC",
+      "sector": "Information Technology",
+      "correlation": 0.9214,
+      "cointegration_pvalue": 0.015
+    },
+    {
+      "ticker_a": "JCI",
+      "ticker_b": "WAB",
+      "sector": "Industrials",
+      "correlation": 0.9211,
+      "cointegration_pvalue": 0.0274
+    },
+    {
+      "ticker_a": "AMGN",
+      "ticker_b": "DGX",
+      "sector": "Health Care",
+      "correlation": 0.9184,
+      "cointegration_pvalue": 0.0023
+    },
+    {
+      "ticker_a": "BRO",
+      "ticker_b": "ERIE",
+      "sector": "Financials",
+      "correlation": 0.918,
+      "cointegration_pvalue": 0.0429
+    },
+    {
+      "ticker_a": "GDDY",
+      "ticker_b": "NOW",
+      "sector": "Information Technology",
+      "correlation": 0.9179,
+      "cointegration_pvalue": 0.0277
+    },
+    {
+      "ticker_a": "CNP",
+      "ticker_b": "WEC",
+      "sector": "Utilities",
+      "correlation": 0.9178,
+      "cointegration_pvalue": 0.0111
+    },
+    {
+      "ticker_a": "DGX",
+      "ticker_b": "MRK",
+      "sector": "Health Care",
+      "correlation": 0.9178,
+      "cointegration_pvalue": 0.0391
+    },
+    {
+      "ticker_a": "DE",
+      "ticker_b": "NDSN",
+      "sector": "Industrials",
+      "correlation": 0.9178,
+      "cointegration_pvalue": 0.0395
+    },
+    {
+      "ticker_a": "DPZ",
+      "ticker_b": "LULU",
+      "sector": "Consumer Discretionary",
+      "correlation": 0.9174,
+      "cointegration_pvalue": 0.015
+    },
+    {
+      "ticker_a": "ANET",
+      "ticker_b": "HPE",
+      "sector": "Information Technology",
+      "correlation": 0.916,
+      "cointegration_pvalue": 0.0436
+    },
+    {
+      "ticker_a": "AAPL",
+      "ticker_b": "NTAP",
+      "sector": "Information Technology",
+      "correlation": 0.9158,
+      "cointegration_pvalue": 0.0021
+    },
+    {
+      "ticker_a": "AMGN",
+      "ticker_b": "LH",
+      "sector": "Health Care",
+      "correlation": 0.9157,
+      "cointegration_pvalue": 0.0
+    },
+    {
+      "ticker_a": "GL",
+      "ticker_b": "IBKR",
+      "sector": "Financials",
+      "correlation": 0.915,
+      "cointegration_pvalue": 0.0126
+    },
+    {
+      "ticker_a": "ANET",
+      "ticker_b": "DELL",
+      "sector": "Information Technology",
+      "correlation": 0.9148,
+      "cointegration_pvalue": 0.0228
+    },
+    {
+      "ticker_a": "FRT",
+      "ticker_b": "VMRK",
+      "sector": "Real Estate",
+      "correlation": 0.914,
+      "cointegration_pvalue": 0.0078
+    },
+    {
+      "ticker_a": "CAT",
+      "ticker_b": "JBHT",
+      "sector": "Industrials",
+      "correlation": 0.9127,
+      "cointegration_pvalue": 0.0464
+    },
+    {
+      "ticker_a": "AAPL",
+      "ticker_b": "HPE",
+      "sector": "Information Technology",
+      "correlation": 0.9095,
+      "cointegration_pvalue": 0.0005
+    },
+    {
+      "ticker_a": "AEE",
+      "ticker_b": "SO",
+      "sector": "Utilities",
+      "correlation": 0.9094,
+      "cointegration_pvalue": 0.0099
+    },
+    {
+      "ticker_a": "CNC",
+      "ticker_b": "WST",
+      "sector": "Health Care",
+      "correlation": 0.9084,
+      "cointegration_pvalue": 0.014
+    },
+    {
+      "ticker_a": "AAPL",
+      "ticker_b": "PANW",
+      "sector": "Information Technology",
+      "correlation": 0.9083,
+      "cointegration_pvalue": 0.0181
+    },
+    {
+      "ticker_a": "AAPL",
+      "ticker_b": "TWLO",
+      "sector": "Information Technology",
+      "correlation": 0.9063,
+      "cointegration_pvalue": 0.0113
+    },
+    {
+      "ticker_a": "CPAY",
+      "ticker_b": "IVZ",
+      "sector": "Financials",
+      "correlation": 0.9058,
+      "cointegration_pvalue": 0.012
+    },
+    {
+      "ticker_a": "JPM",
+      "ticker_b": "PRU",
+      "sector": "Financials",
+      "correlation": 0.9055,
+      "cointegration_pvalue": 0.0364
+    },
+    {
+      "ticker_a": "PSA",
+      "ticker_b": "SPG",
+      "sector": "Real Estate",
+      "correlation": 0.9043,
+      "cointegration_pvalue": 0.0002
+    },
+    {
+      "ticker_a": "COHR",
+      "ticker_b": "MPWR",
+      "sector": "Information Technology",
+      "correlation": 0.9041,
+      "cointegration_pvalue": 0.0116
+    },
+    {
+      "ticker_a": "AAPL",
+      "ticker_b": "DELL",
+      "sector": "Information Technology",
+      "correlation": 0.9038,
+      "cointegration_pvalue": 0.0039
+    },
+    {
+      "ticker_a": "CPRT",
+      "ticker_b": "PNR",
+      "sector": "Industrials",
+      "correlation": 0.9032,
+      "cointegration_pvalue": 0.0385
+    },
+    {
+      "ticker_a": "IDXX",
+      "ticker_b": "STE",
+      "sector": "Health Care",
+      "correlation": 0.9026,
+      "cointegration_pvalue": 0.045
+    },
+    {
+      "ticker_a": "FTV",
+      "ticker_b": "ODFL",
+      "sector": "Industrials",
+      "correlation": 0.9023,
+      "cointegration_pvalue": 0.0003
+    },
+    {
+      "ticker_a": "ESS",
+      "ticker_b": "SPG",
+      "sector": "Real Estate",
+      "correlation": 0.9022,
+      "cointegration_pvalue": 0.0318
+    },
+    {
+      "ticker_a": "ADM",
+      "ticker_b": "MO",
+      "sector": "Consumer Staples",
+      "correlation": 0.9022,
+      "cointegration_pvalue": 0.0328
+    },
+    {
+      "ticker_a": "CIEN",
+      "ticker_b": "MPWR",
+      "sector": "Information Technology",
+      "correlation": 0.9019,
+      "cointegration_pvalue": 0.0295
+    },
+    {
+      "ticker_a": "CSCO",
+      "ticker_b": "WDC",
+      "sector": "Information Technology",
+      "correlation": 0.9011,
+      "cointegration_pvalue": 0.0299
+    },
+    {
+      "ticker_a": "AMGN",
+      "ticker_b": "BDX",
+      "sector": "Health Care",
+      "correlation": 0.9003,
+      "cointegration_pvalue": 0.0107
+    }
+  ]
+}

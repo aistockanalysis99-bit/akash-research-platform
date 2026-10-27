@@ -43,3 +43,11 @@ Thumbs.db
 # Screenshots dir is tracked, contents are not
 docs/screenshots/*.png
 !docs/screenshots/.gitkeep
+
+# Extra workspace scratch / pair discovery
+EXTRA/
+scratch/
+*.log
+*.sqlite3
+
+

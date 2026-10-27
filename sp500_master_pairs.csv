@@ -1,0 +1,129 @@
+ticker_a,ticker_b,sector,correlation,cointegration_pvalue
+MTB,PNC,Financials,0.9894,0.0021
+FITB,PNC,Financials,0.9886,0.0043
+DELL,HPE,Information Technology,0.9859,0.0098
+BNY,NTRS,Financials,0.9849,0.0327
+FITB,MTB,Financials,0.9837,0.0478
+SNDK,STX,Information Technology,0.9817,0.0123
+HLT,MAR,Consumer Discretionary,0.9788,0.001
+BSX,PODD,Health Care,0.9786,0.0364
+FIX,PWR,Industrials,0.9785,0.0235
+DELL,FTNT,Information Technology,0.9763,0.0044
+KEYS,LITE,Information Technology,0.9757,0.0027
+PFG,STT,Financials,0.9739,0.0079
+FTNT,HPE,Information Technology,0.9735,0.0061
+OKE,TRGP,Energy,0.9724,0.0197
+BEN,PFG,Financials,0.9698,0.0097
+CRWD,NTAP,Information Technology,0.9695,0.0029
+NTRS,PFG,Financials,0.9671,0.0217
+BEN,NTRS,Financials,0.9668,0.0205
+DUK,SO,Utilities,0.9662,0.0392
+NTAP,PANW,Information Technology,0.9655,0.0335
+INTC,SNDK,Information Technology,0.9649,0.0251
+INTC,STX,Information Technology,0.9648,0.0222
+GL,STT,Financials,0.9624,0.0204
+BNY,PFG,Financials,0.9623,0.0316
+BEN,IBKR,Financials,0.9606,0.0015
+AMD,FFIV,Information Technology,0.9605,0.0291
+HPE,TWLO,Information Technology,0.9597,0.0014
+GS,MS,Financials,0.9597,0.045
+COHR,JBL,Information Technology,0.959,0.0002
+AME,IEX,Industrials,0.959,0.0012
+LRCX,WDC,Information Technology,0.959,0.0014
+FIX,GEV,Industrials,0.9578,0.0358
+CRWD,HPE,Information Technology,0.9574,0.0144
+BNY,GL,Financials,0.9564,0.0136
+GIS,MKC,Consumer Staples,0.956,0.0052
+AMD,MRVL,Information Technology,0.9559,0.0427
+JBL,Q,Information Technology,0.9557,0.0012
+GLW,Q,Information Technology,0.9552,0.0011
+GL,PFG,Financials,0.9551,0.0261
+NOW,WDAY,Information Technology,0.9549,0.045
+GL,NTRS,Financials,0.9539,0.0113
+FANG,OKE,Energy,0.9532,0.0332
+LVS,WYNN,Consumer Discretionary,0.9525,0.0121
+FFIV,MU,Information Technology,0.9519,0.022
+AME,WAB,Industrials,0.9515,0.0116
+COHR,GLW,Information Technology,0.9511,0.0018
+CSCO,STX,Information Technology,0.9484,0.0237
+HUM,WST,Health Care,0.9474,0.0329
+AMAT,WDC,Information Technology,0.947,0.0113
+CHD,CL,Consumer Staples,0.9467,0.0204
+CRWD,TWLO,Information Technology,0.9467,0.0417
+CSCO,MU,Information Technology,0.9465,0.0189
+BEN,GL,Financials,0.9465,0.0434
+KLAC,WDC,Information Technology,0.9461,0.0001
+IBKR,NTRS,Financials,0.9458,0.0015
+HII,NOC,Industrials,0.9452,0.0047
+COHR,Q,Information Technology,0.9444,0.0029
+DLR,EQIX,Real Estate,0.9441,0.0128
+DELL,TWLO,Information Technology,0.944,0.0163
+ILMN,RVTY,Health Care,0.942,0.0403
+NTAP,TWLO,Information Technology,0.9415,0.0179
+GWW,IEX,Industrials,0.9409,0.0268
+JBL,WDC,Information Technology,0.9409,0.0326
+LEN,NKE,Consumer Discretionary,0.9403,0.0173
+AME,NDSN,Industrials,0.9379,0.017
+CMS,SRE,Utilities,0.9369,0.0006
+IBKR,STT,Financials,0.9357,0.0332
+AIZ,MET,Financials,0.9344,0.0245
+FFIV,TWLO,Information Technology,0.9341,0.046
+FLEX,WDC,Information Technology,0.9324,0.0188
+BSX,IDXX,Health Care,0.932,0.0007
+BNY,IBKR,Financials,0.9316,0.0496
+AAPL,FTNT,Information Technology,0.9304,0.0151
+CNP,SO,Utilities,0.9303,0.002
+FAST,NDSN,Industrials,0.93,0.0108
+IEX,UNP,Industrials,0.9299,0.0387
+GLW,JBL,Information Technology,0.9297,0.0476
+DOC,ESS,Real Estate,0.9295,0.0114
+EXR,PSA,Real Estate,0.9293,0.0267
+IDXX,PODD,Health Care,0.929,0.0028
+JBL,MPWR,Information Technology,0.928,0.0164
+CNC,ELV,Health Care,0.9276,0.0449
+DPZ,TSCO,Consumer Discretionary,0.9272,0.0471
+MPWR,Q,Information Technology,0.9265,0.0085
+AMP,RJF,Financials,0.9264,0.0367
+IBKR,PFG,Financials,0.9257,0.0077
+CSCO,SNDK,Information Technology,0.9248,0.0451
+BE,PWR,Industrials,0.9242,0.0231
+EG,TRV,Financials,0.9237,0.0022
+KIM,PSA,Real Estate,0.9231,0.0152
+AAPL,CRWD,Information Technology,0.9225,0.0053
+CPRT,LDOS,Industrials,0.9225,0.0306
+BMY,JNJ,Health Care,0.922,0.0268
+A,WAT,Health Care,0.9218,0.0455
+CSCO,INTC,Information Technology,0.9214,0.015
+JCI,WAB,Industrials,0.9211,0.0274
+AMGN,DGX,Health Care,0.9184,0.0023
+BRO,ERIE,Financials,0.918,0.0429
+GDDY,NOW,Information Technology,0.9179,0.0277
+CNP,WEC,Utilities,0.9178,0.0111
+DGX,MRK,Health Care,0.9178,0.0391
+DE,NDSN,Industrials,0.9178,0.0395
+DPZ,LULU,Consumer Discretionary,0.9174,0.015
+ANET,HPE,Information Technology,0.916,0.0436
+AAPL,NTAP,Information Technology,0.9158,0.0021
+AMGN,LH,Health Care,0.9157,0.0
+GL,IBKR,Financials,0.915,0.0126
+ANET,DELL,Information Technology,0.9148,0.0228
+FRT,VMRK,Real Estate,0.914,0.0078
+CAT,JBHT,Industrials,0.9127,0.0464
+AAPL,HPE,Information Technology,0.9095,0.0005
+AEE,SO,Utilities,0.9094,0.0099
+CNC,WST,Health Care,0.9084,0.014
+AAPL,PANW,Information Technology,0.9083,0.0181
+AAPL,TWLO,Information Technology,0.9063,0.0113
+CPAY,IVZ,Financials,0.9058,0.012
+JPM,PRU,Financials,0.9055,0.0364
+PSA,SPG,Real Estate,0.9043,0.0002
+COHR,MPWR,Information Technology,0.9041,0.0116
+AAPL,DELL,Information Technology,0.9038,0.0039
+CPRT,PNR,Industrials,0.9032,0.0385
+IDXX,STE,Health Care,0.9026,0.045
+FTV,ODFL,Industrials,0.9023,0.0003
+ESS,SPG,Real Estate,0.9022,0.0318
+ADM,MO,Consumer Staples,0.9022,0.0328
+CIEN,MPWR,Information Technology,0.9019,0.0295
+CSCO,WDC,Information Technology,0.9011,0.0299
+AMGN,BDX,Health Care,0.9003,0.0107
