@@ -913,5 +913,10 @@ export const api = {
 
     getSavedRun: (runId: string) =>
       get<Backtest1YResponse>(`/simulator/backtest-1y/run/${encodeURIComponent(runId)}`),
+
+    deleteSavedRun: (runId: string) =>
+      del<{ status: string; run_id: string; remaining: number }>(
+        `/simulator/backtest-1y/run/${encodeURIComponent(runId)}`
+      ),
   },
 };

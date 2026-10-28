@@ -786,3 +786,18 @@ def get_saved_backtest_run_by_id(run_id: str) -> Response:
     if not file_path.exists():
         raise HTTPException(404, f"Run '{clean_id}' not found in runs cache.")
     return Response(content=file_path.read_bytes(), media_type="application/json")
+
+
+@router.delete("/backtest-1y/run/{run_id}")
+def delete_saved_backtest_run(run_id: str) -> Dict[str, Any]:
+    """Delete a saved backtest run from cache and manifest."""
+    from scripts.run_1y_backtest import delete_saved_run, get_saved_runs_list
+    clean_id = run_id.strip()
+    with _cached_1y_lock:
+        if clean_id in _runs_bytes_cache:
+            del _runs_bytes_cache[clean_id]
+        success = delete_saved_run(clean_id)
+        if not success:
+            raise HTTPException(404, f"Run '{clean_id}' not found.")
+        remaining = get_saved_runs_list()
+        return {"status": "deleted", "run_id": clean_id, "remaining": len(remaining)}

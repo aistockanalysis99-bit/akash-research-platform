@@ -197,3 +197,31 @@ def test_backtest_saved_runs_manifest(client: TestClient):
     assert cached_resp.status_code == 200
     assert dur_ms < 100.0, f"Subsequent cache fetch took too long: {dur_ms:.1f}ms"
 
+
+def test_backtest_delete_saved_run(client: TestClient):
+    """Verify that deleting a saved run removes it from cache and manifest."""
+    from scripts.run_1y_backtest import save_backtest_run, RUNS_CACHE_DIR
+    dummy = {
+        "period": {
+            "start_date": "2025-01-01",
+            "end_date": "2025-07-01",
+            "trading_days_evaluated": 125,
+            "pairs_universe_count": 52,
+        },
+        "overall_summary": {"total_trades": 10, "win_count": 5, "loss_count": 5, "win_rate_pct": 50.0},
+        "trades": [],
+        "meta": {"entry_z": 2.22, "stop_z": 3.77, "max_horizon_days": 12},
+    }
+    key = save_backtest_run(dummy)
+    assert (RUNS_CACHE_DIR / f"{key}.json").exists()
+
+    # Delete via API
+    del_resp = client.delete(f"/api/simulator/backtest-1y/run/{key}")
+    assert del_resp.status_code == 200
+    assert del_resp.json()["status"] == "deleted"
+    assert not (RUNS_CACHE_DIR / f"{key}.json").exists()
+
+    # Verify 404 on deleting non-existent
+    del_again = client.delete(f"/api/simulator/backtest-1y/run/{key}")
+    assert del_again.status_code == 404
+

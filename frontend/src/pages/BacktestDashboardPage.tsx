@@ -38,6 +38,7 @@ import {
   Square,
   FileText,
   Filter,
+  Trash2,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import type { Backtest1YTrade, SavedBacktestRun } from "@/lib/simulatorTypes";
@@ -285,6 +286,7 @@ export default function BacktestDashboardPage() {
   const [timeframeFilter, setTimeframeFilter] = useState<TimeframeFilter>("all");
   const [selectedRunIdsToCompare, setSelectedRunIdsToCompare] = useState<string[]>([]);
   const [inspectedRun, setInspectedRun] = useState<SavedBacktestRun | null>(null);
+  const [isDeletingRunId, setIsDeletingRunId] = useState<string | null>(null);
 
   // ─── Date Range Validation (Min: 6 Months, Max: 5 Years) ──────────────────
   const dateValidation = useMemo(() => {
@@ -430,7 +432,8 @@ export default function BacktestDashboardPage() {
         ["backtest-1y", p.start_date, p.end_date, p.entry_z, p.stop_z, p.max_horizon_days],
         freshData
       );
-      refetchSavedRuns();
+      await refetchSavedRuns();
+      queryClient.invalidateQueries({ queryKey: ["saved-backtest-runs"] });
       const computedAt =
         freshData?.meta?.computed_at || new Date().toLocaleTimeString();
       const latency = freshData?.meta?.latency_seconds
@@ -438,9 +441,9 @@ export default function BacktestDashboardPage() {
         : "";
       setRecalcBanner({
         type: "success",
-        text: `Backtest computed and cached successfully${latency} (${p.start_date} to ${p.end_date}). ${
+        text: `Backtest "${freshData?.period?.start_date} to ${freshData?.period?.end_date} (|Z| ≥ ${p.entry_z}σ)" computed and automatically saved to Compare suite! (${
           freshData.trades?.length ?? 0
-        } trades evaluated with zero lookahead at ${computedAt}.`,
+        } trades evaluated with zero lookahead at ${computedAt}${latency}).`,
       });
       setTimeout(() => setRecalcBanner(null), 10000);
     } catch (err: any) {
@@ -454,6 +457,51 @@ export default function BacktestDashboardPage() {
       setTimeout(() => setRecalcBanner(null), 10000);
     } finally {
       setIsRecalculating(false);
+    }
+  };
+
+  // Auto-refresh saved runs catalog whenever a backtest calculation completes
+  useEffect(() => {
+    if (data?.meta?.computed_at) {
+      refetchSavedRuns();
+    }
+  }, [data?.meta?.computed_at, refetchSavedRuns]);
+
+  // Delete a saved strategy run from persistent cache and manifest
+  const handleDeleteSavedRun = async (run: SavedBacktestRun) => {
+    const runName = run.test_name || run.run_id;
+    if (
+      !window.confirm(
+        `Are you sure you want to delete "${runName}" from the Compare Tests suite?`
+      )
+    ) {
+      return;
+    }
+    setIsDeletingRunId(run.run_id);
+    try {
+      await api.simulator.deleteSavedRun(run.run_id);
+      setSelectedRunIdsToCompare((prev) =>
+        prev.filter((id) => id !== run.run_id)
+      );
+      if (inspectedRun?.run_id === run.run_id) {
+        setInspectedRun(null);
+      }
+      await refetchSavedRuns();
+      queryClient.invalidateQueries({ queryKey: ["saved-backtest-runs"] });
+      setRecalcBanner({
+        type: "success",
+        text: `Deleted "${runName}" from saved comparison suite.`,
+      });
+      setTimeout(() => setRecalcBanner(null), 5000);
+    } catch (err: any) {
+      console.error("Failed to delete saved run:", err);
+      setRecalcBanner({
+        type: "error",
+        text: err?.message || "Failed to delete saved test run.",
+      });
+      setTimeout(() => setRecalcBanner(null), 6000);
+    } finally {
+      setIsDeletingRunId(null);
     }
   };
 
@@ -2059,13 +2107,23 @@ export default function BacktestDashboardPage() {
                           <td className="py-2 px-3 text-gray-400 font-sans">Action</td>
                           {runsBeingCompared.map((r) => (
                             <td key={r.run_id} className="py-2 px-3">
-                              <button
-                                onClick={() => handleLoadSavedRun(r)}
-                                className="px-3 py-1 rounded bg-brand text-bg text-[10px] font-bold hover:bg-brand/90 transition-all inline-flex items-center gap-1 shadow-sm"
-                              >
-                                <Zap className="w-3 h-3 fill-bg" />
-                                <span>Load Strategy</span>
-                              </button>
+                              <div className="flex items-center gap-1.5">
+                                <button
+                                  onClick={() => handleLoadSavedRun(r)}
+                                  className="px-2.5 py-1 rounded bg-brand text-bg text-[10px] font-bold hover:bg-brand/90 transition-all inline-flex items-center gap-1 shadow-sm"
+                                >
+                                  <Zap className="w-3 h-3 fill-bg" />
+                                  <span>Load</span>
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteSavedRun(r)}
+                                  disabled={isDeletingRunId === r.run_id}
+                                  className="p-1 rounded bg-rose-950/40 text-rose-300 hover:text-white hover:bg-rose-900/60 border border-rose-500/30 transition-colors inline-flex items-center disabled:opacity-50"
+                                  title={`Delete "${r.test_name || r.run_id}"`}
+                                >
+                                  <Trash2 className="w-3 h-3 text-rose-400" />
+                                </button>
+                              </div>
                             </td>
                           ))}
                         </tr>
@@ -2271,6 +2329,18 @@ export default function BacktestDashboardPage() {
                                     <span>Load</span>
                                   </button>
                                 )}
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteSavedRun(r);
+                                  }}
+                                  disabled={isDeletingRunId === r.run_id}
+                                  className="text-[10px] font-medium text-rose-400 hover:text-white px-2 py-1 rounded bg-rose-950/30 hover:bg-rose-900/60 border border-rose-500/30 hover:border-rose-500/60 transition-colors inline-flex items-center gap-1 disabled:opacity-50"
+                                  title={`Delete test "${r.test_name || r.run_id}" from comparison suite`}
+                                >
+                                  <Trash2 className="w-3 h-3 text-rose-400" />
+                                  <span>Delete</span>
+                                </button>
                               </div>
                             </td>
                           </tr>
@@ -3609,6 +3679,17 @@ export default function BacktestDashboardPage() {
               </div>
 
               <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    handleDeleteSavedRun(inspectedRun);
+                  }}
+                  disabled={isDeletingRunId === inspectedRun.run_id}
+                  className="px-3 py-1.5 rounded-lg bg-rose-950/40 border border-rose-500/30 text-xs font-bold text-rose-300 hover:text-white hover:bg-rose-900/60 transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                  title="Delete this strategy run from compare suite"
+                >
+                  <Trash2 className="w-3.5 h-3.5 text-rose-400" />
+                  <span>Delete</span>
+                </button>
                 <button
                   onClick={() => setInspectedRun(null)}
                   className="px-3 py-1.5 rounded-lg bg-surface-2 border border-line text-xs text-gray-300 hover:text-white transition-colors"

@@ -294,6 +294,38 @@ def get_saved_runs_list() -> List[Dict[str, Any]]:
     return []
 
 
+def delete_saved_run(run_id: str) -> bool:
+    """Delete a saved run from cache files and update manifest.json."""
+    clean_id = run_id.strip()
+    file_path = RUNS_CACHE_DIR / f"{clean_id}.json"
+    deleted_file = False
+    if file_path.exists():
+        try:
+            file_path.unlink()
+            deleted_file = True
+        except Exception as e:
+            logger.warning(f"Failed to delete file {file_path}: {e}")
+
+    # Remove from manifest.json
+    if MANIFEST_FILE.exists():
+        try:
+            with open(MANIFEST_FILE, "r", encoding="utf-8") as f:
+                manifest = json.load(f)
+            runs = manifest.get("runs", [])
+            initial_len = len(runs)
+            manifest["runs"] = [r for r in runs if r.get("run_id") != clean_id]
+            if len(manifest["runs"]) < initial_len:
+                with tempfile.NamedTemporaryFile("w", dir=str(RUNS_CACHE_DIR), delete=False, encoding="utf-8") as tf:
+                    json.dump(manifest, tf, indent=2)
+                    temp_name = tf.name
+                os.replace(temp_name, MANIFEST_FILE)
+                return True
+        except Exception as e:
+            logger.warning(f"Failed to update manifest during delete: {e}")
+
+    return deleted_file
+
+
 def run_1y_walkforward_backtest(
     start_date: str = "2025-10-26",
     end_date: str = "2026-10-26",
