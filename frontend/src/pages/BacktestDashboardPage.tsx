@@ -3159,7 +3159,7 @@ export default function BacktestDashboardPage() {
                             onClick={(e) => e.stopPropagation()}
                             className="text-[11px] font-semibold text-brand hover:text-brand/80 px-2 py-1 rounded border border-brand/30 hover:border-brand/60 bg-brand/10 inline-flex items-center gap-1 transition-colors"
                           >
-                            <span>Replay</span>
+                            <span>Show Graph</span>
                             <ArrowRight className="w-3 h-3" />
                           </Link>
                         </div>
@@ -3388,7 +3388,7 @@ export default function BacktestDashboardPage() {
                   to={`/setups/${inspectedTrade.ticker_a}/${inspectedTrade.ticker_b}?date=${inspectedTrade.entry_date}`}
                   className="px-4 py-1.5 rounded-lg bg-brand text-bg text-xs font-bold hover:bg-brand/90 transition-all flex items-center gap-1.5 shadow-sm"
                 >
-                  <span>Open Point-in-Time Historical Trade Replay</span>
+                  <span>Show Graph</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
