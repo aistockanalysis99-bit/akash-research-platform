@@ -74,6 +74,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -119,6 +121,8 @@
       "max_adverse_z": 0.514,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -164,6 +168,8 @@
       "max_adverse_z": 2.254,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -209,6 +215,8 @@
       "max_adverse_z": 2.11,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -254,6 +262,8 @@
       "max_adverse_z": 0.833,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -299,6 +309,8 @@
       "max_adverse_z": 1.77,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -344,6 +356,8 @@
       "max_adverse_z": 0.172,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -389,6 +403,8 @@
       "max_adverse_z": 1.103,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -434,6 +450,8 @@
       "max_adverse_z": 0.932,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -479,6 +497,8 @@
       "max_adverse_z": 1.655,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -524,6 +544,8 @@
       "max_adverse_z": 1.56,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -569,6 +591,8 @@
       "max_adverse_z": 2.047,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -614,6 +638,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -659,6 +685,8 @@
       "max_adverse_z": 1.395,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -704,6 +732,8 @@
       "max_adverse_z": 0.084,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -749,6 +779,8 @@
       "max_adverse_z": 0.86,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -794,6 +826,8 @@
       "max_adverse_z": 0.042,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -839,6 +873,8 @@
       "max_adverse_z": 0.034,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -884,6 +920,8 @@
       "max_adverse_z": 1.325,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -929,6 +967,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -974,6 +1014,8 @@
       "max_adverse_z": 7.547,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -1019,6 +1061,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -1064,6 +1108,8 @@
       "max_adverse_z": 0.23,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -1109,6 +1155,8 @@
       "max_adverse_z": 0.71,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -1154,6 +1202,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -1199,6 +1249,8 @@
       "max_adverse_z": 2.019,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -1244,6 +1296,8 @@
       "max_adverse_z": 0.646,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -1289,6 +1343,8 @@
       "max_adverse_z": 0.081,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -1334,6 +1390,8 @@
       "max_adverse_z": 1.996,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -1379,6 +1437,8 @@
       "max_adverse_z": 1.551,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -1424,6 +1484,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -1469,6 +1531,8 @@
       "max_adverse_z": 1.931,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -1514,6 +1578,8 @@
       "max_adverse_z": 0.258,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -1559,6 +1625,8 @@
       "max_adverse_z": 0.039,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -1604,6 +1672,8 @@
       "max_adverse_z": 0.271,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -1649,6 +1719,8 @@
       "max_adverse_z": 0.525,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -1694,6 +1766,8 @@
       "max_adverse_z": 1.053,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -1739,6 +1813,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -1784,6 +1860,8 @@
       "max_adverse_z": 1.587,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -1829,6 +1907,8 @@
       "max_adverse_z": 1.039,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -1874,6 +1954,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -1919,6 +2001,8 @@
       "max_adverse_z": 0.512,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -1964,6 +2048,8 @@
       "max_adverse_z": 0.032,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -2009,6 +2095,8 @@
       "max_adverse_z": 1.01,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -2054,6 +2142,8 @@
       "max_adverse_z": 3.042,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -2099,6 +2189,8 @@
       "max_adverse_z": 3.767,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -2144,6 +2236,8 @@
       "max_adverse_z": 1.923,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -2189,6 +2283,8 @@
       "max_adverse_z": 0.776,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -2234,6 +2330,8 @@
       "max_adverse_z": 1.617,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -2279,6 +2377,8 @@
       "max_adverse_z": 1.016,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -2324,6 +2424,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -2369,6 +2471,8 @@
       "max_adverse_z": 1.442,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -2414,6 +2518,8 @@
       "max_adverse_z": 0.215,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -2459,6 +2565,8 @@
       "max_adverse_z": 1.587,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -2504,6 +2612,8 @@
       "max_adverse_z": 1.76,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -2549,6 +2659,8 @@
       "max_adverse_z": 0.629,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -2594,6 +2706,8 @@
       "max_adverse_z": 0.712,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -2639,6 +2753,8 @@
       "max_adverse_z": 0.824,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -2684,6 +2800,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -2729,6 +2847,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -2774,6 +2894,8 @@
       "max_adverse_z": 1.382,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -2819,6 +2941,8 @@
       "max_adverse_z": 0.2,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -2864,6 +2988,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -2909,6 +3035,8 @@
       "max_adverse_z": 1.139,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -2954,6 +3082,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -2999,6 +3129,8 @@
       "max_adverse_z": 1.323,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -3044,6 +3176,8 @@
       "max_adverse_z": 0.444,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -3089,6 +3223,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -3134,6 +3270,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -3179,6 +3317,8 @@
       "max_adverse_z": 1.685,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -3224,6 +3364,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -3269,6 +3411,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -3314,6 +3458,8 @@
       "max_adverse_z": 1.119,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -3359,6 +3505,8 @@
       "max_adverse_z": 1.548,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -3404,6 +3552,8 @@
       "max_adverse_z": 1.456,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -3449,6 +3599,8 @@
       "max_adverse_z": 2.865,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -3494,6 +3646,8 @@
       "max_adverse_z": 1.763,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -3539,6 +3693,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -3584,6 +3740,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -3629,6 +3787,8 @@
       "max_adverse_z": 1.319,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -3674,6 +3834,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -3719,6 +3881,8 @@
       "max_adverse_z": 1.794,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -3764,6 +3928,8 @@
       "max_adverse_z": 0.785,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -3809,6 +3975,8 @@
       "max_adverse_z": 1.065,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -3854,6 +4022,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -3899,6 +4069,8 @@
       "max_adverse_z": 1.522,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -3944,6 +4116,8 @@
       "max_adverse_z": 0.884,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -3989,6 +4163,8 @@
       "max_adverse_z": 0.316,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -4034,6 +4210,8 @@
       "max_adverse_z": 1.304,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -4079,6 +4257,8 @@
       "max_adverse_z": 0.634,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -4124,6 +4304,8 @@
       "max_adverse_z": 0.616,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -4169,6 +4351,8 @@
       "max_adverse_z": 0.707,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -4214,6 +4398,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -4259,6 +4445,8 @@
       "max_adverse_z": 0.133,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -4304,6 +4492,8 @@
       "max_adverse_z": 1.316,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -4349,6 +4539,8 @@
       "max_adverse_z": 1.386,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -4394,6 +4586,8 @@
       "max_adverse_z": 1.299,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -4439,6 +4633,8 @@
       "max_adverse_z": 0.798,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -4484,6 +4680,8 @@
       "max_adverse_z": 0.946,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -4529,6 +4727,8 @@
       "max_adverse_z": 0.524,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -4574,6 +4774,8 @@
       "max_adverse_z": 0.587,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -4619,6 +4821,8 @@
       "max_adverse_z": 5.952,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -4664,6 +4868,8 @@
       "max_adverse_z": 4.684,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -4709,6 +4915,8 @@
       "max_adverse_z": 0.012,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -4754,6 +4962,8 @@
       "max_adverse_z": 0.201,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -4799,6 +5009,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -4844,6 +5056,8 @@
       "max_adverse_z": 2.119,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -4889,6 +5103,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -4934,6 +5150,8 @@
       "max_adverse_z": 1.617,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -4979,6 +5197,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -5024,6 +5244,8 @@
       "max_adverse_z": 2.019,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -5069,6 +5291,8 @@
       "max_adverse_z": 0.764,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -5114,6 +5338,8 @@
       "max_adverse_z": 0.906,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -5159,6 +5385,8 @@
       "max_adverse_z": 0.393,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -5204,6 +5432,8 @@
       "max_adverse_z": 2.366,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -5249,6 +5479,8 @@
       "max_adverse_z": 5.752,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -5294,6 +5526,8 @@
       "max_adverse_z": 0.289,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -5339,6 +5573,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -5384,6 +5620,8 @@
       "max_adverse_z": 0.166,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -5429,6 +5667,8 @@
       "max_adverse_z": 0.898,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -5474,6 +5714,8 @@
       "max_adverse_z": 4.763,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -5519,6 +5761,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -5564,6 +5808,8 @@
       "max_adverse_z": 1.072,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -5609,6 +5855,8 @@
       "max_adverse_z": 0.089,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -5654,6 +5902,8 @@
       "max_adverse_z": 0.482,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -5699,6 +5949,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -5744,6 +5996,8 @@
       "max_adverse_z": 0.819,
       "is_perfect_10": false,
       "passed_checks_count": 8,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -5789,6 +6043,8 @@
       "max_adverse_z": 2.669,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -5834,6 +6090,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -5879,6 +6137,8 @@
       "max_adverse_z": 0.567,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": false,
+      "is_ready_to_take": false,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -5924,6 +6184,8 @@
       "max_adverse_z": 0.955,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -5969,6 +6231,8 @@
       "max_adverse_z": 0.54,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -6014,6 +6278,8 @@
       "max_adverse_z": 0.1,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -6059,6 +6325,8 @@
       "max_adverse_z": 1.447,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -6104,6 +6372,8 @@
       "max_adverse_z": 1.911,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -6149,6 +6419,8 @@
       "max_adverse_z": 0.437,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -6194,6 +6466,8 @@
       "max_adverse_z": 0.29,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -6239,6 +6513,8 @@
       "max_adverse_z": 1.721,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -6284,6 +6560,8 @@
       "max_adverse_z": 1.733,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -6329,6 +6607,8 @@
       "max_adverse_z": 1.166,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -6374,6 +6654,8 @@
       "max_adverse_z": 1.256,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -6419,6 +6701,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -6464,6 +6748,8 @@
       "max_adverse_z": 2.189,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -6509,6 +6795,8 @@
       "max_adverse_z": 1.974,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -6554,6 +6842,8 @@
       "max_adverse_z": 0.827,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -6599,6 +6889,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -6644,6 +6936,8 @@
       "max_adverse_z": 0.307,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -6689,6 +6983,8 @@
       "max_adverse_z": 1.549,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -6734,6 +7030,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -6779,6 +7077,8 @@
       "max_adverse_z": 3.364,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -6824,6 +7124,8 @@
       "max_adverse_z": 1.48,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -6869,6 +7171,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -6914,6 +7218,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -6959,6 +7265,8 @@
       "max_adverse_z": 1.571,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -7004,6 +7312,8 @@
       "max_adverse_z": 1.269,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -7049,6 +7359,8 @@
       "max_adverse_z": 1.994,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -7094,6 +7406,8 @@
       "max_adverse_z": 1.27,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -7139,6 +7453,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -7184,6 +7500,8 @@
       "max_adverse_z": 0.245,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -7229,6 +7547,8 @@
       "max_adverse_z": 0.081,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -7274,6 +7594,8 @@
       "max_adverse_z": 2.703,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -7319,6 +7641,8 @@
       "max_adverse_z": 2.056,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -7364,6 +7688,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -7409,6 +7735,8 @@
       "max_adverse_z": 2.341,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -7454,6 +7782,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -7499,6 +7829,8 @@
       "max_adverse_z": 0.342,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -7544,6 +7876,8 @@
       "max_adverse_z": 0.092,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -7589,6 +7923,8 @@
       "max_adverse_z": 1.697,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -7634,6 +7970,8 @@
       "max_adverse_z": 1.41,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -7679,6 +8017,8 @@
       "max_adverse_z": 0.519,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -7724,6 +8064,8 @@
       "max_adverse_z": 1.458,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -7769,6 +8111,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -7814,6 +8158,8 @@
       "max_adverse_z": 1.355,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -7859,6 +8205,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -7904,6 +8252,8 @@
       "max_adverse_z": 1.849,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -7949,6 +8299,8 @@
       "max_adverse_z": 1.749,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -7994,6 +8346,8 @@
       "max_adverse_z": 1.773,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -8039,6 +8393,8 @@
       "max_adverse_z": 1.752,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -8084,6 +8440,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -8129,6 +8487,8 @@
       "max_adverse_z": 2.235,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -8174,6 +8534,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -8219,6 +8581,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -8264,6 +8628,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -8309,6 +8675,8 @@
       "max_adverse_z": 1.245,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -8354,6 +8722,8 @@
       "max_adverse_z": 0.873,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -8399,6 +8769,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -8444,6 +8816,8 @@
       "max_adverse_z": 2.135,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -8489,6 +8863,8 @@
       "max_adverse_z": 0.117,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -8534,6 +8910,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -8579,6 +8957,8 @@
       "max_adverse_z": 0.652,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -8624,6 +9004,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -8669,6 +9051,8 @@
       "max_adverse_z": 1.891,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -8714,6 +9098,8 @@
       "max_adverse_z": 1.025,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -8759,6 +9145,8 @@
       "max_adverse_z": 0.868,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -8804,6 +9192,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -8849,6 +9239,8 @@
       "max_adverse_z": 1.428,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -8894,6 +9286,8 @@
       "max_adverse_z": 0.057,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -8939,6 +9333,8 @@
       "max_adverse_z": 1.043,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -8984,6 +9380,8 @@
       "max_adverse_z": 0.622,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -9029,6 +9427,8 @@
       "max_adverse_z": 0.989,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -9074,6 +9474,8 @@
       "max_adverse_z": 0.81,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -9119,6 +9521,8 @@
       "max_adverse_z": 0.325,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -9164,6 +9568,8 @@
       "max_adverse_z": 0.625,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -9209,6 +9615,8 @@
       "max_adverse_z": 0.02,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -9254,6 +9662,8 @@
       "max_adverse_z": 1.269,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -9299,6 +9709,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -9344,6 +9756,8 @@
       "max_adverse_z": 1.554,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -9389,6 +9803,8 @@
       "max_adverse_z": 1.718,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -9434,6 +9850,8 @@
       "max_adverse_z": 1.575,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -9479,6 +9897,8 @@
       "max_adverse_z": 1.498,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -9524,6 +9944,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -9569,6 +9991,8 @@
       "max_adverse_z": 0.257,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -9614,6 +10038,8 @@
       "max_adverse_z": 1.355,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -9659,6 +10085,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -9704,6 +10132,8 @@
       "max_adverse_z": 1.706,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -9749,6 +10179,8 @@
       "max_adverse_z": 1.024,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -9794,6 +10226,8 @@
       "max_adverse_z": 0.925,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -9839,6 +10273,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -9884,6 +10320,8 @@
       "max_adverse_z": 0.423,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -9929,6 +10367,8 @@
       "max_adverse_z": 1.388,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -9974,6 +10414,8 @@
       "max_adverse_z": 1.058,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -10019,6 +10461,8 @@
       "max_adverse_z": 0.407,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -10064,6 +10508,8 @@
       "max_adverse_z": 0.782,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -10109,6 +10555,8 @@
       "max_adverse_z": 1.507,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -10154,6 +10602,8 @@
       "max_adverse_z": 1.454,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -10199,6 +10649,8 @@
       "max_adverse_z": 0.7,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -10244,6 +10696,8 @@
       "max_adverse_z": 1.671,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -10289,6 +10743,8 @@
       "max_adverse_z": 0.892,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -10334,6 +10790,8 @@
       "max_adverse_z": 0.388,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -10379,6 +10837,8 @@
       "max_adverse_z": 0.047,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -10424,6 +10884,8 @@
       "max_adverse_z": 2.381,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -10469,6 +10931,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -10514,6 +10978,8 @@
       "max_adverse_z": 0.614,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -10559,6 +11025,8 @@
       "max_adverse_z": 0.638,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": false,
+      "is_ready_to_take": false,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -10604,6 +11072,8 @@
       "max_adverse_z": 0.175,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -10649,6 +11119,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -10694,6 +11166,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -10739,6 +11213,8 @@
       "max_adverse_z": 2.392,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -10784,6 +11260,8 @@
       "max_adverse_z": 2.482,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -10829,6 +11307,8 @@
       "max_adverse_z": 0.751,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -10874,6 +11354,8 @@
       "max_adverse_z": 0.221,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": false,
+      "is_ready_to_take": false,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -10919,6 +11401,8 @@
       "max_adverse_z": 1.179,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -10964,6 +11448,8 @@
       "max_adverse_z": 1.979,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -11009,6 +11495,8 @@
       "max_adverse_z": 5.76,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -11054,6 +11542,8 @@
       "max_adverse_z": 1.619,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -11099,6 +11589,8 @@
       "max_adverse_z": 0.97,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -11144,6 +11636,8 @@
       "max_adverse_z": 1.365,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -11189,6 +11683,8 @@
       "max_adverse_z": 0.867,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -11234,6 +11730,8 @@
       "max_adverse_z": 0.207,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -11279,6 +11777,8 @@
       "max_adverse_z": 1.553,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -11324,6 +11824,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -11369,6 +11871,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -11414,6 +11918,8 @@
       "max_adverse_z": 0.046,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -11459,6 +11965,8 @@
       "max_adverse_z": 0.07,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -11504,6 +12012,8 @@
       "max_adverse_z": 0.513,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -11549,6 +12059,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -11594,6 +12106,8 @@
       "max_adverse_z": 4.117,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -11639,6 +12153,8 @@
       "max_adverse_z": 0.892,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -11684,6 +12200,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -11729,6 +12247,8 @@
       "max_adverse_z": 4.637,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -11774,6 +12294,8 @@
       "max_adverse_z": 0.904,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": false,
+      "is_ready_to_take": false,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -11819,6 +12341,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -11864,6 +12388,8 @@
       "max_adverse_z": 2.235,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -11909,6 +12435,8 @@
       "max_adverse_z": 0.951,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -11954,6 +12482,8 @@
       "max_adverse_z": 0.697,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -11999,6 +12529,8 @@
       "max_adverse_z": 1.335,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -12044,6 +12576,8 @@
       "max_adverse_z": 0.4,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -12089,6 +12623,8 @@
       "max_adverse_z": 3.396,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -12134,6 +12670,8 @@
       "max_adverse_z": 1.181,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -12179,6 +12717,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -12224,6 +12764,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -12269,6 +12811,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -12314,6 +12858,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -12359,6 +12905,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -12404,6 +12952,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": false,
+      "is_ready_to_take": false,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -12449,6 +12999,8 @@
       "max_adverse_z": 0.096,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -12494,6 +13046,8 @@
       "max_adverse_z": 2.043,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -12539,6 +13093,8 @@
       "max_adverse_z": 1.84,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -12584,6 +13140,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -12629,6 +13187,8 @@
       "max_adverse_z": 0.519,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -12674,6 +13234,8 @@
       "max_adverse_z": 1.294,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -12719,6 +13281,8 @@
       "max_adverse_z": 0.132,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -12764,6 +13328,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -12809,6 +13375,8 @@
       "max_adverse_z": 1.468,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": false,
+      "is_ready_to_take": false,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -12854,6 +13422,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -12899,6 +13469,8 @@
       "max_adverse_z": 1.493,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -12944,6 +13516,8 @@
       "max_adverse_z": 1.348,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -12989,6 +13563,8 @@
       "max_adverse_z": 0.838,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -13034,6 +13610,8 @@
       "max_adverse_z": 0.426,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -13079,6 +13657,8 @@
       "max_adverse_z": 1.107,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -13124,6 +13704,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -13169,6 +13751,8 @@
       "max_adverse_z": 0.945,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -13214,6 +13798,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -13259,6 +13845,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -13304,6 +13892,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -13349,6 +13939,8 @@
       "max_adverse_z": 2.603,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -13394,6 +13986,8 @@
       "max_adverse_z": 0.143,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -13439,6 +14033,8 @@
       "max_adverse_z": 0.815,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -13484,6 +14080,8 @@
       "max_adverse_z": 1.486,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -13529,6 +14127,8 @@
       "max_adverse_z": 1.94,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -13574,6 +14174,8 @@
       "max_adverse_z": 3.401,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -13619,6 +14221,8 @@
       "max_adverse_z": 2.53,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -13664,6 +14268,8 @@
       "max_adverse_z": 3.577,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -13709,6 +14315,8 @@
       "max_adverse_z": 1.347,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -13754,6 +14362,8 @@
       "max_adverse_z": 1.272,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -13799,6 +14409,8 @@
       "max_adverse_z": 0.863,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -13844,6 +14456,8 @@
       "max_adverse_z": 0.47,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -13889,6 +14503,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -13934,6 +14550,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -13979,6 +14597,8 @@
       "max_adverse_z": 0.049,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -14024,6 +14644,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -14069,6 +14691,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -14114,6 +14738,8 @@
       "max_adverse_z": 0.617,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -14159,6 +14785,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -14204,6 +14832,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -14249,6 +14879,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -14294,6 +14926,8 @@
       "max_adverse_z": 1.622,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -14339,6 +14973,8 @@
       "max_adverse_z": 3.863,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -14384,6 +15020,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -14429,6 +15067,8 @@
       "max_adverse_z": 4.221,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -14474,6 +15114,8 @@
       "max_adverse_z": 1.371,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -14519,6 +15161,8 @@
       "max_adverse_z": 0.608,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -14564,6 +15208,8 @@
       "max_adverse_z": 1.003,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -14609,6 +15255,8 @@
       "max_adverse_z": 0.027,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -14654,6 +15302,8 @@
       "max_adverse_z": 1.997,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -14699,6 +15349,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -14744,6 +15396,8 @@
       "max_adverse_z": 0.959,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -14789,6 +15443,8 @@
       "max_adverse_z": 1.512,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -14834,6 +15490,8 @@
       "max_adverse_z": 2.362,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -14879,6 +15537,8 @@
       "max_adverse_z": 1.185,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -14924,6 +15584,8 @@
       "max_adverse_z": 1.361,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -14969,6 +15631,8 @@
       "max_adverse_z": 0.553,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -15014,6 +15678,8 @@
       "max_adverse_z": 0.808,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -15059,6 +15725,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -15104,6 +15772,8 @@
       "max_adverse_z": 0.038,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": false,
+      "is_ready_to_take": false,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -15149,6 +15819,8 @@
       "max_adverse_z": 1.882,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -15194,6 +15866,8 @@
       "max_adverse_z": 1.405,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -15239,6 +15913,8 @@
       "max_adverse_z": 1.459,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -15284,6 +15960,8 @@
       "max_adverse_z": 1.476,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -15329,6 +16007,8 @@
       "max_adverse_z": 0.326,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -15374,6 +16054,8 @@
       "max_adverse_z": 2.126,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -15419,6 +16101,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -15464,6 +16148,8 @@
       "max_adverse_z": 1.308,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -15509,6 +16195,8 @@
       "max_adverse_z": 0.773,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -15554,6 +16242,8 @@
       "max_adverse_z": 0.109,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -15599,6 +16289,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -15644,6 +16336,8 @@
       "max_adverse_z": 1.121,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -15689,6 +16383,8 @@
       "max_adverse_z": 0.157,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -15734,6 +16430,8 @@
       "max_adverse_z": 1.535,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -15779,6 +16477,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -15824,6 +16524,8 @@
       "max_adverse_z": 2.022,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -15869,6 +16571,8 @@
       "max_adverse_z": 1.774,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -15914,6 +16618,8 @@
       "max_adverse_z": 0.712,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -15959,6 +16665,8 @@
       "max_adverse_z": 1.376,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -16004,6 +16712,8 @@
       "max_adverse_z": 1.311,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -16049,6 +16759,8 @@
       "max_adverse_z": 1.603,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -16094,6 +16806,8 @@
       "max_adverse_z": 0.002,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -16139,6 +16853,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -16184,6 +16900,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -16229,6 +16947,8 @@
       "max_adverse_z": 1.03,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -16274,6 +16994,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -16319,6 +17041,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -16364,6 +17088,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -16409,6 +17135,8 @@
       "max_adverse_z": 1.153,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -16454,6 +17182,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -16499,6 +17229,8 @@
       "max_adverse_z": 0.704,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -16544,6 +17276,8 @@
       "max_adverse_z": 0.788,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -16589,6 +17323,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -16634,6 +17370,8 @@
       "max_adverse_z": 0.798,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -16679,6 +17417,8 @@
       "max_adverse_z": 0.866,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -16724,6 +17464,8 @@
       "max_adverse_z": 0.825,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -16769,6 +17511,8 @@
       "max_adverse_z": 1.253,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -16814,6 +17558,8 @@
       "max_adverse_z": 1.471,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -16859,6 +17605,8 @@
       "max_adverse_z": 0.991,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -16904,6 +17652,8 @@
       "max_adverse_z": 0.742,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": false,
+      "is_ready_to_take": false,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -16949,6 +17699,8 @@
       "max_adverse_z": 1.421,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -16994,6 +17746,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -17039,6 +17793,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -17084,6 +17840,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": true,
       "passed_checks_count": 10,
+      "is_tradeable": true,
+      "is_ready_to_take": true,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -17129,6 +17887,8 @@
       "max_adverse_z": 0.0,
       "is_perfect_10": false,
       "passed_checks_count": 9,
+      "is_tradeable": false,
+      "is_ready_to_take": false,
       "checks": {
         "z_score_divergence": true,
         "cointegration_pvalue": true,
@@ -17153,7 +17913,7 @@
     "entry_z": 2.0,
     "stop_z": 3.5,
     "max_horizon_days": 30,
-    "computed_at": "2026-10-28 12:11:36",
-    "latency_seconds": 33.8
+    "computed_at": "2026-10-28 13:04:11",
+    "latency_seconds": 65.94
   }
 }

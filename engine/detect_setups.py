@@ -19,10 +19,11 @@ import json
 import logging
 import os
 import sys
+import threading
 import warnings
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import httpx
 import numpy as np
@@ -999,15 +1000,53 @@ def detect_active_setups(
     return payload
 
 
+_PARQUET_PRICE_MATRIX: Optional[pd.DataFrame] = None
+_PARQUET_PRICE_MATRIX_LOCK = threading.Lock()
+
+
+def _get_parquet_price_matrix() -> Optional[pd.DataFrame]:
+    """Retrieve in-memory cached 5-year daily price matrix for instant sub-10ms lookup."""
+    global _PARQUET_PRICE_MATRIX
+    if _PARQUET_PRICE_MATRIX is not None:
+        return _PARQUET_PRICE_MATRIX
+    with _PARQUET_PRICE_MATRIX_LOCK:
+        if _PARQUET_PRICE_MATRIX is not None:
+            return _PARQUET_PRICE_MATRIX
+        try:
+            from engine.simulator_engine import PointInTimeEngine, PARQUET_PATH_DEFAULT
+            if PARQUET_PATH_DEFAULT.exists():
+                engine = PointInTimeEngine()
+                df = engine.load_data()
+                available_fields = df.columns.levels[0].tolist() if isinstance(df.columns, pd.MultiIndex) else []
+                if "Adj Close" in available_fields:
+                    _PARQUET_PRICE_MATRIX = df["Adj Close"]
+                elif "Close" in available_fields:
+                    _PARQUET_PRICE_MATRIX = df["Close"]
+                elif isinstance(df.columns, pd.MultiIndex):
+                    _PARQUET_PRICE_MATRIX = df.iloc[:, 0].unstack()
+                else:
+                    _PARQUET_PRICE_MATRIX = df
+        except Exception as e:
+            logger.warning(f"Could not initialize parquet price matrix: {e}")
+    return _PARQUET_PRICE_MATRIX
+
+
 def get_pair_history_series(
     ticker_a: str,
     ticker_b: str,
     period: str = "5y",
     lookback_days: int = DEFAULT_LOOKBACK_DAYS,
+    as_of_date: Optional[Union[str, pd.Timestamp, date]] = None,
 ) -> Dict[str, Any]:
-    """Retrieve 5-year daily price history for ticker_a and ticker_b, compute rolling spread, Z-score, returns and trend."""
+    """Retrieve daily price history for ticker_a and ticker_b, compute rolling spread, Z-score, returns and trend.
+    
+    If as_of_date is provided, strictly slices history to t <= as_of_date (Zero Lookahead Bias)
+    and evaluates metrics matching that exact historical trading day.
+    """
     ticker_a = ticker_a.strip().upper()
     ticker_b = ticker_b.strip().upper()
+    clean_a = ticker_a.replace(".", "-")
+    clean_b = ticker_b.replace(".", "-")
 
     pair_meta = {}
     try:
@@ -1015,17 +1054,65 @@ def get_pair_history_series(
         matches = pairs_df[(pairs_df["ticker_a"] == ticker_a) & (pairs_df["ticker_b"] == ticker_b)]
         if matches.empty:
             matches = pairs_df[(pairs_df["ticker_a"] == ticker_b) & (pairs_df["ticker_b"] == ticker_a)]
+        if matches.empty:
+            matches = pairs_df[(pairs_df["ticker_a"] == clean_a) & (pairs_df["ticker_b"] == clean_b)]
+        if matches.empty:
+            matches = pairs_df[(pairs_df["ticker_a"] == clean_b) & (pairs_df["ticker_b"] == clean_a)]
         if not matches.empty:
             pair_meta = matches.iloc[0].to_dict()
     except Exception as e:
         logger.warning(f"Could not load metadata for {ticker_a}/{ticker_b}: {e}")
 
-    df_prices = fetch_historical_prices([ticker_a, ticker_b], period=period)
-    if ticker_a not in df_prices.columns or ticker_b not in df_prices.columns:
-        raise ValueError(f"Historical data unavailable for {ticker_a} or {ticker_b}")
+    # 1. Fast-path lookup from local 5-year Parquet dataset (sub-5ms)
+    comb = None
+    pm = _get_parquet_price_matrix()
+    if pm is not None:
+        col_a = clean_a if clean_a in pm.columns else (ticker_a if ticker_a in pm.columns else None)
+        col_b = clean_b if clean_b in pm.columns else (ticker_b if ticker_b in pm.columns else None)
+        if col_a and col_b:
+            s_a = pm[col_a].dropna()
+            s_b = pm[col_b].dropna()
+            comb = pd.concat([s_a, s_b], axis=1).dropna()
+            comb.columns = ["pa", "pb"]
 
-    comb = pd.concat([df_prices[ticker_a], df_prices[ticker_b]], axis=1).dropna()
-    comb.columns = ["pa", "pb"]
+    # 2. Fallback to API download if either ticker is missing in parquet
+    if comb is None or len(comb) < MIN_VALID_BARS:
+        df_prices = fetch_historical_prices([ticker_a, ticker_b], period=period)
+        if ticker_a not in df_prices.columns or ticker_b not in df_prices.columns:
+            raise ValueError(f"Historical data unavailable for {ticker_a} or {ticker_b}")
+        comb = pd.concat([df_prices[ticker_a], df_prices[ticker_b]], axis=1).dropna()
+        comb.columns = ["pa", "pb"]
+
+    # Ensure index is sorted DatetimeIndex and timezone-naive
+    if not isinstance(comb.index, pd.DatetimeIndex):
+        comb.index = pd.to_datetime(comb.index)
+    if comb.index.tz is not None:
+        comb.index = comb.index.tz_localize(None)
+    comb.index = comb.index.normalize()
+    comb = comb.sort_index()
+
+    # 3. Strict Point-in-Time Slicing if as_of_date is provided (Zero Lookahead Bias)
+    target_ts = None
+    if as_of_date:
+        target_ts = pd.to_datetime(as_of_date).tz_localize(None).normalize()
+        comb = comb.loc[comb.index <= target_ts]
+        if len(comb) < MIN_VALID_BARS:
+            raise ValueError(f"Insufficient overlapping trading bars for {ticker_a} and {ticker_b} on or before {as_of_date} (found {len(comb)})")
+
+        # Update metadata dynamically using PointInTimeEngine for Date T
+        try:
+            from engine.simulator_engine import PointInTimeEngine
+            pit_engine = PointInTimeEngine()
+            pit_setup = pit_engine.calculate_pair_pit(clean_a, clean_b, target_date=target_ts, lookback_days=lookback_days)
+            if pit_setup is not None:
+                pair_meta["cointegration_pvalue"] = pit_setup.adf_pvalue
+                pair_meta["half_life"] = pit_setup.half_life_days
+                pair_meta["adf_t_stat"] = pit_setup.adf_tstat
+                pair_meta["correlation"] = pit_setup.correlation
+                pair_meta["zero_crossings"] = pit_setup.zero_crossings
+                pair_meta["composite_score"] = pit_setup.composite_score
+        except Exception as ex:
+            logger.debug(f"Could not calculate PIT setup metadata for {ticker_a}/{ticker_b}: {ex}")
 
     if len(comb) < MIN_VALID_BARS:
         raise ValueError(f"Insufficient overlapping trading bars for {ticker_a} and {ticker_b} (found {len(comb)})")
@@ -1302,6 +1389,9 @@ def get_pair_history_series(
             "expected_profit_pct_b": profit_pct_b,
             "is_tradeable_now": is_tradeable_now,
             "trade_readiness": trade_readiness,
+            "as_of_date": str(as_of_date)[:10] if as_of_date else None,
+            "is_historical_point_in_time": bool(as_of_date is not None),
+            "trading_date_used": bars[-1]["date"] if bars else (str(as_of_date)[:10] if as_of_date else None),
             "is_perfect_setup": (
                 (safe_float(pair_meta.get("cointegration_pvalue"), 1.0) <= 0.05)
                 and (2.0 <= safe_float(pair_meta.get("half_life"), 0.0) <= 35.0)
@@ -1311,6 +1401,9 @@ def get_pair_history_series(
                 and (abs(latest_z) >= 2.0)
             ),
         },
+        "as_of_date": str(as_of_date)[:10] if as_of_date else None,
+        "is_historical_point_in_time": bool(as_of_date is not None),
+        "trading_date_used": bars[-1]["date"] if bars else (str(as_of_date)[:10] if as_of_date else None),
     }
 
 

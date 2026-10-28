@@ -58,6 +58,7 @@ from .ai_jobs import (
     read_morning_files,
 )
 from .jobs import job_manager
+from api.simulator_router import router as simulator_router
 
 from engine.live import memory as live_memory
 from engine.live import profiles as live_profiles
@@ -130,8 +131,8 @@ async def shutdown() -> None:
         pass
 
 
-# --------------- 1-Year Backtest Dashboard Router ---------------
-from api.simulator_router import router as simulator_router
+# --------------- Point-in-Time Simulator Router ---------------
+# strip_api_prefix middleware automatically routes /api/simulator/* to /simulator/*
 app.include_router(simulator_router, prefix="/simulator", tags=["simulator"])
 
 
@@ -2509,11 +2510,12 @@ async def get_pair_history(
     ticker_a: str,
     ticker_b: str,
     period: str = "5y",
+    as_of_date: Optional[str] = Query(None, description="Optional Point-in-Time date YYYY-MM-DD to strictly truncate data up to"),
     refresh: bool = False,
 ) -> dict[str, Any]:
     """Return 5-year daily price history, rolling spread, and Z-score for TradingView-style charts."""
     global _PAIR_HISTORY_CACHE
-    cache_key = f"{ticker_a.upper()}-{ticker_b.upper()}-{period}"
+    cache_key = f"{ticker_a.upper()}-{ticker_b.upper()}-{period}-{as_of_date or 'live'}"
     now_ts = datetime.now(timezone.utc).timestamp()
 
     if not refresh and cache_key in _PAIR_HISTORY_CACHE:
@@ -2528,6 +2530,7 @@ async def get_pair_history(
             ticker_a=ticker_a,
             ticker_b=ticker_b,
             period=period,
+            as_of_date=as_of_date,
         )
         _PAIR_HISTORY_CACHE[cache_key] = (now_ts, result)
         return result

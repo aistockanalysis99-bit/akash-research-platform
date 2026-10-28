@@ -39,6 +39,47 @@ def load_bars(symbol: str, timeframe: str) -> pd.DataFrame:
     """Load cached bars for a symbol/timeframe. Empty DataFrame if missing."""
     path = _cache_path(symbol, timeframe)
     if not path.exists():
+        # Fallback: check if available in universe_5y_daily.parquet for daily timeframes
+        if timeframe in ("1D", "1W"):
+            master_file = DATA_CACHE_DIR / "universe_5y_daily.parquet"
+            if master_file.exists():
+                try:
+                    master_df = pd.read_parquet(master_file)
+                    sym_candidates = [
+                        symbol,
+                        symbol.replace(".", "-"),
+                        symbol.replace("-", "."),
+                        symbol.replace("/", "-"),
+                    ]
+                    # Common aliases
+                    if symbol == "BK":
+                        sym_candidates.append("BNY")
+                    elif symbol == "BNY":
+                        sym_candidates.append("BK")
+
+                    matched_sym = None
+                    for c in sym_candidates:
+                        if ("Close", c) in master_df.columns:
+                            matched_sym = c
+                            break
+
+                    if matched_sym:
+                        t_df = pd.DataFrame({
+                            "timestamp": pd.to_datetime(master_df.index, utc=True),
+                            "open": master_df[("Open", matched_sym)].values,
+                            "high": master_df[("High", matched_sym)].values,
+                            "low": master_df[("Low", matched_sym)].values,
+                            "close": master_df[("Close", matched_sym)].values,
+                            "volume": master_df[("Volume", matched_sym)].values,
+                            "adj_close": master_df[("Adj Close", matched_sym)].values,
+                        })
+                        t_df = t_df.dropna(subset=["close"]).reset_index(drop=True)
+                        if not t_df.empty:
+                            save_bars(symbol, "1D", t_df)
+                            return t_df
+                except Exception as ex:
+                    log.warning("Could not extract %s from universe_5y_daily.parquet: %s", symbol, ex)
+
         return pd.DataFrame(columns=["timestamp", "open", "high", "low", "close", "volume", "adj_close"])
     df = pd.read_parquet(path)
     if "timestamp" in df.columns:

@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
   ArrowLeft,
@@ -17,6 +17,7 @@ import {
   Sparkles,
   Zap,
   Info,
+  Clock,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { Button, Card, ErrorBox, Loading, PageTitle, StatCard } from "@/components/ui";
@@ -60,6 +61,8 @@ const SECTOR_STYLES: Record<string, { badge: string; dot: string }> = {
 
 export default function SetupDetailPage() {
   const params = useParams<{ tickerA?: string; tickerB?: string; pairKey?: string }>();
+  const [searchParams] = useSearchParams();
+  const asOfDate = searchParams.get("date") || "";
 
   // Extract symbols from params (handles /setups/:tickerA/:tickerB or /setups/:pairKey)
   let tickerA = params.tickerA?.toUpperCase().trim() || "";
@@ -77,8 +80,8 @@ export default function SetupDetailPage() {
 
   // Fetch 5-year historical dataset for the pair
   const historyQuery = useQuery({
-    queryKey: ["pair-history", tickerA, tickerB],
-    queryFn: () => api.pairHistory(tickerA, tickerB, "5y"),
+    queryKey: ["pair-history", tickerA, tickerB, asOfDate],
+    queryFn: () => api.pairHistory(tickerA, tickerB, "5y", false, asOfDate || undefined),
     enabled: !!tickerA && !!tickerB,
     staleTime: 5 * 60 * 1000,
   });
@@ -149,11 +152,11 @@ export default function SetupDetailPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link
-            to="/setups"
+            to={asOfDate ? `/backtest?date=${asOfDate}` : "/setups"}
             className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-400 hover:text-white transition-colors bg-surface-2 px-3 py-1.5 rounded-lg border border-line"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Back to Active Setups</span>
+            <span>{asOfDate ? `Back to Backtest (${asOfDate})` : "Back to Active Setups"}</span>
           </Link>
           <Link
             to="/pairs"
@@ -180,6 +183,49 @@ export default function SetupDetailPage() {
           </Button>
         </div>
       </div>
+
+      {/* ─── POINT-IN-TIME HISTORICAL TRADE MODE BANNER ─────────────────── */}
+      {asOfDate && (
+        <div className="p-4 rounded-xl border border-amber-500/40 bg-amber-500/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-lg backdrop-blur">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-amber-500/20 border border-amber-500/30 flex items-center justify-center shrink-0">
+              <Clock className="w-5 h-5 text-amber-400" />
+            </div>
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-amber-400 font-mono">
+                  Point-in-Time Historical Trade Mode
+                </span>
+                <span className="text-[11px] font-mono text-amber-200 bg-amber-950/60 px-2.5 py-0.5 rounded border border-amber-500/30 font-bold">
+                  Date T: {asOfDate}
+                </span>
+                <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-500/30">
+                  Strict Zero Lookahead Bias
+                </span>
+              </div>
+              <p className="text-xs text-gray-300 mt-1">
+                Viewing stock prices, OLS hedge ratio (β={pairData?.hedge_ratio ?? "..."}), spread Z-score ({pairData?.current_z_score !== undefined ? `${pairData.current_z_score > 0 ? "+" : ""}${pairData.current_z_score.toFixed(2)}σ` : "..."}), order sizing, and chart bars strictly as of <strong className="text-white">{pairData?.trading_date_used || asOfDate}</strong>.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <Link
+              to={`/backtest?date=${asOfDate}`}
+              className="text-xs font-semibold text-gray-300 hover:text-white px-3 py-1.5 rounded-lg bg-surface-2 border border-line hover:border-gray-500 transition-colors flex items-center gap-1.5"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Back to Backtest</span>
+            </Link>
+            <Link
+              to={`/setups/${tickerA}/${tickerB}`}
+              className="text-xs font-semibold text-cyan-400 hover:text-cyan-300 px-3 py-1.5 rounded-lg bg-cyan-950/40 border border-cyan-500/30 hover:border-cyan-500/60 transition-colors flex items-center gap-1.5"
+            >
+              <span>View Live Prices</span>
+            </Link>
+          </div>
+        </div>
+      )}
 
       {historyQuery.isLoading ? (
         <Loading label={`Downloading 1-year institutional price history for ${tickerA} & ${tickerB}...`} />
@@ -280,7 +326,7 @@ export default function SetupDetailPage() {
               </div>
 
               <div className="text-right px-3 py-1.5 rounded-xl bg-surface-2 border border-line">
-                <div className="text-[10px] uppercase tracking-wider text-gray-400 font-mono">Live Z-Score</div>
+                <div className="text-[10px] uppercase tracking-wider text-gray-400 font-mono">{asOfDate ? `Date T Z-Score (${asOfDate})` : "Live Z-Score"}</div>
                 <div
                   className={cn(
                     "text-2xl font-mono font-extrabold",
@@ -297,7 +343,7 @@ export default function SetupDetailPage() {
           {/* Quick Metrics Bar */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
             <StatCard
-              label={`${tickerA} Last Price (Blue)`}
+              label={`${tickerA} ${asOfDate ? `Price (${asOfDate})` : "Last Price"} (Blue)`}
               value={
                 <span className="text-blue-400 font-mono font-bold">
                   ${pairData?.last_price_a?.toFixed(2) ?? "—"}
@@ -306,7 +352,7 @@ export default function SetupDetailPage() {
               sub="Stock A (Primary Asset)"
             />
             <StatCard
-              label={`${tickerB} Last Price (Red)`}
+              label={`${tickerB} ${asOfDate ? `Price (${asOfDate})` : "Last Price"} (Red)`}
               value={
                 <span className="text-rose-400 font-mono font-bold">
                   ${pairData?.last_price_b?.toFixed(2) ?? "—"}

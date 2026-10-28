@@ -10863,7 +10863,7 @@
     "entry_z": 2.0,
     "stop_z": 3.5,
     "max_horizon_days": 30,
-    "computed_at": "2026-10-28 12:48:33",
-    "latency_seconds": 15.91
+    "computed_at": "2026-10-28 20:57:25",
+    "latency_seconds": 15.24
   }
 }
