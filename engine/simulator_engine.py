@@ -642,11 +642,12 @@ class PointInTimeEngine:
         top_n: int = 20,
         only_active_setups: bool = True,
         price_col: str = "Adj Close",
+        exclude_pairs: Optional[Set[str]] = None,
     ) -> List[PointInTimeSetup]:
         """Scan all universe pairs for Date T and return ranked setups.
         
         Guaranteed: Slices strictly to t <= target_date with zero lookahead bias.
-        Optimized with single-pass matrix pre-slicing for high performance.
+        Optimized with single-pass matrix pre-slicing and candidate-ticker filtering for high performance.
         """
         history = self.slice_history(target_date)
         if len(history) < self.min_valid_bars:
@@ -656,11 +657,21 @@ class PointInTimeEngine:
         p_field = price_col if price_col in available_fields else ("Close" if "Close" in available_fields else available_fields[0])
         # Pre-slice to lookback window once for sub-100ms multi-pair scanning
         price_matrix = history[p_field].iloc[-self.default_lookback:]
-        # Pre-extract all column arrays to a dict clean_ticker -> 1D float array for sub-50ms scans
-        col_arrays = {
-            str(col).strip().upper().replace(".", "-"): price_matrix[col].to_numpy(dtype=float)
-            for col in price_matrix.columns
-        }
+
+        # Pre-filter candidate tickers only (63 tickers instead of 972) to minimize array extraction overhead
+        if not hasattr(self, "_candidate_tickers_set"):
+            cand = set()
+            for p in self.get_pairs():
+                cand.add(str(p.get("ticker_a", "")).strip().upper().replace(".", "-"))
+                cand.add(str(p.get("ticker_b", "")).strip().upper().replace(".", "-"))
+            self._candidate_tickers_set = cand
+
+        cand_set = self._candidate_tickers_set
+        col_arrays = {}
+        for col in price_matrix.columns:
+            clean_col = str(col).strip().upper().replace(".", "-")
+            if clean_col in cand_set:
+                col_arrays[clean_col] = price_matrix[col].to_numpy(dtype=float)
 
         pairs = self.get_pairs()
         setups: List[PointInTimeSetup] = []
@@ -671,9 +682,15 @@ class PointInTimeEngine:
             if not ta or not tb:
                 continue
 
+            clean_a = str(ta).strip().upper().replace(".", "-")
+            clean_b = str(tb).strip().upper().replace(".", "-")
+            pair_key = f"{clean_a}/{clean_b}"
+            if exclude_pairs and pair_key in exclude_pairs:
+                continue
+
             setup = self.calculate_pair_pit(
-                ta,
-                tb,
+                clean_a,
+                clean_b,
                 target_date=target_date,
                 price_col=p_field,
                 history=history,

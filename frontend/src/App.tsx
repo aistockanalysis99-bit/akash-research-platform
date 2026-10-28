@@ -75,7 +75,7 @@ export default function App() {
         <Route path="/options/league" element={<LeagueTablePage />} />
         <Route path="/options/wheel" element={<WheelPage />} />
         {/* Backtesting section */}
-        <Route path="/backtest" element={<BacktestPage />} />
+        <Route path="/backtest" element={<BacktestDashboardPage />} />
         <Route path="/backtest-dashboard" element={<BacktestDashboardPage />} />
         <Route path="/backtest/dashboard" element={<BacktestDashboardPage />} />
         <Route path="/runs" element={<RunsPage />} />

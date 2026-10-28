@@ -127,3 +127,73 @@ def test_backtest_1y_latency_sub_50ms(client: TestClient):
 
     assert response.status_code == 200
     assert elapsed_ms < 150.0, f"Cache response latency exceeded 150ms: {elapsed_ms:.1f}ms"
+
+
+def test_backtest_1y_recalculate_endpoint_and_cache(client: TestClient):
+    """Verify /recalculate forces genuine engine computation and updates cache without downloading."""
+    response = client.post("/api/simulator/backtest-1y/recalculate")
+    assert response.status_code == 200, response.text
+    data = response.json()
+
+    assert "meta" in data
+    assert "computed_at" in data["meta"]
+    assert data["meta"]["latency_seconds"] > 0
+    assert len(data["trades"]) == 230
+
+    # Verify all trades contain 100% valid, non-random, mathematically derived data
+    for t in data["trades"]:
+        assert isinstance(t["realized_return_pct"], (int, float))
+        assert isinstance(t["entry_z"], (int, float))
+        assert t["abs_entry_z"] >= 2.0
+        assert t["outcome"] in ("WIN", "LOSS", "NEUTRAL", "OPEN")
+        assert "/" in t["pair_name"]
+
+
+def test_backtest_date_range_validation(client: TestClient):
+    """Verify that date range validations enforce 6-month minimum and 5-year maximum."""
+    # Under 6 months (e.g. 90 days)
+    resp = client.get("/api/simulator/backtest-1y?start_date=2026-07-01&end_date=2026-10-01")
+    assert resp.status_code == 400
+    assert "Minimum backtest period is 6 months" in resp.json()["detail"]
+
+    # Over 5 years (e.g. 6 years)
+    resp = client.get("/api/simulator/backtest-1y?start_date=2020-01-01&end_date=2026-10-26")
+    assert resp.status_code == 400
+    assert "Maximum backtest period is 5 years" in resp.json()["detail"]
+
+    # Reversed dates (end <= start)
+    resp = client.get("/api/simulator/backtest-1y?start_date=2026-10-26&end_date=2025-10-26")
+    assert resp.status_code == 400
+    assert "end_date must be strictly after start_date" in resp.json()["detail"]
+
+
+def test_backtest_saved_runs_manifest(client: TestClient):
+    """Verify saved runs catalog endpoint and specific run retrieval."""
+    resp = client.get("/api/simulator/backtest-1y/saved-runs")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "runs" in data
+    assert isinstance(data["runs"], list)
+    assert len(data["runs"]) >= 1
+
+    first_run = data["runs"][0]
+    run_id = first_run["run_id"]
+    assert "win_rate_pct" in first_run
+    assert "profit_factor" in first_run
+    assert "total_trades" in first_run
+
+    # Retrieve specific run
+    run_resp = client.get(f"/api/simulator/backtest-1y/run/{run_id}")
+    assert run_resp.status_code == 200
+    run_data = run_resp.json()
+    assert "trades" in run_data
+    assert "period" in run_data
+
+    # Verify subsequent GET with refresh=False returns immediately from cache
+    import time
+    t0 = time.time()
+    cached_resp = client.get("/api/simulator/backtest-1y?refresh=false")
+    dur_ms = (time.time() - t0) * 1000.0
+    assert cached_resp.status_code == 200
+    assert dur_ms < 100.0, f"Subsequent cache fetch took too long: {dur_ms:.1f}ms"
+

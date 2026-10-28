@@ -16,7 +16,16 @@ import type {
   TelegramLogRow,
   WatchlistItem,
 } from "./types";
-import type { Backtest1YResponse } from "./simulatorTypes";
+import type {
+  DayBatchScorecard,
+  ForwardEvaluationResult,
+  PairChartResponse,
+  PointInTimeSetup,
+  SimulatorInitResponse,
+  SimulatorScanResponse,
+  SimulatorStepResponse,
+  Backtest1YResponse,
+} from "./simulatorTypes";
 
 // In dev + single-service prod, Vite/FastAPI handle "/api".
 // On Vercel (frontend split from backend), set VITE_API_BASE to the Render
@@ -191,8 +200,12 @@ export const api = {
     }>(`/pairs/active-setups${qs ? `?${qs}` : ""}`);
   },
 
-  pairHistory: (tickerA: string, tickerB: string, period = "5y", refresh = false) => {
-    const qs = refresh ? `?period=${period}&refresh=true` : `?period=${period}`;
+  pairHistory: (tickerA: string, tickerB: string, period = "5y", refresh = false, asOfDate?: string) => {
+    const params = new URLSearchParams();
+    if (period) params.set("period", period);
+    if (refresh) params.set("refresh", "true");
+    if (asOfDate) params.set("as_of_date", asOfDate);
+    const qs = params.toString() ? `?${params.toString()}` : "";
     return get<{
       ticker_a: string;
       ticker_b: string;
@@ -231,6 +244,9 @@ export const api = {
       trade_readiness?: string;
       last_price_a: number;
       last_price_b: number;
+      as_of_date?: string;
+      is_historical_point_in_time?: boolean;
+      trading_date_used?: string;
       return_5y_a?: number;
       return_5y_b?: number;
       return_1y_a?: number;
@@ -779,8 +795,123 @@ export const api = {
     post<{ name: string; params: Record<string, unknown> }>("/params/save", { name, params }),
   paramDelete: (name: string) => del<unknown>(`/params/${name}`),
 
+  // Point-in-Time Simulator
   simulator: {
-    backtest1Y: (refresh = false) =>
-      get<Backtest1YResponse>(`/simulator/backtest-1y${refresh ? "?refresh=true" : ""}`),
+    init: (params?: {
+      anchor_date?: string;
+      lookback_days?: number;
+      min_z_score?: number;
+      max_adf_pvalue?: number;
+      min_correlation?: number;
+      max_horizon_days?: number;
+    }) => post<SimulatorInitResponse>("/simulator/init", params || {}),
+
+    scan: (params: {
+      current_date: string;
+      top_n?: number;
+      only_active_setups?: boolean;
+      min_z?: number;
+      max_adf?: number;
+      min_corr?: number;
+    }) => {
+      const q = new URLSearchParams();
+      q.set("current_date", params.current_date);
+      if (params.top_n) q.set("top_n", String(params.top_n));
+      if (params.only_active_setups !== undefined) q.set("only_active_setups", String(params.only_active_setups));
+      if (params.min_z !== undefined) q.set("min_z", String(params.min_z));
+      if (params.max_adf !== undefined) q.set("max_adf", String(params.max_adf));
+      if (params.min_corr !== undefined) q.set("min_corr", String(params.min_corr));
+      return get<SimulatorScanResponse>(`/simulator/scan?${q.toString()}`);
+    },
+
+    step: (params: { current_date: string; direction: string; step_size?: number }) => {
+      const q = new URLSearchParams();
+      q.set("current_date", params.current_date);
+      q.set("direction", params.direction);
+      if (params.step_size) q.set("step_size", String(params.step_size));
+      return get<SimulatorStepResponse>(`/simulator/step?${q.toString()}`);
+    },
+
+    pairChart: (params: {
+      ticker_a: string;
+      ticker_b: string;
+      current_date: string;
+      lookback_days?: number;
+      reveal?: boolean;
+      forward_days?: number;
+    }) => {
+      const q = new URLSearchParams();
+      q.set("ticker_a", params.ticker_a);
+      q.set("ticker_b", params.ticker_b);
+      q.set("current_date", params.current_date);
+      if (params.lookback_days) q.set("lookback_days", String(params.lookback_days));
+      if (params.reveal) q.set("reveal", "true");
+      if (params.forward_days) q.set("forward_days", String(params.forward_days));
+      return get<PairChartResponse>(`/simulator/pair-chart?${q.toString()}`);
+    },
+
+    reveal: (params: {
+      ticker_a: string;
+      ticker_b: string;
+      target_date: string;
+      max_horizon_days?: number;
+      lookback_days?: number;
+    }) => post<ForwardEvaluationResult>("/simulator/reveal", params),
+
+    scorecard: (params: { target_date: string; max_horizon_days?: number; top_n?: number }) => {
+      const q = new URLSearchParams();
+      q.set("target_date", params.target_date);
+      if (params.max_horizon_days) q.set("max_horizon_days", String(params.max_horizon_days));
+      if (params.top_n) q.set("top_n", String(params.top_n));
+      return get<DayBatchScorecard>(`/simulator/batch-scorecard?${q.toString()}`);
+    },
+
+    backtest1Y: (
+      refresh = false,
+      params?: {
+        start_date?: string;
+        end_date?: string;
+        entry_z?: number;
+        stop_z?: number;
+        max_horizon_days?: number;
+      }
+    ) => {
+      const q = new URLSearchParams();
+      if (refresh) q.set("refresh", "true");
+      if (params?.start_date) q.set("start_date", params.start_date);
+      if (params?.end_date) q.set("end_date", params.end_date);
+      if (params?.entry_z !== undefined) q.set("entry_z", String(params.entry_z));
+      if (params?.stop_z !== undefined) q.set("stop_z", String(params.stop_z));
+      if (params?.max_horizon_days !== undefined)
+        q.set("max_horizon_days", String(params.max_horizon_days));
+      const qs = q.toString() ? `?${q.toString()}` : "";
+      return get<Backtest1YResponse>(`/simulator/backtest-1y${qs}`);
+    },
+
+    recalculate1Y: (params?: {
+      start_date?: string;
+      end_date?: string;
+      entry_z?: number;
+      stop_z?: number;
+      max_horizon_days?: number;
+    }) => {
+      const q = new URLSearchParams();
+      if (params?.start_date) q.set("start_date", params.start_date);
+      if (params?.end_date) q.set("end_date", params.end_date);
+      if (params?.entry_z !== undefined) q.set("entry_z", String(params.entry_z));
+      if (params?.stop_z !== undefined) q.set("stop_z", String(params.stop_z));
+      if (params?.max_horizon_days !== undefined)
+        q.set("max_horizon_days", String(params.max_horizon_days));
+      const qs = q.toString() ? `?${q.toString()}` : "";
+      return post<Backtest1YResponse>(`/simulator/backtest-1y/recalculate${qs}`);
+    },
+
+    getSavedRuns: () =>
+      get<{ runs: import("./simulatorTypes").SavedBacktestRun[]; total: number }>(
+        "/simulator/backtest-1y/saved-runs"
+      ),
+
+    getSavedRun: (runId: string) =>
+      get<Backtest1YResponse>(`/simulator/backtest-1y/run/${encodeURIComponent(runId)}`),
   },
 };

@@ -182,6 +182,8 @@ export interface Backtest1YTrade {
   is_perfect_10: boolean;
   passed_checks_count: number;
   checks?: Record<string, boolean>;
+  is_tradeable?: boolean;
+  is_ready_to_take?: boolean;
   adf_pvalue: number;
   correlation: number;
   half_life_days: number;
@@ -224,3 +226,38 @@ export interface Backtest1YResponse {
     latency_seconds: number;
   };
 }
+
+export interface SavedTradeHighlight {
+  pair_name: string;
+  realized_return_pct: number;
+  entry_date: string;
+  exit_date?: string;
+  holding_days: number;
+}
+
+export interface SavedBacktestRun {
+  run_id: string;
+  test_name?: string;
+  start_date: string;
+  end_date: string;
+  entry_z: number;
+  stop_z: number;
+  max_horizon_days: number;
+  trading_days: number;
+  total_trades: number;
+  win_count: number;
+  loss_count: number;
+  win_rate_pct: number;
+  profit_factor: number;
+  avg_return_pct: number;
+  net_return_pct?: number;
+  max_drawdown_pct: number;
+  avg_holding_days: number;
+  best_trade?: SavedTradeHighlight | null;
+  worst_trade?: SavedTradeHighlight | null;
+  perfect_10_win_rate?: number;
+  perfect_10_trades?: number;
+  computed_at: string;
+  latency_seconds: number;
+}
+

@@ -28,7 +28,6 @@ const SECTIONS: {
     items: [
       { label: "Pairs", to: "/pairs" },
       { label: "Setups", to: "/setups" },
-      { label: "1Y Dashboard", to: "/backtest-dashboard" },
     ],
   },
   {
@@ -61,12 +60,7 @@ const SECTIONS: {
     name: "Backtesting",
     base: "backtest",
     items: [
-      { label: "1Y Dashboard", to: "/backtest-dashboard" },
       { label: "Backtest", to: "/backtest" },
-      { label: "Run History", to: "/runs" },
-      { label: "Compare", to: "/compare" },
-      { label: "Data Cache", to: "/data" },
-      { label: "Parameters", to: "/params" },
     ],
   },
 ];
