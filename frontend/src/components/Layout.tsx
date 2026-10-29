@@ -60,7 +60,11 @@ const SECTIONS: {
     name: "Backtesting",
     base: "backtest",
     items: [
-      { label: "Backtest", to: "/backtest" },
+      { label: "Dashboard", to: "/backtest" },
+      { label: "Strategy 1 (Baseline)", to: "/backtest/strategy-v1" },
+      { label: "Strategy 2 (Staged)", to: "/backtest/strategy-v2" },
+      { label: "Strategy 3 (Alpha)", to: "/backtest/strategy-v3" },
+      { label: "Compare Strategies", to: "/backtest/compare-strategies" },
     ],
   },
 ];
@@ -204,7 +208,7 @@ export default function Layout() {
             <NavLink
               key={it.to}
               to={it.to}
-              end={it.to === "/" || it.to === "/options"}
+              end={it.to === "/" || it.to === "/options" || it.to === "/backtest"}
               className={({ isActive }) =>
                 cn(
                   "px-3 py-1 text-sm rounded-md whitespace-nowrap transition-colors",

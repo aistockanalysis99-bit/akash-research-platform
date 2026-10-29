@@ -869,6 +869,7 @@ export const api = {
     backtest1Y: (
       refresh = false,
       params?: {
+        period?: string;
         start_date?: string;
         end_date?: string;
         entry_z?: number;
@@ -878,6 +879,7 @@ export const api = {
     ) => {
       const q = new URLSearchParams();
       if (refresh) q.set("refresh", "true");
+      if (params?.period) q.set("period", params.period);
       if (params?.start_date) q.set("start_date", params.start_date);
       if (params?.end_date) q.set("end_date", params.end_date);
       if (params?.entry_z !== undefined) q.set("entry_z", String(params.entry_z));
@@ -886,6 +888,14 @@ export const api = {
         q.set("max_horizon_days", String(params.max_horizon_days));
       const qs = q.toString() ? `?${q.toString()}` : "";
       return get<Backtest1YResponse>(`/simulator/backtest-1y${qs}`);
+    },
+
+    // Strategy v1 Direct Multi-Horizon Method
+    getV1Backtest: (period: "1Y" | "2Y" | "3Y" | "5Y" | string = "1Y", refresh = false) => {
+      const q = new URLSearchParams();
+      q.set("period", period);
+      if (refresh) q.set("refresh", "true");
+      return get<Backtest1YResponse>(`/simulator/v1/backtest?${q.toString()}`);
     },
 
     recalculate1Y: (params?: {
@@ -918,5 +928,59 @@ export const api = {
       del<{ status: string; run_id: string; remaining: number }>(
         `/simulator/backtest-1y/run/${encodeURIComponent(runId)}`
       ),
+
+    // Strategy v2 Methods
+    getV2Backtest: (period: "1Y" | "2Y" | "3Y" | "5Y" | string = "1Y", refresh = false) => {
+      const q = new URLSearchParams();
+      q.set("period", period);
+      if (refresh) q.set("refresh", "true");
+      return get<import("./simulatorTypes").StrategyV2Response>(`/simulator/v2/backtest?${q.toString()}`);
+    },
+
+    recalculateV2: (params: {
+      period?: string;
+      start_date?: string;
+      end_date?: string;
+      z_score_hurdle?: number;
+      z_score_hook_entry?: number;
+      z_score_exit_tp1?: number;
+      z_score_exit_tp2?: number;
+      z_score_stop_loss_barrier?: number;
+      half_life_multiplier?: number;
+    }) => post<import("./simulatorTypes").StrategyV2Response>("/simulator/v2/recalculate", params),
+
+    getV2Trajectory: (tradeId: string, period = "1Y") =>
+      get<import("./simulatorTypes").StrategyV2TrajectoryResponse>(
+        `/simulator/v2/trade/${encodeURIComponent(tradeId)}/trajectory?period=${encodeURIComponent(period)}`
+      ),
+
+    // Strategy v3 Methods ("Asymmetric Alpha Maximizer")
+    getV3Backtest: (period: "1Y" | "2Y" | "3Y" | "5Y" | string = "1Y", refresh = false) => {
+      const q = new URLSearchParams();
+      q.set("period", period);
+      if (refresh) q.set("refresh", "true");
+      return get<import("./simulatorTypes").StrategyV3Response>(`/simulator/v3/backtest?${q.toString()}`);
+    },
+
+    recalculateV3: (params: {
+      period?: string;
+      start_date?: string;
+      end_date?: string;
+      z_score_entry?: number;
+      z_score_stop_loss?: number;
+      tier1_multiplier?: number;
+      tier3_multiplier?: number;
+      protected_stop_z?: number;
+      activation_recovery_z?: number;
+      max_holding_days?: number;
+    }) => post<import("./simulatorTypes").StrategyV3Response>("/simulator/v3/recalculate", params),
+
+    // Strategy Comparison Methods (3-Way Benchmark)
+    getComparison: (period: "1Y" | "2Y" | "3Y" | "5Y" | string = "1Y", refresh = false) => {
+      const q = new URLSearchParams();
+      q.set("period", period);
+      if (refresh) q.set("refresh", "true");
+      return get<import("./simulatorTypes").StrategyComparisonResponse>(`/simulator/compare?${q.toString()}`);
+    },
   },
 };

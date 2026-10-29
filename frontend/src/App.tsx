@@ -34,6 +34,10 @@ import PairsPage from "./pages/PairsPage";
 import SetupsPage from "./pages/SetupsPage";
 import SetupDetailPage from "./pages/SetupDetailPage";
 import BacktestDashboardPage from "./pages/BacktestDashboardPage";
+import StrategyV1Page from "./pages/StrategyV1Page";
+import StrategyV2Page from "./pages/StrategyV2Page";
+import StrategyV3Page from "./pages/StrategyV3Page";
+import StrategyComparePage from "./pages/StrategyComparePage";
 
 export default function App() {
   return (
@@ -78,6 +82,14 @@ export default function App() {
         <Route path="/backtest" element={<BacktestDashboardPage />} />
         <Route path="/backtest-dashboard" element={<BacktestDashboardPage />} />
         <Route path="/backtest/dashboard" element={<BacktestDashboardPage />} />
+        <Route path="/backtest/strategy-v1" element={<StrategyV1Page />} />
+        <Route path="/backtest/strategy-1" element={<StrategyV1Page />} />
+        <Route path="/backtest/strategy-v2" element={<StrategyV2Page />} />
+        <Route path="/backtest/strategy-2" element={<StrategyV2Page />} />
+        <Route path="/backtest/strategy-v3" element={<StrategyV3Page />} />
+        <Route path="/backtest/strategy-3" element={<StrategyV3Page />} />
+        <Route path="/backtest/compare-strategies" element={<StrategyComparePage />} />
+        <Route path="/backtest/compare" element={<StrategyComparePage />} />
         <Route path="/runs" element={<RunsPage />} />
         <Route path="/runs/:runId" element={<RunDetailPage />} />
         <Route path="/compare" element={<ComparePage />} />

@@ -17,6 +17,7 @@ Guarantees:
 from __future__ import annotations
 
 import collections
+import json
 import math
 import threading
 import time
@@ -658,7 +659,9 @@ _last_1y_recalc_ts: float = 0.0
 
 
 @router.get("/backtest-1y")
+@router.get("/v1/backtest")
 def get_backtest_1y(
+    period: Optional[str] = Query(None, description="Preset horizon period: 1Y, 2Y, 3Y, 5Y"),
     refresh: bool = Query(False, description="Force re-computation of walkforward backtest"),
     start_date: Optional[str] = Query(None, description="Start date (YYYY-MM-DD), min 6M, max 5Y"),
     end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)"),
@@ -680,8 +683,26 @@ def get_backtest_1y(
         run_1y_walkforward_backtest,
     )
 
-    s_clean = (start_date or "2025-10-26").strip()
-    e_clean = (end_date or "2026-10-26").strip()
+    if period:
+        p_up = period.strip().upper()
+        if p_up == "1Y":
+            s_clean = "2025-10-26"
+            e_clean = "2026-10-26"
+        elif p_up == "2Y":
+            s_clean = "2024-10-26"
+            e_clean = "2026-10-26"
+        elif p_up == "3Y":
+            s_clean = "2023-10-26"
+            e_clean = "2026-10-26"
+        elif p_up == "5Y":
+            s_clean = "2021-10-27"
+            e_clean = "2026-10-26"
+        else:
+            s_clean = (start_date or "2025-10-26").strip()
+            e_clean = (end_date or "2026-10-26").strip()
+    else:
+        s_clean = (start_date or "2025-10-26").strip()
+        e_clean = (end_date or "2026-10-26").strip()
 
     try:
         s_ts = pd.to_datetime(s_clean).tz_localize(None).normalize()
@@ -801,3 +822,354 @@ def delete_saved_backtest_run(run_id: str) -> Dict[str, Any]:
             raise HTTPException(404, f"Run '{clean_id}' not found.")
         remaining = get_saved_runs_list()
         return {"status": "deleted", "run_id": clean_id, "remaining": len(remaining)}
+
+
+# =========================================================================== #
+# Strategy v2 Endpoints (/simulator/v2/* and /api/simulator/v2/*)
+# =========================================================================== #
+
+_v2_bytes_cache: Dict[str, bytes] = {}
+_v2_cache_lock = threading.Lock()
+
+
+class StrategyV2RecalculateRequest(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    period: Optional[str] = "1Y"
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
+    z_score_hurdle: Optional[float] = None
+    z_score_hook_entry: Optional[float] = None
+    z_score_exit_tp1: Optional[float] = None
+    z_score_exit_tp2: Optional[float] = None
+    z_score_stop_loss_barrier: Optional[float] = None
+    half_life_multiplier: Optional[float] = None
+
+
+@router.get("/v2/backtest")
+def get_strategy_v2_backtest(
+    period: str = Query("1Y", description="Horizon period: 1Y, 2Y, 3Y, 5Y"),
+    refresh: bool = Query(False, description="Force recalculation"),
+) -> Response:
+    """Retrieve Strategy v2 backtest results, trade array, and staged exit diagnostics."""
+    global _v2_bytes_cache
+    p = period.strip().upper()
+    if p not in ("1Y", "2Y", "3Y", "5Y"):
+        raise HTTPException(400, f"Invalid period '{period}'. Expected 1Y, 2Y, 3Y, or 5Y.")
+
+    cache_key = f"v2_horizon_{p}"
+
+    with _v2_cache_lock:
+        if not refresh and cache_key in _v2_bytes_cache:
+            return Response(content=_v2_bytes_cache[cache_key], media_type="application/json")
+
+        file_name = f"backtest_v2_{p.lower()}_results.json"
+        from engine.config import PROJECT_ROOT
+        file_path = PROJECT_ROOT / "data" / file_name
+
+        if not refresh and file_path.exists():
+            try:
+                b = file_path.read_bytes()
+                _v2_bytes_cache[cache_key] = b
+                return Response(content=b, media_type="application/json")
+            except Exception as e:
+                logger.warning(f"Failed to read cached v2 file {file_path}: {e}")
+
+        # Recalculate if refresh or file missing
+        from scripts.run_v2_backtest import HORIZON_CONFIGS, run_strategy_v2_backtest
+        cfg = HORIZON_CONFIGS.get(p)
+        if not cfg:
+            raise HTTPException(400, f"Configuration for period {p} not found.")
+
+        try:
+            res = run_strategy_v2_backtest(
+                start_date=cfg["start_date"],
+                end_date=cfg["end_date"],
+            )
+            from scripts.run_v2_backtest import save_v2_results_atomically
+            save_v2_results_atomically(res, cfg["output_file"])
+            sanitized = sanitize_json_data(res)
+            res_bytes = json.dumps(sanitized).encode("utf-8")
+            _v2_bytes_cache[cache_key] = res_bytes
+            return Response(content=res_bytes, media_type="application/json")
+        except Exception as err:
+            logger.error(f"Error computing Strategy v2 backtest: {err}", exc_info=True)
+            raise HTTPException(500, f"Error calculating Strategy v2 backtest: {str(err)}")
+
+
+@router.post("/v2/recalculate")
+def recalculate_strategy_v2(
+    req: StrategyV2RecalculateRequest,
+) -> Response:
+    """Run on-the-fly custom parameter recalculation for Strategy v2."""
+    p = (req.period or "1Y").strip().upper()
+    from scripts.run_v2_backtest import HORIZON_CONFIGS, run_strategy_v2_backtest
+    from engine.strategy_v2_engine import load_strategy_v2_config
+
+    base_cfg = load_strategy_v2_config()
+    cfg_copy = json.loads(json.dumps(base_cfg))
+
+    if req.z_score_hurdle is not None:
+        cfg_copy["divergence_triggers"]["z_score_hurdle"] = float(req.z_score_hurdle)
+    if req.z_score_hook_entry is not None:
+        cfg_copy["divergence_triggers"]["z_score_hook_entry"] = float(req.z_score_hook_entry)
+    if req.z_score_exit_tp1 is not None:
+        cfg_copy["divergence_triggers"]["z_score_exit_tp1"] = float(req.z_score_exit_tp1)
+    if req.z_score_exit_tp2 is not None:
+        cfg_copy["divergence_triggers"]["z_score_exit_tp2"] = float(req.z_score_exit_tp2)
+    if req.z_score_stop_loss_barrier is not None:
+        cfg_copy["divergence_triggers"]["z_score_stop_loss_barrier"] = float(req.z_score_stop_loss_barrier)
+    if req.half_life_multiplier is not None:
+        cfg_copy["trade_management"]["half_life_time_stop_multiplier"] = float(req.half_life_multiplier)
+
+    horizon_meta = HORIZON_CONFIGS.get(p, HORIZON_CONFIGS["1Y"])
+    start_date = req.start_date or horizon_meta["start_date"]
+    end_date = req.end_date or horizon_meta["end_date"]
+
+    try:
+        res = run_strategy_v2_backtest(
+            start_date=start_date,
+            end_date=end_date,
+            config=cfg_copy,
+        )
+        sanitized = sanitize_json_data(res)
+        res_bytes = json.dumps(sanitized).encode("utf-8")
+        return Response(content=res_bytes, media_type="application/json")
+    except Exception as err:
+        logger.error(f"Error recalculating Strategy v2: {err}", exc_info=True)
+        raise HTTPException(500, f"Error recalculating Strategy v2: {str(err)}")
+
+
+@router.get("/v2/trade/{trade_id}/trajectory")
+def get_strategy_v2_trade_trajectory(
+    trade_id: str,
+    period: str = Query("1Y", description="Horizon period where trade occurred"),
+) -> Dict[str, Any]:
+    """Retrieve detailed time-series trajectory with Entry Hook, TP1, and Final Exit pins."""
+    clean_id = trade_id.strip()
+    from engine.config import PROJECT_ROOT
+
+    periods_to_check = [period.strip().upper()] + [x for x in ("1Y", "2Y", "3Y", "5Y") if x != period.strip().upper()]
+
+    found_trade = None
+    for p in periods_to_check:
+        f_path = PROJECT_ROOT / "data" / f"backtest_v2_{p.lower()}_results.json"
+        if f_path.exists():
+            try:
+                with open(f_path, "r", encoding="utf-8") as fp:
+                    data = json.load(fp)
+                for t in data.get("trades", []):
+                    if t.get("id") == clean_id:
+                        found_trade = t
+                        break
+            except Exception:
+                pass
+        if found_trade:
+            break
+
+    if not found_trade:
+        raise HTTPException(404, f"Trade with id '{clean_id}' not found.")
+
+    trajectory = found_trade.get("trajectory", [])
+    entry_pin = {
+        "date": found_trade.get("entry_date"),
+        "label": f"Entry Hook: {found_trade.get('direction_label')}",
+        "z_score": found_trade.get("entry_z"),
+        "price_a": found_trade.get("entry_price_a"),
+        "price_b": found_trade.get("entry_price_b"),
+    }
+    tp1_pin = None
+    if found_trade.get("tp1_hit"):
+        tp1_pin = {
+            "date": found_trade.get("tp1_date"),
+            "label": f"TP1 Executed (Banked +{found_trade.get('tranche1_pnl_pct')}%)",
+            "z_score": found_trade.get("tp1_z_score"),
+            "days_held": found_trade.get("tp1_days_held"),
+        }
+    exit_pin = {
+        "date": found_trade.get("exit_date"),
+        "label": f"Final Exit: {found_trade.get('exit_reason')} ({found_trade.get('realized_return_pct'):+.2f}%)",
+        "z_score": found_trade.get("exit_z"),
+        "price_a": found_trade.get("exit_price_a"),
+        "price_b": found_trade.get("exit_price_b"),
+        "outcome": found_trade.get("outcome"),
+    }
+
+    return {
+        "trade_id": clean_id,
+        "pair_name": found_trade.get("pair_name"),
+        "direction": found_trade.get("direction"),
+        "direction_label": found_trade.get("direction_label"),
+        "outcome": found_trade.get("outcome"),
+        "exit_reason": found_trade.get("exit_reason"),
+        "realized_return_pct": found_trade.get("realized_return_pct"),
+        "holding_days": found_trade.get("holding_days"),
+        "pins": {
+            "entry": entry_pin,
+            "tp1": tp1_pin,
+            "exit": exit_pin,
+        },
+        "trajectory": trajectory,
+    }
+
+
+# =========================================================================== #
+# Strategy Comparison Endpoints (/simulator/compare and /api/simulator/compare)
+# =========================================================================== #
+
+_compare_bytes_cache: Dict[str, bytes] = {}
+_compare_cache_lock = threading.Lock()
+_comparison_engine_instance = None
+
+
+def get_comparison_engine():
+    global _comparison_engine_instance
+    if _comparison_engine_instance is None:
+        from engine.strategy_comparison_engine import StrategyComparisonEngine
+        _comparison_engine_instance = StrategyComparisonEngine()
+    return _comparison_engine_instance
+
+
+@router.get("/compare")
+def get_strategy_comparison(
+    period: str = Query("1Y", description="Horizon period: 1Y, 2Y, 3Y, 5Y"),
+    refresh: bool = Query(False, description="Force re-computation"),
+) -> Response:
+    """Retrieve side-by-side Strategy v1 vs Strategy v2 delta analytics and trade diagnostics."""
+    global _compare_bytes_cache
+    p = period.strip().upper()
+    if p not in ("1Y", "2Y", "3Y", "5Y"):
+        raise HTTPException(400, f"Invalid period '{period}'. Expected 1Y, 2Y, 3Y, or 5Y.")
+
+    with _compare_cache_lock:
+        if not refresh and p in _compare_bytes_cache:
+            return Response(content=_compare_bytes_cache[p], media_type="application/json")
+
+        engine = get_comparison_engine()
+        try:
+            res_dict = engine.compare(p)
+        except Exception as e:
+            logger.error(f"Error computing strategy comparison for {p}: {e}", exc_info=True)
+            raise HTTPException(500, f"Failed to compute comparison for {p}: {str(e)}")
+
+        res_bytes = json.dumps(res_dict, default=str, allow_nan=False).encode("utf-8")
+        _compare_bytes_cache[p] = res_bytes
+        return Response(content=res_bytes, media_type="application/json")
+
+
+# =========================================================================== #
+# Strategy v3 Endpoints (/simulator/v3/* and /api/simulator/v3/*)
+# =========================================================================== #
+
+_v3_bytes_cache: Dict[str, bytes] = {}
+_v3_cache_lock = threading.Lock()
+_v3_engine_instance = None
+
+
+def get_v3_engine():
+    global _v3_engine_instance
+    if _v3_engine_instance is None:
+        from engine.strategy_v3_engine import StrategyV3Engine
+        _v3_engine_instance = StrategyV3Engine()
+    return _v3_engine_instance
+
+
+class StrategyV3RecalculateRequest(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    period: Optional[str] = "1Y"
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
+    z_score_entry: Optional[float] = None
+    z_score_stop_loss: Optional[float] = None
+    tier1_multiplier: Optional[float] = None
+    tier3_multiplier: Optional[float] = None
+    protected_stop_z: Optional[float] = None
+    activation_recovery_z: Optional[float] = None
+    max_holding_days: Optional[int] = None
+
+
+@router.get("/v3/backtest")
+def get_strategy_v3_backtest(
+    period: str = Query("1Y", description="Horizon period: 1Y, 2Y, 3Y, 5Y"),
+    refresh: bool = Query(False, description="Force recalculation"),
+) -> Response:
+    """Retrieve pre-computed Strategy v3 backtest results and performance scorecard."""
+    global _v3_bytes_cache
+    p = period.strip().upper()
+    if p not in ("1Y", "2Y", "3Y", "5Y"):
+        raise HTTPException(400, f"Invalid period '{period}'. Expected 1Y, 2Y, 3Y, or 5Y.")
+
+    cache_key = f"v3_horizon_{p}"
+
+    with _v3_cache_lock:
+        if not refresh and cache_key in _v3_bytes_cache:
+            return Response(content=_v3_bytes_cache[cache_key], media_type="application/json")
+
+        file_name = f"backtest_v3_{p.lower()}_results.json"
+        from engine.config import PROJECT_ROOT
+        file_path = PROJECT_ROOT / "data" / file_name
+
+        if not refresh and file_path.exists():
+            try:
+                b = file_path.read_bytes()
+                _v3_bytes_cache[cache_key] = b
+                return Response(content=b, media_type="application/json")
+            except Exception as e:
+                logger.warning(f"Failed to read cached v3 file {file_path}: {e}")
+
+        # If file missing or refresh forced, compute on the fly
+        horizon_dates = {
+            "1Y": ("2025-10-26", "2026-10-26"),
+            "2Y": ("2024-10-26", "2026-10-26"),
+            "3Y": ("2023-10-26", "2026-10-26"),
+            "5Y": ("2021-10-26", "2026-10-26"),
+        }
+        s_date, e_date = horizon_dates[p]
+        engine = get_v3_engine()
+        res_dict = engine.run_backtest(s_date, e_date)
+        res_bytes = json.dumps(res_dict, default=str, allow_nan=False).encode("utf-8")
+        _v3_bytes_cache[cache_key] = res_bytes
+        return Response(content=res_bytes, media_type="application/json")
+
+
+@router.post("/v3/recalculate")
+def recalculate_strategy_v3_backtest(
+    req: StrategyV3RecalculateRequest,
+) -> Response:
+    """Execute on-the-fly backtest simulation with custom Strategy v3 parameters."""
+    from engine.strategy_v3_engine import StrategyV3Config, StrategyV3Engine
+    config = StrategyV3Config.load()
+
+    if req.z_score_entry is not None:
+        config.z_score_entry = req.z_score_entry
+    if req.z_score_stop_loss is not None:
+        config.z_score_stop_loss = req.z_score_stop_loss
+    if req.tier1_multiplier is not None:
+        config.tier1_multiplier = req.tier1_multiplier
+    if req.tier3_multiplier is not None:
+        config.tier3_multiplier = req.tier3_multiplier
+    if req.protected_stop_z is not None:
+        config.protected_stop_z = req.protected_stop_z
+    if req.activation_recovery_z is not None:
+        config.activation_recovery_z = req.activation_recovery_z
+    if req.max_holding_days is not None:
+        config.max_holding_days = req.max_holding_days
+
+    horizon_dates = {
+        "1Y": ("2025-10-26", "2026-10-26"),
+        "2Y": ("2024-10-26", "2026-10-26"),
+        "3Y": ("2023-10-26", "2026-10-26"),
+        "5Y": ("2021-10-26", "2026-10-26"),
+    }
+    p = (req.period or "1Y").strip().upper()
+    s_date, e_date = horizon_dates.get(p, ("2025-10-26", "2026-10-26"))
+    if req.start_date:
+        s_date = req.start_date
+    if req.end_date:
+        e_date = req.end_date
+
+    engine = StrategyV3Engine(config)
+    res_dict = engine.run_backtest(s_date, e_date)
+    res_bytes = json.dumps(res_dict, default=str, allow_nan=False).encode("utf-8")
+    return Response(content=res_bytes, media_type="application/json")
+
+

@@ -1,0 +1,67 @@
+{
+  "version": "3.0.0",
+  "strategy_name": "Cointegrated Stat-Arb v3 (Asymmetric Alpha Maximizer)",
+  "description": "Institutional Quantitative Pairs Trading Strategy engineered to maximize total net profit and compound return across multi-year horizons (1Y, 2Y, 3Y, 5Y) using Full-Ride Mean Reversion, Conviction Kelly Sizing, Asymmetric Ratchet Floors, and Bertram OU Timing.",
+  "divergence_triggers": {
+    "z_score_entry_threshold": 2.00,
+    "z_score_exit_target": 0.05,
+    "z_score_overshoot_runner": -0.20,
+    "z_score_stop_loss_barrier": 3.50,
+    "lookback_days": 90,
+    "historical_period": "5y",
+    "min_valid_bars": 30
+  },
+  "conviction_position_sizing": {
+    "enabled": true,
+    "tier1_composite_score_min": 82.0,
+    "tier1_spread_vol_max_pct": 4.5,
+    "tier1_capital_multiplier": 1.45,
+    "tier2_composite_score_min": 70.0,
+    "tier2_capital_multiplier": 1.00,
+    "tier3_composite_score_min": 0.0,
+    "tier3_capital_multiplier": 0.60
+  },
+  "asymmetric_risk_management": {
+    "ratchet_disaster_floor_enabled": true,
+    "ratchet_activation_recovery_z": 0.70,
+    "ratchet_protected_stop_z": 1.50,
+    "half_life_time_stop_multiplier": 2.20,
+    "min_holding_days_floor": 10,
+    "max_holding_days_cap": 35,
+    "earnings_blackout_days": 3
+  },
+  "gauntlet_screening_thresholds": {
+    "min_correlation": 0.85,
+    "max_cointegration_pvalue": 0.05,
+    "min_zero_crossings_per_year": 10,
+    "min_half_life_days": 2.0,
+    "max_half_life_days": 32.0,
+    "max_hurst_exponent": 0.48,
+    "max_adf_t_stat": -2.80,
+    "min_adv_shares": 1500000,
+    "min_r_squared": 0.38,
+    "min_overlap_score": 50.0
+  },
+  "spread_volatility_tiers": {
+    "max_allowed_spread_vol_pct": 7.5,
+    "ultra_tight_max_pct": 2.5,
+    "tight_max_pct": 4.5,
+    "medium_max_pct": 7.5,
+    "blowout_penalty_z_sigma": 3.8
+  },
+  "composite_scoring_weights": {
+    "overlap_weight": 0.30,
+    "co_movement_weight": 0.35,
+    "spread_tightness_weight": 0.20,
+    "divergence_weight": 0.15,
+    "prime_setup_min_score": 82.0,
+    "strong_setup_min_score": 70.0
+  },
+  "performance_targets_vs_strategy1": {
+    "target_1y_net_profit_pct": 115.0,
+    "target_2y_net_profit_pct": 140.0,
+    "target_3y_net_profit_pct": 180.0,
+    "target_5y_net_profit_pct": 165.0,
+    "target_profit_factor": 1.75
+  }
+}

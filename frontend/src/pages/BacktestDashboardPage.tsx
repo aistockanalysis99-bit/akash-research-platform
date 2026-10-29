@@ -1237,6 +1237,109 @@ export default function BacktestDashboardPage() {
         </div>
       )}
 
+      {/* ─── SAVED BENCHMARK STRATEGIES QUICK SWITCHER (12 BUILT STRATEGIES) ─── */}
+      <div className="p-4 rounded-xl bg-surface-2/70 border border-line space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-line/40 pb-2.5">
+          <div className="flex items-center gap-2">
+            <span className="p-1 rounded bg-brand/10 text-brand">
+              <Layers className="w-4 h-4" />
+            </span>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-white uppercase tracking-wider">
+                  Saved Strategy Presets ({savedRuns.length} Built Strategies)
+                </span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-brand/10 border border-brand/30 text-brand font-semibold">
+                  1-Click Instant Load
+                </span>
+              </div>
+              <p className="text-[11px] text-gray-400 mt-0.5">
+                Instant 1-click loading of previously built models, or tweak parameters below to calibrate and save a new model.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                setIsAdvancedOpen(true);
+                setAdvancedTab("compare");
+              }}
+              className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-line bg-surface-3 hover:bg-surface-3/80 text-cyan-300 hover:text-white transition-all flex items-center gap-1.5 shadow-sm"
+              title="Open full comparison matrix of all saved models"
+            >
+              <GitCompare className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Compare All {savedRuns.length} Models</span>
+            </button>
+            <button
+              onClick={() => {
+                setIsAdvancedOpen(true);
+                setAdvancedTab("settings");
+              }}
+              className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-brand/40 bg-brand/15 text-brand hover:bg-brand/25 transition-all flex items-center gap-1.5 shadow-sm"
+              title="Open settings panel to calibrate, test, and save a new strategy"
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5 text-brand" />
+              <span>Tweak Settings & Create New</span>
+            </button>
+          </div>
+        </div>
+
+        {/* 12 Saved Strategy Cards / Quick Selectors */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+          {savedRuns.slice(0, 12).map((r) => {
+            const isCurrentActive =
+              r.start_date === startDate &&
+              r.end_date === endDate &&
+              Math.abs(r.entry_z - minEntryZ) < 1e-4 &&
+              Math.abs(r.stop_z - stopLossZ) < 1e-4;
+
+            return (
+              <button
+                key={r.run_id}
+                onClick={() => handleLoadSavedRun(r)}
+                className={cn(
+                  "p-2.5 rounded-lg border text-left transition-all relative overflow-hidden group flex flex-col justify-between",
+                  isCurrentActive
+                    ? "bg-brand/15 border-brand shadow-sm ring-1 ring-brand/40"
+                    : "bg-surface-1/70 hover:bg-surface-3 text-gray-300 hover:text-white border-line hover:border-gray-600"
+                )}
+                title={`Load "${r.test_name || r.run_id}" into simulator`}
+              >
+                <div>
+                  <div className="flex items-center justify-between gap-1 mb-1">
+                    <span className="text-[10px] font-mono text-gray-400 truncate">
+                      {r.start_date.slice(0, 4)}–{r.end_date.slice(0, 4)}
+                    </span>
+                    {isCurrentActive && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-brand animate-pulse shrink-0" />
+                    )}
+                  </div>
+                  <div className="text-xs font-bold text-white truncate group-hover:text-brand transition-colors">
+                    {r.test_name || r.run_id}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-line/40 text-[10px] font-mono">
+                  <span className="text-gray-400">
+                    WR: <strong className="text-gray-200">{r.win_rate_pct.toFixed(0)}%</strong>
+                  </span>
+                  <span
+                    className={cn(
+                      "font-bold",
+                      (r.net_return_pct ?? 0) >= 0 ? "text-emerald-400" : "text-rose-400"
+                    )}
+                  >
+                    {(r.net_return_pct ?? 0) >= 0 ? "+" : ""}
+                    {(r.net_return_pct ?? 0).toFixed(1)}%
+                  </span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* ─── ADVANCED STRATEGY SETTINGS & RUN COMPARISON DRAWER ────────────────── */}
       {isAdvancedOpen && (
         <Card className="p-5 border-brand/40 bg-gradient-to-b from-surface via-surface to-surface-2 shadow-2xl relative overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 space-y-5">

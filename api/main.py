@@ -258,8 +258,26 @@ async def run_backtest_endpoint(req: BacktestRequest) -> BacktestRunResponse:
     return BacktestRunResponse(run_id=run_id, name=run_name, status="running", progress=0.0)
 
 
-@app.get("/backtest/{run_id}", response_model=RunSummary)
-async def get_backtest(run_id: str) -> RunSummary:
+@app.get("/backtest/{run_id}")
+async def get_backtest(run_id: str) -> Any:
+    # If route is a known frontend SPA sub-path, serve the SPA index.html
+    if run_id in (
+        "dashboard",
+        "strategy-v1",
+        "strategy-1",
+        "strategy-v2",
+        "strategy-2",
+        "strategy-v3",
+        "strategy-3",
+        "compare-strategies",
+        "compare",
+    ):
+        from pathlib import Path
+        from fastapi.responses import FileResponse
+        idx = Path(__file__).resolve().parent.parent / "frontend" / "dist" / "index.html"
+        if idx.exists():
+            return FileResponse(idx)
+
     row = repo.get_run(run_id)
     if not row:
         raise HTTPException(404, "run not found")

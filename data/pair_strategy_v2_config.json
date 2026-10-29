@@ -1,0 +1,29 @@
+{
+  "version": "2.0.0",
+  "strategy_name": "Cointegrated Stat-Arb v2 (Confirmed Reversion & Staged Exits)",
+  "divergence_triggers": {
+    "z_score_hurdle": 2.10,
+    "z_score_hook_entry": 1.85,
+    "z_score_exit_tp1": 0.80,
+    "z_score_exit_tp2": 0.20,
+    "z_score_stop_loss_barrier": 3.20,
+    "lookback_days": 90
+  },
+  "trade_management": {
+    "staged_take_profit_enabled": true,
+    "tp1_allocation_pct": 50,
+    "move_stop_to_breakeven_on_tp1": true,
+    "half_life_time_stop_multiplier": 1.75,
+    "min_holding_days_floor": 10,
+    "max_holding_days_cap": 25,
+    "earnings_blackout_days": 5
+  },
+  "gauntlet_screening_thresholds": {
+    "min_correlation": 0.85,
+    "max_cointegration_pvalue": 0.04,
+    "min_half_life_days": 2.0,
+    "max_half_life_days": 22.0,
+    "max_hurst_exponent": 0.48,
+    "min_r_squared": 0.50
+  }
+}
