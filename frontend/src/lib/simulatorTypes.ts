@@ -466,28 +466,35 @@ export interface StrategyComparisonSummaryDelta {
   win_rate_v1: number;
   win_rate_v2: number;
   win_rate_v3?: number;
+  win_rate_v4?: number;
   delta_win_rate_pct: number;
   profit_factor_v1: number;
   profit_factor_v2: number;
   profit_factor_v3?: number;
+  profit_factor_v4?: number;
   delta_profit_factor: number;
   max_drawdown_v1: number;
   max_drawdown_v2: number;
   max_drawdown_v3?: number;
+  max_drawdown_v4?: number;
   delta_max_drawdown_saved_pct: number;
   avg_return_v1: number;
   avg_return_v2: number;
   avg_return_v3?: number;
+  avg_return_v4?: number;
   delta_avg_return_pct: number;
   avg_holding_days_v1: number;
   avg_holding_days_v2: number;
+  avg_holding_days_v4?: number;
   delta_avg_holding_days: number;
   total_net_return_v1?: number;
   total_net_return_v2?: number;
   total_net_return_v3?: number;
+  total_net_return_v4?: number;
   total_trades_v1: number;
   total_trades_v2: number;
   total_trades_v3?: number;
+  total_trades_v4?: number;
   capital_preserved_loss_pct: number;
 }
 
@@ -515,8 +522,10 @@ export interface AlignedEquityPoint {
   v1_equity: number;
   v2_equity: number;
   v3_equity?: number;
+  v4_equity?: number;
   spread_alpha: number;
   v3_spread_alpha?: number;
+  v4_spread_alpha?: number;
 }
 
 export interface StrategyComparisonResponse {
@@ -527,6 +536,7 @@ export interface StrategyComparisonResponse {
   v1_summary: Record<string, any>;
   v2_summary: Record<string, any>;
   v3_summary?: StrategyV3Summary;
+  v4_summary?: StrategyV4Summary;
   trade_deltas: StrategyComparisonTradeDelta[];
   aligned_equity: AlignedEquityPoint[];
 }
@@ -623,6 +633,134 @@ export interface StrategyV3Response {
   trades: StrategyV3Trade[];
   meta: Record<string, any>;
 }
+
+// ---------------------------------------------------------------------------
+// Strategy v4 Types ("Risk-Engineered Pure Alpha")
+// ---------------------------------------------------------------------------
+
+export interface StrategyV4Summary {
+  total_trades: number;
+  win_count: number;
+  loss_count: number;
+  neutral_count: number;
+  win_rate_pct: number;
+  net_return_pct: number;
+  gross_profit_pct: number;
+  gross_loss_pct: number;
+  profit_factor: number;
+  max_drawdown_pct: number;
+  avg_return_pct: number;
+  avg_holding_days: number;
+  reversion_target_exits: number;
+  tight_stop_exits: number;
+  time_stop_exits: number;
+  sharpe_ratio: number;
+  calmar_ratio: number;
+}
+
+export interface StrategyV4Trade {
+  id: string;
+  pair_name: string;
+  ticker_a: string;
+  ticker_b: string;
+  sector: string;
+  entry_date: string;
+  exit_date: string;
+  direction: string;
+  direction_label: string;
+  entry_z: number;
+  exit_z: number;
+  hedge_ratio: number;
+  entry_price_a: number;
+  entry_price_b: number;
+  exit_price_a: number;
+  exit_price_b: number;
+  outcome: string;
+  exit_reason: string;
+  status_reason: string;
+  holding_days: number;
+  raw_return_pct: number;
+  realized_return_pct: number;
+  sizing_multiplier: number;
+  spread_vol_pct: number;
+  half_life_days: number;
+  max_holding_limit: number;
+  is_dampened: boolean;
+  momentum_slope: number;
+  composite_score: number;
+  trajectory?: Array<{
+    date: string;
+    days_elapsed: number;
+    price_a: number;
+    price_b: number;
+    spread: number;
+    z_score: number;
+  }>;
+}
+
+export interface StrategyV4MonthlyReturn {
+  month: string;
+  trades_count: number;
+  win_rate_pct: number;
+  return_pct: number;
+  cumulative_return_pct: number;
+}
+
+export interface StrategyV4EquityPoint {
+  date: string;
+  daily_pnl_pct?: number;
+  trade_id?: string;
+  return_pct?: number;
+  cumulative_equity_pct: number;
+  drawdown_pct: number;
+}
+
+export interface StrategyV4Response {
+  version: string;
+  strategy_name: string;
+  period: {
+    start_date: string;
+    end_date: string;
+    trading_days: number;
+  };
+  overall_summary: StrategyV4Summary;
+  monthly_returns: Record<string, number> | StrategyV4MonthlyReturn[];
+  equity_curve: StrategyV4EquityPoint[];
+  trades: StrategyV4Trade[];
+  meta: Record<string, any>;
+}
+
+export interface TradeChartBar {
+  date: string;
+  price_a: number;
+  price_b: number;
+  norm_price_a: number;
+  norm_price_b: number;
+  spread: number;
+  z_score: number;
+  is_entry: boolean;
+  is_exit: boolean;
+  in_trade: boolean;
+}
+
+export interface TradeChartDataResponse {
+  ticker_a: string;
+  ticker_b: string;
+  pair_name: string;
+  entry_date: string;
+  exit_date?: string | null;
+  pre_days: number;
+  post_days: number;
+  entry_index: number;
+  exit_index: number;
+  hedge_ratio: number;
+  spread_mean: number;
+  spread_std: number;
+  total_bars: number;
+  bars: TradeChartBar[];
+}
+
+
 
 
 

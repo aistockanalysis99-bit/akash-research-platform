@@ -34,6 +34,7 @@ import { api } from "@/lib/api";
 import type { Backtest1YTrade } from "@/lib/simulatorTypes";
 import { Card } from "@/components/ui";
 import { cn } from "@/lib/utils";
+import TradeInspectorModal from "@/components/simulator/TradeInspectorModal";
 
 type HorizonPeriod = "1Y" | "2Y" | "3Y" | "5Y";
 type ActiveChartTab = "equity" | "drawdown" | "monthly";
@@ -907,95 +908,25 @@ export default function StrategyV1Page() {
       </Card>
 
       {/* ------------------------------------------------------------------- */}
-      {/* 6. Trade Inspector Modal                                            */}
+      {/* 6. Institutional Full-Window Trade Inspector Modal                  */}
       {/* ------------------------------------------------------------------- */}
       {selectedTrade && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
-          <div
-            className="w-full max-w-3xl bg-surface-1 border border-line rounded-xl p-5 shadow-2xl relative max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-start justify-between pb-4 border-b border-line">
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-lg font-bold text-white font-mono">
-                    {selectedTrade.pair_name} Trade Inspector
-                  </h3>
-                  <span
-                    className={cn(
-                      "px-2 py-0.5 rounded text-xs font-mono font-semibold",
-                      selectedTrade.outcome === "WIN"
-                        ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                        : "bg-rose-500/20 text-rose-300 border border-rose-500/30"
-                    )}
-                  >
-                    {selectedTrade.outcome} ({selectedTrade.realized_return_pct >= 0 ? "+" : ""}{selectedTrade.realized_return_pct.toFixed(2)}%)
-                  </span>
-                </div>
-                <p className="text-xs text-gray-400 font-mono mt-1">
-                  {selectedTrade.direction_label} &middot; Sector: {selectedTrade.sector || "Other"} &middot; Held for {selectedTrade.holding_days} trading days
-                </p>
-              </div>
-
-              <button
-                onClick={() => setSelectedTrade(null)}
-                className="p-1.5 rounded-lg hover:bg-surface-3 text-gray-400 hover:text-white transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 my-4">
-              <div className="p-3 rounded-lg bg-surface-2 border border-line">
-                <div className="text-[10px] text-gray-400 font-mono uppercase">Entry Z-Score</div>
-                <div className="text-sm font-bold font-mono text-sky-400 mt-0.5">
-                  {selectedTrade.entry_z.toFixed(2)}σ
-                </div>
-                <div className="text-[10px] text-gray-500 font-mono">
-                  Date: {selectedTrade.entry_date}
-                </div>
-              </div>
-
-              <div className="p-3 rounded-lg bg-surface-2 border border-line">
-                <div className="text-[10px] text-gray-400 font-mono uppercase">Exit Z-Score</div>
-                <div className="text-sm font-bold font-mono text-white mt-0.5">
-                  {selectedTrade.exit_z !== null && selectedTrade.exit_z !== undefined ? `${selectedTrade.exit_z.toFixed(2)}σ` : "0.00σ"}
-                </div>
-                <div className="text-[10px] text-gray-500 font-mono">
-                  Date: {selectedTrade.exit_date}
-                </div>
-              </div>
-
-              <div className="p-3 rounded-lg bg-surface-2 border border-line">
-                <div className="text-[10px] text-gray-400 font-mono uppercase">Holding Days</div>
-                <div className="text-sm font-bold font-mono text-white mt-0.5">
-                  {selectedTrade.holding_days} Days
-                </div>
-                <div className="text-[10px] text-gray-500 font-mono">
-                  Max Horizon: 30d
-                </div>
-              </div>
-
-              <div className="p-3 rounded-lg bg-surface-2 border border-line">
-                <div className="text-[10px] text-gray-400 font-mono uppercase">Quality Checks</div>
-                <div className="text-sm font-bold font-mono text-emerald-400 mt-0.5">
-                  {selectedTrade.passed_checks_count || 0}/10 Checks
-                </div>
-                <div className="text-[10px] text-gray-500 font-mono">
-                  ADF &amp; Cointegration
-                </div>
-              </div>
-            </div>
-
-            {/* Narrative */}
-            <div className="p-3 rounded-lg bg-surface-2 border border-line">
-              <div className="text-[10px] text-gray-400 font-mono uppercase mb-1">Execution Status &amp; Narrative</div>
-              <p className="text-xs text-gray-300 font-mono">
-                {selectedTrade.status_reason || selectedTrade.outcome}
-              </p>
-            </div>
-          </div>
-        </div>
+        <TradeInspectorModal
+          trade={selectedTrade}
+          onClose={() => setSelectedTrade(null)}
+          strategyLabel="STRATEGY 1: BASELINE DIVERGENCE ARBITRAGE"
+          strategyThemeColor="sky"
+          tradeIndex={filteredTrades.findIndex((t) => t.id === selectedTrade.id)}
+          totalTrades={filteredTrades.length}
+          onPrevTrade={() => {
+            const idx = filteredTrades.findIndex((t) => t.id === selectedTrade.id);
+            if (idx > 0) setSelectedTrade(filteredTrades[idx - 1]);
+          }}
+          onNextTrade={() => {
+            const idx = filteredTrades.findIndex((t) => t.id === selectedTrade.id);
+            if (idx < filteredTrades.length - 1) setSelectedTrade(filteredTrades[idx + 1]);
+          }}
+        />
       )}
     </div>
   );

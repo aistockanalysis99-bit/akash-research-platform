@@ -98,6 +98,14 @@ class StrategyComparisonEngine:
             "5Y": self.data_dir / "backtest_v3_5y_results.json",
         }
 
+        # Mapping for v4 precomputed results across horizons
+        self.v4_files: Dict[str, Path] = {
+            "1Y": self.data_dir / "backtest_v4_1y_results.json",
+            "2Y": self.data_dir / "backtest_v4_2y_results.json",
+            "3Y": self.data_dir / "backtest_v4_3y_results.json",
+            "5Y": self.data_dir / "backtest_v4_5y_results.json",
+        }
+
     def load_v1_results(self, period: str = "1Y") -> Dict[str, Any]:
         """Load Strategy v1 results for the specified horizon."""
         clean_period = period.strip().upper()
@@ -131,6 +139,19 @@ class StrategyComparisonEngine:
         f_path = self.v3_files.get(clean_period)
         if not f_path or not f_path.exists():
             f_path = self.data_dir / f"backtest_v3_{clean_period.lower()}_results.json"
+
+        if not f_path.exists():
+            return {}
+
+        with open(f_path, "r", encoding="utf-8") as fp:
+            return json.load(fp)
+
+    def load_v4_results(self, period: str = "1Y") -> Dict[str, Any]:
+        """Load Strategy v4 results for the specified horizon."""
+        clean_period = period.strip().upper()
+        f_path = self.v4_files.get(clean_period)
+        if not f_path or not f_path.exists():
+            f_path = self.data_dir / f"backtest_v4_{clean_period.lower()}_results.json"
 
         if not f_path.exists():
             return {}
@@ -424,8 +445,9 @@ class StrategyComparisonEngine:
         v1_trades: List[Dict[str, Any]],
         v2_equity_curve: List[Dict[str, Any]],
         v3_equity_curve: Optional[List[Dict[str, Any]]] = None,
+        v4_equity_curve: Optional[List[Dict[str, Any]]] = None,
     ) -> List[Dict[str, Any]]:
-        """Construct a synchronized multi-series daily equity step function for Strategy 1, 2, and 3."""
+        """Construct a synchronized multi-series daily equity step function for Strategy 1, 2, 3, and 4."""
         # 1. Map v1 realized returns by date
         v1_sorted = sorted(
             v1_trades,
@@ -455,13 +477,29 @@ class StrategyComparisonEngine:
                 if d_str:
                     v3_daily[d_str] = clean_float(pt.get("cumulative_equity_pct", 0.0))
 
-        # 4. Combine and sort all unique dates
-        all_dates = sorted(list(set(v1_daily.keys()).union(set(v2_daily.keys())).union(set(v3_daily.keys()))))
+        # 4. Map v4 realized returns by date
+        v4_daily: Dict[str, float] = {}
+        if v4_equity_curve:
+            for pt in v4_equity_curve:
+                d_str = pt.get("date")
+                if d_str:
+                    v4_daily[d_str] = clean_float(pt.get("cumulative_equity_pct", 0.0))
+
+        # 5. Combine and sort all unique dates
+        all_dates = sorted(
+            list(
+                set(v1_daily.keys())
+                .union(set(v2_daily.keys()))
+                .union(set(v3_daily.keys()))
+                .union(set(v4_daily.keys()))
+            )
+        )
 
         aligned: List[Dict[str, Any]] = []
         curr_v1 = 0.0
         curr_v2 = 0.0
         curr_v3 = 0.0
+        curr_v4 = 0.0
 
         for d in all_dates:
             if d in v1_daily:
@@ -470,22 +508,27 @@ class StrategyComparisonEngine:
                 curr_v2 = v2_daily[d]
             if d in v3_daily:
                 curr_v3 = v3_daily[d]
+            if d in v4_daily:
+                curr_v4 = v4_daily[d]
 
             alpha_spread = round(curr_v2 - curr_v1, 2)
             v3_alpha_spread = round(curr_v3 - curr_v1, 2)
+            v4_alpha_spread = round(curr_v4 - curr_v1, 2)
             aligned.append({
                 "date": d,
                 "v1_equity": round(curr_v1, 2),
                 "v2_equity": round(curr_v2, 2),
                 "v3_equity": round(curr_v3, 2),
+                "v4_equity": round(curr_v4, 2),
                 "spread_alpha": alpha_spread,
                 "v3_spread_alpha": v3_alpha_spread,
+                "v4_spread_alpha": v4_alpha_spread,
             })
 
         return aligned
 
     def compare(self, period: str = "1Y") -> Dict[str, Any]:
-        """Execute full comparative analysis across Strategy 1, 2, and 3 for a given horizon."""
+        """Execute full comparative analysis across Strategy 1, 2, 3, and 4 for a given horizon."""
         clean_period = period.strip().upper()
         if clean_period not in ("1Y", "2Y", "3Y", "5Y"):
             clean_period = "1Y"
@@ -493,14 +536,17 @@ class StrategyComparisonEngine:
         v1_data = self.load_v1_results(clean_period)
         v2_data = self.load_v2_results(clean_period)
         v3_data = self.load_v3_results(clean_period)
+        v4_data = self.load_v4_results(clean_period)
 
         v1_trades = v1_data.get("trades", [])
         v2_trades = v2_data.get("trades", [])
         v3_trades = v3_data.get("trades", [])
+        v4_trades = v4_data.get("trades", [])
 
         v1_summary = v1_data.get("overall_summary", {})
         v2_summary = v2_data.get("overall_summary", {})
         v3_summary = v3_data.get("overall_summary", {})
+        v4_summary = v4_data.get("overall_summary", {})
 
         # Trade matching and cohort categorization
         trade_deltas, category_metrics = self.match_trades(v1_trades, v2_trades)
@@ -511,7 +557,8 @@ class StrategyComparisonEngine:
         # Aligned equity curves
         v2_equity_curve = v2_data.get("equity_curve", [])
         v3_equity_curve = v3_data.get("equity_curve", [])
-        aligned_equity = self.build_aligned_equity(v1_trades, v2_equity_curve, v3_equity_curve)
+        v4_equity_curve = v4_data.get("equity_curve", [])
+        aligned_equity = self.build_aligned_equity(v1_trades, v2_equity_curve, v3_equity_curve, v4_equity_curve)
 
         # Differential Delta Metrics
         v1_wr = clean_float(v1_summary.get("win_rate_pct", 0.0))
@@ -539,37 +586,53 @@ class StrategyComparisonEngine:
         v3_pf = clean_float(v3_summary.get("profit_factor", 0.0))
         v3_dd = clean_float(v3_summary.get("max_drawdown_pct", 0.0))
         v3_avg_ret = clean_float(v3_summary.get("avg_return_pct", 0.0))
+
+        # v4 Key Metrics
+        v4_wr = clean_float(v4_summary.get("win_rate_pct", 0.0))
+        v4_pf = clean_float(v4_summary.get("profit_factor", 0.0))
+        v4_dd = clean_float(v4_summary.get("max_drawdown_pct", 0.0))
+        v4_avg_ret = clean_float(v4_summary.get("avg_return_pct", 0.0))
+        v4_avg_hold = clean_float(v4_summary.get("avg_holding_days", 0.0))
+
         v1_net_ret = clean_float(v1_summary.get("gross_profit_pct", 0.0) - v1_summary.get("gross_loss_pct", 0.0))
         v2_net_ret = clean_float(v2_summary.get("gross_profit_pct", 0.0) - v2_summary.get("gross_loss_pct", 0.0))
         v3_net_ret = clean_float(v3_summary.get("net_return_pct", 0.0)) or clean_float(v3_summary.get("gross_profit_pct", 0.0) - v3_summary.get("gross_loss_pct", 0.0))
+        v4_net_ret = clean_float(v4_summary.get("net_return_pct", 0.0)) or clean_float(v4_summary.get("gross_profit_pct", 0.0) - v4_summary.get("gross_loss_pct", 0.0))
 
         summary_delta = {
             "period": clean_period,
             "win_rate_v1": v1_wr,
             "win_rate_v2": v2_wr,
             "win_rate_v3": v3_wr,
+            "win_rate_v4": v4_wr,
             "delta_win_rate_pct": delta_wr,
             "profit_factor_v1": v1_pf,
             "profit_factor_v2": v2_pf,
             "profit_factor_v3": v3_pf,
+            "profit_factor_v4": v4_pf,
             "delta_profit_factor": delta_pf,
             "max_drawdown_v1": v1_dd,
             "max_drawdown_v2": v2_dd,
             "max_drawdown_v3": v3_dd,
+            "max_drawdown_v4": v4_dd,
             "delta_max_drawdown_saved_pct": delta_dd_saved,
             "avg_return_v1": v1_avg_ret,
             "avg_return_v2": v2_avg_ret,
             "avg_return_v3": v3_avg_ret,
+            "avg_return_v4": v4_avg_ret,
             "delta_avg_return_pct": delta_avg_ret,
             "avg_holding_days_v1": v1_avg_hold,
             "avg_holding_days_v2": v2_avg_hold,
+            "avg_holding_days_v4": v4_avg_hold,
             "delta_avg_holding_days": delta_avg_hold,
             "total_net_return_v1": v1_net_ret,
             "total_net_return_v2": v2_net_ret,
             "total_net_return_v3": v3_net_ret,
+            "total_net_return_v4": v4_net_ret,
             "total_trades_v1": len(v1_trades),
             "total_trades_v2": len(v2_trades),
             "total_trades_v3": len(v3_trades),
+            "total_trades_v4": len(v4_trades),
             "capital_preserved_loss_pct": category_metrics["capital_preserved_loss_pct"],
         }
 
@@ -581,6 +644,7 @@ class StrategyComparisonEngine:
             "v1_summary": v1_summary,
             "v2_summary": v2_summary,
             "v3_summary": v3_summary,
+            "v4_summary": v4_summary,
             "trade_deltas": trade_deltas,
             "aligned_equity": aligned_equity,
         }

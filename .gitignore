@@ -51,3 +51,8 @@ scratch/
 *.sqlite3
 
 
+
+# Local strategy benchmark outputs
+Strategy_1_result.json
+Strategy_3_result.json
+Strategy_4_result.json

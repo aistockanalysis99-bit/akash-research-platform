@@ -44,6 +44,7 @@ import { api } from "@/lib/api";
 import type { Backtest1YTrade, SavedBacktestRun } from "@/lib/simulatorTypes";
 import { Card } from "@/components/ui";
 import { cn } from "@/lib/utils";
+import TradeInspectorModal from "@/components/simulator/TradeInspectorModal";
 
 type TableQuickFilter =
   | "all"
@@ -3385,189 +3386,24 @@ export default function BacktestDashboardPage() {
         )}
       </Card>
 
-      {/* ─── QUICK INSPECTOR MODAL (FOR INDIVIDUAL TRADE) ───────────────────── */}
+      {/* ─── INSTITUTIONAL FULL-WINDOW TRADE INSPECTOR MODAL ───────────── */}
       {inspectedTrade && (
-        <div
-          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
-          onClick={() => setInspectedTrade(null)}
-        >
-          <div
-            className="bg-surface border border-line/80 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl p-6 space-y-5 animate-in fade-in zoom-in-95 duration-150"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Header */}
-            <div className="flex items-start justify-between border-b border-line pb-4">
-              <div>
-                <div className="flex items-center gap-2.5">
-                  <h3 className="text-lg font-bold text-white font-mono">
-                    {inspectedTrade.pair_name}
-                  </h3>
-                  <span
-                    className={cn(
-                      "px-2.5 py-0.5 rounded text-xs font-bold font-mono border",
-                      inspectedTrade.outcome === "WIN"
-                        ? "bg-emerald-950/60 text-emerald-300 border-emerald-500/50"
-                        : inspectedTrade.outcome === "LOSS"
-                        ? "bg-rose-950/60 text-rose-300 border-rose-500/50"
-                        : "bg-surface-2 text-gray-400 border-line"
-                    )}
-                  >
-                    {inspectedTrade.outcome}
-                  </span>
-                  <span className="text-xs text-gray-400 font-sans">
-                    {inspectedTrade.sector} &middot; {inspectedTrade.spread_tier}
-                  </span>
-                </div>
-                <p className="text-xs text-gray-400 font-mono mt-1">
-                  Triggered:{" "}
-                  <strong className="text-white">
-                    {inspectedTrade.entry_date}
-                  </strong>{" "}
-                  &middot; Exit:{" "}
-                  <strong className="text-white">
-                    {inspectedTrade.exit_date || "Holding"}
-                  </strong>{" "}
-                  ({inspectedTrade.holding_days} trading days)
-                </p>
-              </div>
-
-              <button
-                onClick={() => setInspectedTrade(null)}
-                aria-label="Close trade details modal"
-                className="p-1 rounded-lg bg-surface-2 text-gray-400 hover:text-white border border-line transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Trade Key Quant Facts */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs font-mono">
-              <div className="p-2.5 rounded-lg bg-surface-2 border border-line">
-                <span className="text-gray-400 block text-[10px] uppercase font-sans">
-                  Realized Return
-                </span>
-                <span
-                  className={cn(
-                    "text-base font-extrabold mt-0.5 block",
-                    inspectedTrade.realized_return_pct >= 0
-                      ? "text-emerald-400"
-                      : "text-rose-400"
-                  )}
-                >
-                  {inspectedTrade.realized_return_pct >= 0 ? "+" : ""}
-                  {inspectedTrade.realized_return_pct}%
-                </span>
-              </div>
-
-              <div className="p-2.5 rounded-lg bg-surface-2 border border-line">
-                <span className="text-gray-400 block text-[10px] uppercase font-sans">
-                  Entry &rarr; Exit Z
-                </span>
-                <span className="text-base font-bold text-white mt-0.5 block">
-                  {inspectedTrade.entry_z}&sigma; &rarr;{" "}
-                  {inspectedTrade.exit_z !== null &&
-                  inspectedTrade.exit_z !== undefined
-                    ? `${inspectedTrade.exit_z}σ`
-                    : "—"}
-                </span>
-              </div>
-
-              <div className="p-2.5 rounded-lg bg-surface-2 border border-line">
-                <span className="text-gray-400 block text-[10px] uppercase font-sans">
-                  Hedge Ratio (&beta;)
-                </span>
-                <span className="text-base font-bold text-cyan-300 mt-0.5 block">
-                  {inspectedTrade.hedge_ratio}
-                </span>
-              </div>
-
-              <div className="p-2.5 rounded-lg bg-surface-2 border border-line">
-                <span className="text-gray-400 block text-[10px] uppercase font-sans">
-                  Status Reason
-                </span>
-                <span className="text-[11px] font-semibold text-gray-300 mt-1 block truncate">
-                  {inspectedTrade.status_reason || "Target Reverted"}
-                </span>
-              </div>
-            </div>
-
-            {/* The 10 Institutional Quality Checks Grid */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-white font-mono flex items-center gap-1.5">
-                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                  <span>The 10 Institutional Quality Checks</span>
-                </span>
-                <span className="font-mono text-emerald-400 font-bold">
-                  {inspectedTrade.passed_checks_count} of 10 Passed
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono">
-                {Object.entries(CHECK_INFO).map(([key, info]) => {
-                  const hasChecksObj =
-                    inspectedTrade.checks &&
-                    Object.keys(inspectedTrade.checks).length > 0;
-                  const passed = hasChecksObj
-                    ? Boolean(inspectedTrade.checks![key])
-                    : inspectedTrade.passed_checks_count === 10;
-
-                  return (
-                    <div
-                      key={key}
-                      className={cn(
-                        "p-2.5 rounded-lg border flex items-start gap-2.5 transition-colors",
-                        passed
-                          ? "bg-emerald-950/20 border-emerald-500/30 text-emerald-200"
-                          : "bg-surface-2 border-line text-gray-400"
-                      )}
-                    >
-                      <div className="mt-0.5">
-                        {passed ? (
-                          <Check className="w-4 h-4 text-emerald-400" />
-                        ) : (
-                          <X className="w-4 h-4 text-rose-400" />
-                        )}
-                      </div>
-                      <div className="space-y-0.5 flex-1">
-                        <div className="font-bold text-white text-[11px]">
-                          {info.label}
-                        </div>
-                        <div className="text-[10px] text-gray-400 font-sans leading-tight">
-                          {info.desc}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Action Footer */}
-            <div className="border-t border-line pt-4 flex flex-wrap items-center justify-between gap-3">
-              <div className="text-[11px] text-gray-500 font-mono">
-                Ornstein-Uhlenbeck Half-Life: {inspectedTrade.half_life_days}d
-                &middot; ADF p: {inspectedTrade.adf_pvalue}
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setInspectedTrade(null)}
-                  className="px-3 py-1.5 rounded-lg bg-surface-2 border border-line text-xs text-gray-300 hover:text-white transition-colors"
-                >
-                  Close
-                </button>
-                <Link
-                  to={`/setups/${inspectedTrade.ticker_a}/${inspectedTrade.ticker_b}?date=${inspectedTrade.entry_date}`}
-                  className="px-4 py-1.5 rounded-lg bg-brand text-bg text-xs font-bold hover:bg-brand/90 transition-all flex items-center gap-1.5 shadow-sm"
-                >
-                  <span>Show Graph</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
+        <TradeInspectorModal
+          trade={inspectedTrade}
+          onClose={() => setInspectedTrade(null)}
+          strategyLabel="BACKTEST DASHBOARD TRADE INSPECTOR"
+          strategyThemeColor="sky"
+          tradeIndex={filteredTrades.findIndex((t) => t.id === inspectedTrade.id)}
+          totalTrades={filteredTrades.length}
+          onPrevTrade={() => {
+            const idx = filteredTrades.findIndex((t) => t.id === inspectedTrade.id);
+            if (idx > 0) setInspectedTrade(filteredTrades[idx - 1]);
+          }}
+          onNextTrade={() => {
+            const idx = filteredTrades.findIndex((t) => t.id === inspectedTrade.id);
+            if (idx < filteredTrades.length - 1) setInspectedTrade(filteredTrades[idx + 1]);
+          }}
+        />
       )}
 
       {/* ─── STRATEGY SETTINGS INSPECTOR POPUP MODAL (FOR SAVED RUN) ─────────── */}

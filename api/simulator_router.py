@@ -25,8 +25,11 @@ from datetime import date
 from typing import Any, Dict, List, Optional, Union
 
 import pandas as pd
+import numpy as np
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, ConfigDict, Field
+
+from engine.config import DATA_CACHE_DIR
 
 from engine.simulator_engine import (
     DayBatchScorecard,
@@ -243,6 +246,36 @@ class HistoricalBarSchema(BaseModel):
     price_b: float
     spread: float
     z_score: float
+
+
+class TradeChartBarSchema(BaseModel):
+    date: str
+    price_a: float
+    price_b: float
+    norm_price_a: float
+    norm_price_b: float
+    spread: float
+    z_score: float
+    is_entry: bool
+    is_exit: bool
+    in_trade: bool
+
+
+class TradeChartDataResponse(BaseModel):
+    ticker_a: str
+    ticker_b: str
+    pair_name: str
+    entry_date: str
+    exit_date: Optional[str] = None
+    pre_days: int
+    post_days: int
+    entry_index: int
+    exit_index: int
+    hedge_ratio: float
+    spread_mean: float
+    spread_std: float
+    total_bars: int
+    bars: List[TradeChartBarSchema]
 
 
 class ForwardBarSchema(BaseModel):
@@ -604,6 +637,168 @@ def get_pair_chart(
         historical_bars=historical_bars,
         forward_bars=forward_bars,
         forward_outcome=forward_outcome,
+    )
+
+
+def _fetch_ticker_series(engine: PointInTimeEngine, ticker: str) -> pd.Series:
+    """Load historical price series for ticker from universe parquet or individual cache."""
+    df = engine.load_data()
+    p_df = df["Adj Close"] if "Adj Close" in df else df["Close"]
+    clean_t = ticker.strip().upper()
+    variants = [
+        clean_t,
+        clean_t.replace("-", "_"),
+        clean_t.replace(".", "_"),
+        clean_t.replace("_", "-"),
+        clean_t.replace(".", "-"),
+    ]
+    for v in variants:
+        if v in p_df.columns:
+            s = p_df[v].dropna().copy()
+            s.index = pd.to_datetime(s.index).tz_localize(None)
+            return s
+
+    # Fallback to individual parquet in data_cache
+    for v in variants:
+        fn = f"{v}_1D.parquet"
+        fpath = DATA_CACHE_DIR / fn
+        if fpath.exists():
+            idf = pd.read_parquet(fpath)
+            ts_col = "timestamp" if "timestamp" in idf.columns else idf.index.name
+            if ts_col in idf.columns:
+                idf[ts_col] = pd.to_datetime(idf[ts_col]).dt.tz_localize(None)
+                idf = idf.set_index(ts_col)
+            val_col = "adj_close" if "adj_close" in idf.columns else ("close" if "close" in idf.columns else idf.columns[0])
+            s = idf[val_col].dropna().copy()
+            return s
+
+    raise HTTPException(404, f"Price series not found for ticker '{ticker}' in universe or cache.")
+
+
+@router.get("/trade-chart", response_model=TradeChartDataResponse)
+def get_trade_chart(
+    ticker_a: str = Query(..., description="Primary ticker symbol"),
+    ticker_b: str = Query(..., description="Hedge ticker symbol"),
+    entry_date: str = Query(..., description="Trade entry date (YYYY-MM-DD)"),
+    exit_date: Optional[str] = Query(None, description="Trade exit date (YYYY-MM-DD)"),
+    pre_days: int = Query(60, ge=10, le=120, description="Trading days before entry date"),
+    post_days: int = Query(15, ge=5, le=60, description="Trading days after exit date"),
+    hedge_ratio: Optional[float] = Query(None, description="Optional PIT hedge ratio (beta)"),
+    spread_mean: Optional[float] = Query(None, description="Optional PIT spread mean (mu)"),
+    spread_std: Optional[float] = Query(None, description="Optional PIT spread std (sigma)"),
+) -> TradeChartDataResponse:
+    """Retrieve dual-stock price series, spread excursion, and Z-score for trade inspection.
+    
+    Guarantees window: [entry_date - pre_days trading days] to [exit_date + post_days trading days].
+    """
+    engine = get_engine()
+    ta = ticker_a.strip().upper().replace(".", "-")
+    tb = ticker_b.strip().upper().replace(".", "-")
+
+    if ta == tb:
+        raise HTTPException(400, "ticker_a and ticker_b cannot be identical.")
+
+    s_a = _fetch_ticker_series(engine, ta)
+    s_b = _fetch_ticker_series(engine, tb)
+    common = pd.concat([s_a.rename("A"), s_b.rename("B")], axis=1, join="inner").sort_index()
+    if common.empty:
+        raise HTTPException(404, f"No overlapping trading days found between {ta} and {tb}.")
+
+    try:
+        entry_ts = pd.to_datetime(entry_date).normalize()
+    except Exception:
+        raise HTTPException(400, f"Invalid entry_date format: {entry_date}")
+
+    if exit_date:
+        try:
+            exit_ts = pd.to_datetime(exit_date).normalize()
+        except Exception:
+            exit_ts = entry_ts
+    else:
+        exit_ts = entry_ts
+
+    trading_days = common.index
+    entry_idx = int(trading_days.get_indexer([entry_ts], method="nearest")[0])
+    exit_idx = int(trading_days.get_indexer([exit_ts], method="nearest")[0])
+    if exit_idx < entry_idx:
+        exit_idx = entry_idx
+
+    start_idx = max(0, entry_idx - pre_days)
+    end_idx = min(len(trading_days) - 1, exit_idx + post_days)
+    sliced = common.iloc[start_idx : end_idx + 1]
+
+    # PIT hedge ratio, mean, and std calculation
+    if hedge_ratio is None or spread_mean is None or spread_std is None or spread_std <= 1e-12:
+        lb_start = max(0, entry_idx - pre_days)
+        lb_df = common.iloc[lb_start : entry_idx + 1]
+        pa_lb = lb_df["A"].values
+        pb_lb = lb_df["B"].values
+        cov_mat = np.cov(pa_lb, pb_lb)
+        calc_beta = float(cov_mat[0, 1] / cov_mat[1, 1]) if cov_mat[1, 1] > 1e-12 else 1.0
+        s_lb = pa_lb - calc_beta * pb_lb
+        calc_mu = float(np.mean(s_lb))
+        calc_sigma = float(np.std(s_lb))
+        beta = hedge_ratio if hedge_ratio is not None else calc_beta
+        mu = spread_mean if spread_mean is not None else calc_mu
+        sigma = spread_std if (spread_std is not None and spread_std > 1e-12) else (calc_sigma if calc_sigma > 1e-12 else 1.0)
+    else:
+        beta = hedge_ratio
+        mu = spread_mean
+        sigma = spread_std
+
+    pa_base = float(sliced["A"].iloc[0]) if float(sliced["A"].iloc[0]) > 0 else 1.0
+    pb_base = float(sliced["B"].iloc[0]) if float(sliced["B"].iloc[0]) > 0 else 1.0
+
+    bars: List[TradeChartBarSchema] = []
+    rel_entry_idx = 0
+    rel_exit_idx = 0
+
+    for i, (dt, row) in enumerate(sliced.iterrows()):
+        d_str = dt.strftime("%Y-%m-%d")
+        pa = float(row["A"])
+        pb = float(row["B"])
+        norm_a = round((pa / pa_base) * 100.0, 2)
+        norm_b = round((pb / pb_base) * 100.0, 2)
+        spread = float(pa - beta * pb)
+        z = float((spread - mu) / sigma) if sigma > 1e-12 else 0.0
+
+        is_entry = (i == (entry_idx - start_idx))
+        is_exit = (i == (exit_idx - start_idx))
+        in_trade = (entry_idx - start_idx) <= i <= (exit_idx - start_idx)
+
+        if is_entry:
+            rel_entry_idx = i
+        if is_exit:
+            rel_exit_idx = i
+
+        bars.append(TradeChartBarSchema(
+            date=d_str,
+            price_a=round(clean_float(pa), 2),
+            price_b=round(clean_float(pb), 2),
+            norm_price_a=round(clean_float(norm_a), 2),
+            norm_price_b=round(clean_float(norm_b), 2),
+            spread=round(clean_float(spread), 4),
+            z_score=round(clean_float(z), 2),
+            is_entry=is_entry,
+            is_exit=is_exit,
+            in_trade=in_trade,
+        ))
+
+    return TradeChartDataResponse(
+        ticker_a=ta,
+        ticker_b=tb,
+        pair_name=f"{ta}/{tb}",
+        entry_date=entry_date,
+        exit_date=exit_date,
+        pre_days=pre_days,
+        post_days=post_days,
+        entry_index=rel_entry_idx,
+        exit_index=rel_exit_idx,
+        hedge_ratio=round(beta, 4),
+        spread_mean=round(mu, 4),
+        spread_std=round(sigma, 4),
+        total_bars=len(bars),
+        bars=bars,
     )
 
 
@@ -1171,5 +1366,138 @@ def recalculate_strategy_v3_backtest(
     res_dict = engine.run_backtest(s_date, e_date)
     res_bytes = json.dumps(res_dict, default=str, allow_nan=False).encode("utf-8")
     return Response(content=res_bytes, media_type="application/json")
+
+
+# =========================================================================== #
+# Strategy v4 Endpoints (/simulator/v4/* and /api/simulator/v4/*)
+# =========================================================================== #
+
+_v4_bytes_cache: Dict[str, bytes] = {}
+_v4_cache_lock = threading.Lock()
+_v4_engine_instance = None
+
+
+def get_v4_engine():
+    global _v4_engine_instance
+    if _v4_engine_instance is None:
+        from engine.strategy_v4_engine import StrategyV4Engine
+        _v4_engine_instance = StrategyV4Engine()
+    return _v4_engine_instance
+
+
+class StrategyV4RecalculateRequest(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    period: Optional[str] = "1Y"
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
+    z_score_entry_hurdle: Optional[float] = None
+    max_entry_momentum_slope: Optional[float] = None
+    z_score_exit_target: Optional[float] = None
+    z_score_stop_loss_barrier: Optional[float] = None
+    target_spread_vol_pct: Optional[float] = None
+    drawdown_threshold_pct: Optional[float] = None
+    drawdown_scaling_factor: Optional[float] = None
+    half_life_time_stop_multiplier: Optional[float] = None
+    min_holding_days_floor: Optional[int] = None
+    max_holding_days_cap: Optional[int] = None
+    vix_panic_threshold: Optional[float] = None
+    max_allowed_spread_vol_pct: Optional[float] = None
+
+
+@router.get("/v4/backtest")
+def get_strategy_v4_backtest(
+    period: str = Query("1Y", description="Horizon period: 1Y, 2Y, 3Y, 5Y"),
+    refresh: bool = Query(False, description="Force recalculation"),
+) -> Response:
+    """Retrieve pre-computed Strategy v4 backtest results and performance scorecard."""
+    global _v4_bytes_cache
+    p = period.strip().upper()
+    if p not in ("1Y", "2Y", "3Y", "5Y"):
+        raise HTTPException(400, f"Invalid period '{period}'. Expected 1Y, 2Y, 3Y, or 5Y.")
+
+    cache_key = f"v4_horizon_{p}"
+
+    with _v4_cache_lock:
+        if not refresh and cache_key in _v4_bytes_cache:
+            return Response(content=_v4_bytes_cache[cache_key], media_type="application/json")
+
+        file_name = f"backtest_v4_{p.lower()}_results.json"
+        from engine.config import PROJECT_ROOT
+        file_path = PROJECT_ROOT / "data" / file_name
+
+        if not refresh and file_path.exists():
+            try:
+                b = file_path.read_bytes()
+                _v4_bytes_cache[cache_key] = b
+                return Response(content=b, media_type="application/json")
+            except Exception as e:
+                logger.warning(f"Failed to read cached v4 file {file_path}: {e}")
+
+        # If file missing or refresh forced, compute on the fly
+        horizon_dates = {
+            "1Y": ("2025-10-26", "2026-10-26"),
+            "2Y": ("2024-10-26", "2026-10-26"),
+            "3Y": ("2023-10-26", "2026-10-26"),
+            "5Y": ("2021-10-26", "2026-10-26"),
+        }
+        s_date, e_date = horizon_dates[p]
+        engine = get_v4_engine()
+        res_dict = engine.run_backtest(s_date, e_date)
+        res_bytes = json.dumps(res_dict, default=str, allow_nan=False).encode("utf-8")
+        _v4_bytes_cache[cache_key] = res_bytes
+        return Response(content=res_bytes, media_type="application/json")
+
+
+@router.post("/v4/recalculate")
+def recalculate_strategy_v4_backtest(
+    req: StrategyV4RecalculateRequest,
+) -> Response:
+    """Execute on-the-fly backtest simulation with custom Strategy v4 parameters."""
+    from engine.strategy_v4_engine import StrategyV4Config, StrategyV4Engine
+    config = StrategyV4Config.load()
+
+    if req.z_score_entry_hurdle is not None:
+        config.z_score_entry_hurdle = req.z_score_entry_hurdle
+    if req.max_entry_momentum_slope is not None:
+        config.max_entry_momentum_slope = req.max_entry_momentum_slope
+    if req.z_score_exit_target is not None:
+        config.z_score_exit_target = req.z_score_exit_target
+    if req.z_score_stop_loss_barrier is not None:
+        config.z_score_stop_loss_barrier = req.z_score_stop_loss_barrier
+    if req.target_spread_vol_pct is not None:
+        config.target_spread_vol_pct = req.target_spread_vol_pct
+    if req.drawdown_threshold_pct is not None:
+        config.drawdown_threshold_pct = req.drawdown_threshold_pct
+    if req.drawdown_scaling_factor is not None:
+        config.drawdown_scaling_factor = req.drawdown_scaling_factor
+    if req.half_life_time_stop_multiplier is not None:
+        config.half_life_time_stop_multiplier = req.half_life_time_stop_multiplier
+    if req.min_holding_days_floor is not None:
+        config.min_holding_days_floor = req.min_holding_days_floor
+    if req.max_holding_days_cap is not None:
+        config.max_holding_days_cap = req.max_holding_days_cap
+    if req.vix_panic_threshold is not None:
+        config.vix_panic_threshold = req.vix_panic_threshold
+    if req.max_allowed_spread_vol_pct is not None:
+        config.max_allowed_spread_vol_pct = req.max_allowed_spread_vol_pct
+
+    horizon_dates = {
+        "1Y": ("2025-10-26", "2026-10-26"),
+        "2Y": ("2024-10-26", "2026-10-26"),
+        "3Y": ("2023-10-26", "2026-10-26"),
+        "5Y": ("2021-10-26", "2026-10-26"),
+    }
+    p = (req.period or "1Y").strip().upper()
+    s_date, e_date = horizon_dates.get(p, ("2025-10-26", "2026-10-26"))
+    if req.start_date:
+        s_date = req.start_date
+    if req.end_date:
+        e_date = req.end_date
+
+    engine = StrategyV4Engine(config)
+    res_dict = engine.run_backtest(s_date, e_date)
+    res_bytes = json.dumps(res_dict, default=str, allow_nan=False).encode("utf-8")
+    return Response(content=res_bytes, media_type="application/json")
+
 
 

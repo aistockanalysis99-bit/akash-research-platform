@@ -25,6 +25,7 @@ import type {
   SimulatorScanResponse,
   SimulatorStepResponse,
   Backtest1YResponse,
+  TradeChartDataResponse,
 } from "./simulatorTypes";
 
 // In dev + single-service prod, Vite/FastAPI handle "/api".
@@ -850,6 +851,30 @@ export const api = {
       return get<PairChartResponse>(`/simulator/pair-chart?${q.toString()}`);
     },
 
+    tradeChart: (params: {
+      ticker_a: string;
+      ticker_b: string;
+      entry_date: string;
+      exit_date?: string | null;
+      pre_days?: number;
+      post_days?: number;
+      hedge_ratio?: number;
+      spread_mean?: number;
+      spread_std?: number;
+    }) => {
+      const q = new URLSearchParams();
+      q.set("ticker_a", params.ticker_a);
+      q.set("ticker_b", params.ticker_b);
+      q.set("entry_date", params.entry_date);
+      if (params.exit_date) q.set("exit_date", params.exit_date);
+      if (params.pre_days) q.set("pre_days", String(params.pre_days));
+      if (params.post_days) q.set("post_days", String(params.post_days));
+      if (params.hedge_ratio !== undefined && params.hedge_ratio !== null) q.set("hedge_ratio", String(params.hedge_ratio));
+      if (params.spread_mean !== undefined && params.spread_mean !== null) q.set("spread_mean", String(params.spread_mean));
+      if (params.spread_std !== undefined && params.spread_std !== null) q.set("spread_std", String(params.spread_std));
+      return get<TradeChartDataResponse>(`/simulator/trade-chart?${q.toString()}`);
+    },
+
     reveal: (params: {
       ticker_a: string;
       ticker_b: string;
@@ -975,7 +1000,33 @@ export const api = {
       max_holding_days?: number;
     }) => post<import("./simulatorTypes").StrategyV3Response>("/simulator/v3/recalculate", params),
 
-    // Strategy Comparison Methods (3-Way Benchmark)
+    // Strategy v4 Methods ("Risk-Engineered Pure Alpha")
+    getV4Backtest: (period: "1Y" | "2Y" | "3Y" | "5Y" | string = "1Y", refresh = false) => {
+      const q = new URLSearchParams();
+      q.set("period", period);
+      if (refresh) q.set("refresh", "true");
+      return get<import("./simulatorTypes").StrategyV4Response>(`/simulator/v4/backtest?${q.toString()}`);
+    },
+
+    recalculateV4: (params: {
+      period?: string;
+      start_date?: string;
+      end_date?: string;
+      z_score_entry_hurdle?: number;
+      max_entry_momentum_slope?: number;
+      z_score_exit_target?: number;
+      z_score_stop_loss_barrier?: number;
+      target_spread_vol_pct?: number;
+      drawdown_threshold_pct?: number;
+      drawdown_scaling_factor?: number;
+      half_life_time_stop_multiplier?: number;
+      min_holding_days_floor?: number;
+      max_holding_days_cap?: number;
+      vix_panic_threshold?: number;
+      max_allowed_spread_vol_pct?: number;
+    }) => post<import("./simulatorTypes").StrategyV4Response>("/simulator/v4/recalculate", params),
+
+    // Strategy Comparison Methods (4-Way Benchmark)
     getComparison: (period: "1Y" | "2Y" | "3Y" | "5Y" | string = "1Y", refresh = false) => {
       const q = new URLSearchParams();
       q.set("period", period);

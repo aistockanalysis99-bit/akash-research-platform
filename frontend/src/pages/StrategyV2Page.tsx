@@ -38,6 +38,7 @@ import type {
 } from "@/lib/simulatorTypes";
 import { Card } from "@/components/ui";
 import { cn } from "@/lib/utils";
+import TradeInspectorModal from "@/components/simulator/TradeInspectorModal";
 
 type HorizonPeriod = "1Y" | "2Y" | "3Y" | "5Y";
 type ActiveChartTab = "equity" | "drawdown" | "monthly" | "staged_breakdown";
@@ -1006,185 +1007,25 @@ export default function StrategyV2Page() {
       </Card>
 
       {/* ------------------------------------------------------------------- */}
-      {/* 6. Trade Inspector Modal                                            */}
+      {/* 6. Institutional Full-Window Trade Inspector Modal                  */}
       {/* ------------------------------------------------------------------- */}
       {selectedTrade && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-          <Card className="w-full max-w-3xl bg-surface-1 border-purple-500/30 p-5 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            {/* Modal Header */}
-            <div className="flex items-start justify-between pb-4 border-b border-line">
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-lg font-bold text-white font-mono">
-                    {selectedTrade.pair_name} Trade Inspector
-                  </h3>
-                  <span
-                    className={cn(
-                      "px-2 py-0.5 rounded text-xs font-mono font-semibold",
-                      selectedTrade.outcome === "WIN"
-                        ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                        : "bg-rose-500/20 text-rose-300 border border-rose-500/30"
-                    )}
-                  >
-                    {selectedTrade.outcome} ({selectedTrade.realized_return_pct >= 0 ? "+" : ""}{selectedTrade.realized_return_pct}%)
-                  </span>
-                </div>
-                <p className="text-xs text-gray-400 font-mono mt-1">
-                  {selectedTrade.direction_label} &middot; Held for {selectedTrade.holding_days} trading days &middot; Exit: {selectedTrade.exit_reason}
-                </p>
-              </div>
-
-              <button
-                onClick={() => setSelectedTrade(null)}
-                className="p-1.5 rounded-lg hover:bg-surface-3 text-gray-400 hover:text-white transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Marker Pins Summary */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 my-4">
-              {/* Entry Pin */}
-              <div className="p-3 rounded-lg bg-surface-2/60 border border-purple-500/20">
-                <div className="text-[10px] text-purple-400 font-mono uppercase">Entry Hook Marker</div>
-                <div className="text-sm font-bold font-mono text-white mt-0.5">
-                  Z: {selectedTrade.entry_z}σ
-                </div>
-                <div className="text-[11px] text-gray-400 font-mono mt-1">
-                  Date: {selectedTrade.entry_date}
-                </div>
-                <div className="text-[10px] text-gray-500 font-mono">
-                  Hurdle reached: {selectedTrade.hurdle_breached_z}σ
-                </div>
-              </div>
-
-              {/* TP1 Pin */}
-              <div className="p-3 rounded-lg bg-surface-2/60 border border-emerald-500/20">
-                <div className="text-[10px] text-emerald-400 font-mono uppercase">Tranche 1 TP (50%)</div>
-                <div className="text-sm font-bold font-mono text-white mt-0.5">
-                  {selectedTrade.tp1_hit ? `Locked +${selectedTrade.tranche1_pnl_pct}%` : "Not Reached"}
-                </div>
-                <div className="text-[11px] text-gray-400 font-mono mt-1">
-                  {selectedTrade.tp1_hit ? `Date: ${selectedTrade.tp1_date} (Day ${selectedTrade.tp1_days_held})` : "—"}
-                </div>
-                <div className="text-[10px] text-gray-500 font-mono">
-                  {selectedTrade.tp1_hit ? "Breakeven stop engaged for T2" : "Held initial stop"}
-                </div>
-              </div>
-
-              {/* Exit Pin */}
-              <div className="p-3 rounded-lg bg-surface-2/60 border border-line">
-                <div className="text-[10px] text-gray-400 font-mono uppercase">Final Exit Marker</div>
-                <div className="text-sm font-bold font-mono text-white mt-0.5">
-                  Z: {selectedTrade.exit_z !== null ? `${selectedTrade.exit_z}σ` : "—"}
-                </div>
-                <div className="text-[11px] text-gray-400 font-mono mt-1">
-                  Date: {selectedTrade.exit_date}
-                </div>
-                <div className="text-[10px] text-gray-500 font-mono">
-                  Reason: {selectedTrade.exit_reason}
-                </div>
-              </div>
-            </div>
-
-            {/* Trajectory Time-Series Chart */}
-            <div className="space-y-2 mt-4">
-              <div className="flex items-center justify-between text-xs font-mono text-gray-400">
-                <span>Spread Z-Score Trajectory Over Holding Episode</span>
-                <span>T_max: {selectedTrade.time_stop_days} days</span>
-              </div>
-
-              <div className="h-44 w-full bg-surface-2/80 rounded-lg border border-line/80 p-3 relative flex items-center">
-                {selectedTrade.trajectory && selectedTrade.trajectory.length > 1 ? (
-                  <svg
-                    className="w-full h-full overflow-visible"
-                    viewBox={`0 0 ${selectedTrade.trajectory.length} 100`}
-                    preserveAspectRatio="none"
-                  >
-                    {(() => {
-                      const zVals = selectedTrade.trajectory.map((p) => p.z_score);
-                      const minZ = Math.min(-3.5, ...zVals);
-                      const maxZ = Math.max(3.5, ...zVals);
-                      const zRange = maxZ - minZ || 1;
-
-                      // Map Z to Y coordinate
-                      const toY = (z: number) => 95 - ((z - minZ) / zRange) * 90;
-
-                      const points = selectedTrade.trajectory
-                        .map((p, i) => `${i},${toY(p.z_score)}`)
-                        .join(" ");
-
-                      return (
-                        <>
-                          {/* Zero Mean Line */}
-                          <line
-                            x1="0"
-                            y1={toY(0)}
-                            x2={selectedTrade.trajectory.length - 1}
-                            y2={toY(0)}
-                            stroke="#475569"
-                            strokeDasharray="3 3"
-                            strokeWidth="1"
-                            vectorEffect="non-scaling-stroke"
-                          />
-                          {/* TP1 Line */}
-                          <line
-                            x1="0"
-                            y1={toY(selectedTrade.direction === "LONG_A_SHORT_B" ? -0.8 : 0.8)}
-                            x2={selectedTrade.trajectory.length - 1}
-                            y2={toY(selectedTrade.direction === "LONG_A_SHORT_B" ? -0.8 : 0.8)}
-                            stroke="#10b981"
-                            strokeDasharray="2 2"
-                            strokeWidth="1"
-                            vectorEffect="non-scaling-stroke"
-                          />
-                          {/* Stop Line */}
-                          <line
-                            x1="0"
-                            y1={toY(selectedTrade.direction === "LONG_A_SHORT_B" ? -3.2 : 3.2)}
-                            x2={selectedTrade.trajectory.length - 1}
-                            y2={toY(selectedTrade.direction === "LONG_A_SHORT_B" ? -3.2 : 3.2)}
-                            stroke="#ef4444"
-                            strokeDasharray="2 2"
-                            strokeWidth="1"
-                            vectorEffect="non-scaling-stroke"
-                          />
-
-                          {/* Trajectory Polyline */}
-                          <polyline
-                            fill="none"
-                            stroke="#8b5cf6"
-                            strokeWidth="2.5"
-                            points={points}
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            vectorEffect="non-scaling-stroke"
-                          />
-                        </>
-                      );
-                    })()}
-                  </svg>
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-xs text-gray-500 font-mono">
-                    Single-day resolution or direct exit.
-                  </div>
-                )}
-              </div>
-
-              <div className="flex items-center justify-between text-[10px] text-gray-500 font-mono">
-                <span>Entry: {selectedTrade.entry_date}</span>
-                <span className="text-emerald-400">Green Dash: TP1 (0.80σ)</span>
-                <span className="text-rose-400">Red Dash: Stop Barrier (3.20σ)</span>
-                <span>Exit: {selectedTrade.exit_date}</span>
-              </div>
-            </div>
-
-            {/* Narrative Explanation */}
-            <div className="mt-4 p-3 rounded-lg bg-surface-2/40 border border-line text-xs text-gray-400 font-mono">
-              <strong className="text-gray-300">Execution Narrative:</strong> {selectedTrade.status_reason}
-            </div>
-          </Card>
-        </div>
+        <TradeInspectorModal
+          trade={selectedTrade}
+          onClose={() => setSelectedTrade(null)}
+          strategyLabel="STRATEGY 2: STAGED PARTIAL EXITS (FAILED EXP.)"
+          strategyThemeColor="amber"
+          tradeIndex={filteredTrades.findIndex((t) => t.id === selectedTrade.id)}
+          totalTrades={filteredTrades.length}
+          onPrevTrade={() => {
+            const idx = filteredTrades.findIndex((t) => t.id === selectedTrade.id);
+            if (idx > 0) setSelectedTrade(filteredTrades[idx - 1]);
+          }}
+          onNextTrade={() => {
+            const idx = filteredTrades.findIndex((t) => t.id === selectedTrade.id);
+            if (idx < filteredTrades.length - 1) setSelectedTrade(filteredTrades[idx + 1]);
+          }}
+        />
       )}
     </div>
   );

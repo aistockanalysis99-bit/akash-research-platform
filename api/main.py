@@ -269,6 +269,8 @@ async def get_backtest(run_id: str) -> Any:
         "strategy-2",
         "strategy-v3",
         "strategy-3",
+        "strategy-v4",
+        "strategy-4",
         "compare-strategies",
         "compare",
     ):

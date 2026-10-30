@@ -1,0 +1,6124 @@
+{
+  "version": "4.0.0",
+  "strategy_name": "Cointegrated Stat-Arb v4 (Risk-Engineered Pure Alpha)",
+  "period": {
+    "start_date": "2025-10-26",
+    "end_date": "2026-10-26",
+    "trading_days": 251
+  },
+  "overall_summary": {
+    "total_trades": 54,
+    "win_count": 37,
+    "loss_count": 17,
+    "neutral_count": 0,
+    "win_rate_pct": 68.5,
+    "net_return_pct": 59.25,
+    "gross_profit_pct": 82.44,
+    "gross_loss_pct": 23.19,
+    "profit_factor": 3.55,
+    "max_drawdown_pct": 3.94,
+    "avg_return_pct": 1.1,
+    "avg_holding_days": 6.4,
+    "reversion_target_exits": 17,
+    "tight_stop_exits": 13,
+    "time_stop_exits": 24,
+    "sharpe_ratio": 3.72,
+    "calmar_ratio": 15.04
+  },
+  "equity_curve": [
+    {
+      "date": "2025-10-27",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 0.0,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2025-10-28",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 0.0,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2025-10-29",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 0.0,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2025-10-30",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 0.0,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2025-10-31",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 0.0,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2025-11-03",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 0.0,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2025-11-04",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 0.0,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2025-11-05",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 0.0,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2025-11-06",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 0.0,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2025-11-07",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 0.0,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2025-11-10",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 0.0,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2025-11-11",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 0.0,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2025-11-12",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 0.0,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2025-11-13",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 0.0,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2025-11-14",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 0.0,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2025-11-17",
+      "daily_pnl_pct": -2.2,
+      "cumulative_equity_pct": -2.2,
+      "drawdown_pct": 2.2
+    },
+    {
+      "date": "2025-11-18",
+      "daily_pnl_pct": 0.78,
+      "cumulative_equity_pct": -1.42,
+      "drawdown_pct": 1.42
+    },
+    {
+      "date": "2025-11-19",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": -1.42,
+      "drawdown_pct": 1.42
+    },
+    {
+      "date": "2025-11-20",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": -1.42,
+      "drawdown_pct": 1.42
+    },
+    {
+      "date": "2025-11-21",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": -1.42,
+      "drawdown_pct": 1.42
+    },
+    {
+      "date": "2025-11-24",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": -1.42,
+      "drawdown_pct": 1.42
+    },
+    {
+      "date": "2025-11-25",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": -1.42,
+      "drawdown_pct": 1.42
+    },
+    {
+      "date": "2025-11-26",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": -1.42,
+      "drawdown_pct": 1.42
+    },
+    {
+      "date": "2025-11-28",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": -1.42,
+      "drawdown_pct": 1.42
+    },
+    {
+      "date": "2025-12-01",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": -1.42,
+      "drawdown_pct": 1.42
+    },
+    {
+      "date": "2025-12-02",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": -1.42,
+      "drawdown_pct": 1.42
+    },
+    {
+      "date": "2025-12-03",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": -1.42,
+      "drawdown_pct": 1.42
+    },
+    {
+      "date": "2025-12-04",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": -1.42,
+      "drawdown_pct": 1.42
+    },
+    {
+      "date": "2025-12-05",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": -1.42,
+      "drawdown_pct": 1.42
+    },
+    {
+      "date": "2025-12-08",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": -1.42,
+      "drawdown_pct": 1.42
+    },
+    {
+      "date": "2025-12-09",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": -1.42,
+      "drawdown_pct": 1.42
+    },
+    {
+      "date": "2025-12-10",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": -1.42,
+      "drawdown_pct": 1.42
+    },
+    {
+      "date": "2025-12-11",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": -1.42,
+      "drawdown_pct": 1.42
+    },
+    {
+      "date": "2025-12-12",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": -1.42,
+      "drawdown_pct": 1.42
+    },
+    {
+      "date": "2025-12-15",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": -1.42,
+      "drawdown_pct": 1.42
+    },
+    {
+      "date": "2025-12-16",
+      "daily_pnl_pct": 1.14,
+      "cumulative_equity_pct": -0.28,
+      "drawdown_pct": 0.28
+    },
+    {
+      "date": "2025-12-17",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": -0.28,
+      "drawdown_pct": 0.28
+    },
+    {
+      "date": "2025-12-18",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": -0.28,
+      "drawdown_pct": 0.28
+    },
+    {
+      "date": "2025-12-19",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": -0.28,
+      "drawdown_pct": 0.28
+    },
+    {
+      "date": "2025-12-22",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": -0.28,
+      "drawdown_pct": 0.28
+    },
+    {
+      "date": "2025-12-23",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": -0.28,
+      "drawdown_pct": 0.28
+    },
+    {
+      "date": "2025-12-24",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": -0.28,
+      "drawdown_pct": 0.28
+    },
+    {
+      "date": "2025-12-26",
+      "daily_pnl_pct": 0.54,
+      "cumulative_equity_pct": 0.26,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2025-12-29",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 0.26,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2025-12-30",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 0.26,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2025-12-31",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 0.26,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-01-02",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 0.26,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-01-05",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 0.26,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-01-06",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 0.26,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-01-07",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 0.26,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-01-08",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 0.26,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-01-09",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 0.26,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-01-12",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 0.26,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-01-13",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 0.26,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-01-14",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 0.26,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-01-15",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 0.26,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-01-16",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 0.26,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-01-20",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 0.26,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-01-21",
+      "daily_pnl_pct": 2.45,
+      "cumulative_equity_pct": 2.71,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-01-22",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 2.71,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-01-23",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 2.71,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-01-26",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 2.71,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-01-27",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 2.71,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-01-28",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 2.71,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-01-29",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 2.71,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-01-30",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 2.71,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-02-02",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 2.71,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-02-03",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 2.71,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-02-04",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 2.71,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-02-05",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 2.71,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-02-06",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 2.71,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-02-09",
+      "daily_pnl_pct": -1.9,
+      "cumulative_equity_pct": 0.81,
+      "drawdown_pct": 1.9
+    },
+    {
+      "date": "2026-02-10",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 0.81,
+      "drawdown_pct": 1.9
+    },
+    {
+      "date": "2026-02-11",
+      "daily_pnl_pct": 3.53,
+      "cumulative_equity_pct": 4.34,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-02-12",
+      "daily_pnl_pct": 2.16,
+      "cumulative_equity_pct": 6.5,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-02-13",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 6.5,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-02-17",
+      "daily_pnl_pct": -1.35,
+      "cumulative_equity_pct": 5.15,
+      "drawdown_pct": 1.35
+    },
+    {
+      "date": "2026-02-18",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 5.15,
+      "drawdown_pct": 1.35
+    },
+    {
+      "date": "2026-02-19",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 5.15,
+      "drawdown_pct": 1.35
+    },
+    {
+      "date": "2026-02-20",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 5.15,
+      "drawdown_pct": 1.35
+    },
+    {
+      "date": "2026-02-23",
+      "daily_pnl_pct": -1.5,
+      "cumulative_equity_pct": 3.65,
+      "drawdown_pct": 2.85
+    },
+    {
+      "date": "2026-02-24",
+      "daily_pnl_pct": 5.13,
+      "cumulative_equity_pct": 8.78,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-02-25",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 8.78,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-02-26",
+      "daily_pnl_pct": 0.79,
+      "cumulative_equity_pct": 9.57,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-02-27",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 9.57,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-03-02",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 9.57,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-03-03",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 9.57,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-03-04",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 9.57,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-03-05",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 9.57,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-03-06",
+      "daily_pnl_pct": 6.93,
+      "cumulative_equity_pct": 16.5,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-03-09",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 16.5,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-03-10",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 16.5,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-03-11",
+      "daily_pnl_pct": -1.48,
+      "cumulative_equity_pct": 15.02,
+      "drawdown_pct": 1.48
+    },
+    {
+      "date": "2026-03-12",
+      "daily_pnl_pct": -0.98,
+      "cumulative_equity_pct": 14.04,
+      "drawdown_pct": 2.46
+    },
+    {
+      "date": "2026-03-13",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 14.04,
+      "drawdown_pct": 2.46
+    },
+    {
+      "date": "2026-03-16",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 14.04,
+      "drawdown_pct": 2.46
+    },
+    {
+      "date": "2026-03-17",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 14.04,
+      "drawdown_pct": 2.46
+    },
+    {
+      "date": "2026-03-18",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 14.04,
+      "drawdown_pct": 2.46
+    },
+    {
+      "date": "2026-03-19",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 14.04,
+      "drawdown_pct": 2.46
+    },
+    {
+      "date": "2026-03-20",
+      "daily_pnl_pct": 1.92,
+      "cumulative_equity_pct": 15.96,
+      "drawdown_pct": 0.54
+    },
+    {
+      "date": "2026-03-23",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 15.96,
+      "drawdown_pct": 0.54
+    },
+    {
+      "date": "2026-03-24",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 15.96,
+      "drawdown_pct": 0.54
+    },
+    {
+      "date": "2026-03-25",
+      "daily_pnl_pct": 0.72,
+      "cumulative_equity_pct": 16.68,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-03-26",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 16.68,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-03-27",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 16.68,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-03-30",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 16.68,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-03-31",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 16.68,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-04-01",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 16.68,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-04-02",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 16.68,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-04-06",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 16.68,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-04-07",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 16.68,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-04-08",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 16.68,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-04-09",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 16.68,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-04-10",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 16.68,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-04-13",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 16.68,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-04-14",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 16.68,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-04-15",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 16.68,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-04-16",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 16.68,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-04-17",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 16.68,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-04-20",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 16.68,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-04-21",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 16.68,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-04-22",
+      "daily_pnl_pct": 2.01,
+      "cumulative_equity_pct": 18.69,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-04-23",
+      "daily_pnl_pct": 1.76,
+      "cumulative_equity_pct": 20.45,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-04-24",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 20.45,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-04-27",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 20.45,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-04-28",
+      "daily_pnl_pct": 2.42,
+      "cumulative_equity_pct": 22.87,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-04-29",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 22.87,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-04-30",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 22.87,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-05-01",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 22.87,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-05-04",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 22.87,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-05-05",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 22.87,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-05-06",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 22.87,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-05-07",
+      "daily_pnl_pct": 0.85,
+      "cumulative_equity_pct": 23.72,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-05-08",
+      "daily_pnl_pct": -2.08,
+      "cumulative_equity_pct": 21.64,
+      "drawdown_pct": 2.08
+    },
+    {
+      "date": "2026-05-11",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 21.64,
+      "drawdown_pct": 2.08
+    },
+    {
+      "date": "2026-05-12",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 21.64,
+      "drawdown_pct": 2.08
+    },
+    {
+      "date": "2026-05-13",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 21.64,
+      "drawdown_pct": 2.08
+    },
+    {
+      "date": "2026-05-14",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 21.64,
+      "drawdown_pct": 2.08
+    },
+    {
+      "date": "2026-05-15",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 21.64,
+      "drawdown_pct": 2.08
+    },
+    {
+      "date": "2026-05-18",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 21.64,
+      "drawdown_pct": 2.08
+    },
+    {
+      "date": "2026-05-19",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 21.64,
+      "drawdown_pct": 2.08
+    },
+    {
+      "date": "2026-05-20",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 21.64,
+      "drawdown_pct": 2.08
+    },
+    {
+      "date": "2026-05-21",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 21.64,
+      "drawdown_pct": 2.08
+    },
+    {
+      "date": "2026-05-22",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 21.64,
+      "drawdown_pct": 2.08
+    },
+    {
+      "date": "2026-05-26",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 21.64,
+      "drawdown_pct": 2.08
+    },
+    {
+      "date": "2026-05-27",
+      "daily_pnl_pct": 5.95,
+      "cumulative_equity_pct": 27.59,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-05-28",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 27.59,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-05-29",
+      "daily_pnl_pct": -2.59,
+      "cumulative_equity_pct": 25.0,
+      "drawdown_pct": 2.59
+    },
+    {
+      "date": "2026-06-01",
+      "daily_pnl_pct": 1.02,
+      "cumulative_equity_pct": 26.02,
+      "drawdown_pct": 1.57
+    },
+    {
+      "date": "2026-06-02",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 26.02,
+      "drawdown_pct": 1.57
+    },
+    {
+      "date": "2026-06-03",
+      "daily_pnl_pct": -2.37,
+      "cumulative_equity_pct": 23.65,
+      "drawdown_pct": 3.94
+    },
+    {
+      "date": "2026-06-04",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 23.65,
+      "drawdown_pct": 3.94
+    },
+    {
+      "date": "2026-06-05",
+      "daily_pnl_pct": 2.6,
+      "cumulative_equity_pct": 26.25,
+      "drawdown_pct": 1.34
+    },
+    {
+      "date": "2026-06-08",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 26.25,
+      "drawdown_pct": 1.34
+    },
+    {
+      "date": "2026-06-09",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 26.25,
+      "drawdown_pct": 1.34
+    },
+    {
+      "date": "2026-06-10",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 26.25,
+      "drawdown_pct": 1.34
+    },
+    {
+      "date": "2026-06-11",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 26.25,
+      "drawdown_pct": 1.34
+    },
+    {
+      "date": "2026-06-12",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 26.25,
+      "drawdown_pct": 1.34
+    },
+    {
+      "date": "2026-06-15",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 26.25,
+      "drawdown_pct": 1.34
+    },
+    {
+      "date": "2026-06-16",
+      "daily_pnl_pct": 1.15,
+      "cumulative_equity_pct": 27.4,
+      "drawdown_pct": 0.19
+    },
+    {
+      "date": "2026-06-17",
+      "daily_pnl_pct": 4.93,
+      "cumulative_equity_pct": 32.33,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-06-18",
+      "daily_pnl_pct": -1.5,
+      "cumulative_equity_pct": 30.83,
+      "drawdown_pct": 1.5
+    },
+    {
+      "date": "2026-06-22",
+      "daily_pnl_pct": -0.19,
+      "cumulative_equity_pct": 30.64,
+      "drawdown_pct": 1.69
+    },
+    {
+      "date": "2026-06-23",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 30.64,
+      "drawdown_pct": 1.69
+    },
+    {
+      "date": "2026-06-24",
+      "daily_pnl_pct": 1.11,
+      "cumulative_equity_pct": 31.75,
+      "drawdown_pct": 0.58
+    },
+    {
+      "date": "2026-06-25",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 31.75,
+      "drawdown_pct": 0.58
+    },
+    {
+      "date": "2026-06-26",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 31.75,
+      "drawdown_pct": 0.58
+    },
+    {
+      "date": "2026-06-29",
+      "daily_pnl_pct": 3.01,
+      "cumulative_equity_pct": 34.76,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-06-30",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 34.76,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-07-01",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 34.76,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-07-02",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 34.76,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-07-06",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 34.76,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-07-07",
+      "daily_pnl_pct": 4.23,
+      "cumulative_equity_pct": 38.99,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-07-08",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 38.99,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-07-09",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 38.99,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-07-10",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 38.99,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-07-13",
+      "daily_pnl_pct": 0.35,
+      "cumulative_equity_pct": 39.34,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-07-14",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 39.34,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-07-15",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 39.34,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-07-16",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 39.34,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-07-17",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 39.34,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-07-20",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 39.34,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-07-21",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 39.34,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-07-22",
+      "daily_pnl_pct": -0.93,
+      "cumulative_equity_pct": 38.41,
+      "drawdown_pct": 0.93
+    },
+    {
+      "date": "2026-07-23",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 38.41,
+      "drawdown_pct": 0.93
+    },
+    {
+      "date": "2026-07-24",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 38.41,
+      "drawdown_pct": 0.93
+    },
+    {
+      "date": "2026-07-27",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 38.41,
+      "drawdown_pct": 0.93
+    },
+    {
+      "date": "2026-07-28",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 38.41,
+      "drawdown_pct": 0.93
+    },
+    {
+      "date": "2026-07-29",
+      "daily_pnl_pct": 0.54,
+      "cumulative_equity_pct": 38.95,
+      "drawdown_pct": 0.39
+    },
+    {
+      "date": "2026-07-30",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 38.95,
+      "drawdown_pct": 0.39
+    },
+    {
+      "date": "2026-07-31",
+      "daily_pnl_pct": 3.77,
+      "cumulative_equity_pct": 42.72,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-08-03",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 42.72,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-08-04",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 42.72,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-08-05",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 42.72,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-08-06",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 42.72,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-08-07",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 42.72,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-08-10",
+      "daily_pnl_pct": 0.28,
+      "cumulative_equity_pct": 43.0,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-08-11",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 43.0,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-08-12",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 43.0,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-08-13",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 43.0,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-08-14",
+      "daily_pnl_pct": 0.06,
+      "cumulative_equity_pct": 43.06,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-08-17",
+      "daily_pnl_pct": 2.74,
+      "cumulative_equity_pct": 45.8,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-08-18",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 45.8,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-08-19",
+      "daily_pnl_pct": -1.51,
+      "cumulative_equity_pct": 44.29,
+      "drawdown_pct": 1.51
+    },
+    {
+      "date": "2026-08-20",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 44.29,
+      "drawdown_pct": 1.51
+    },
+    {
+      "date": "2026-08-21",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 44.29,
+      "drawdown_pct": 1.51
+    },
+    {
+      "date": "2026-08-24",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 44.29,
+      "drawdown_pct": 1.51
+    },
+    {
+      "date": "2026-08-25",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 44.29,
+      "drawdown_pct": 1.51
+    },
+    {
+      "date": "2026-08-26",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 44.29,
+      "drawdown_pct": 1.51
+    },
+    {
+      "date": "2026-08-27",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 44.29,
+      "drawdown_pct": 1.51
+    },
+    {
+      "date": "2026-08-28",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 44.29,
+      "drawdown_pct": 1.51
+    },
+    {
+      "date": "2026-08-31",
+      "daily_pnl_pct": -0.04,
+      "cumulative_equity_pct": 44.25,
+      "drawdown_pct": 1.55
+    },
+    {
+      "date": "2026-09-01",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 44.25,
+      "drawdown_pct": 1.55
+    },
+    {
+      "date": "2026-09-02",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 44.25,
+      "drawdown_pct": 1.55
+    },
+    {
+      "date": "2026-09-03",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 44.25,
+      "drawdown_pct": 1.55
+    },
+    {
+      "date": "2026-09-04",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 44.25,
+      "drawdown_pct": 1.55
+    },
+    {
+      "date": "2026-09-08",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 44.25,
+      "drawdown_pct": 1.55
+    },
+    {
+      "date": "2026-09-09",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 44.25,
+      "drawdown_pct": 1.55
+    },
+    {
+      "date": "2026-09-10",
+      "daily_pnl_pct": 3.21,
+      "cumulative_equity_pct": 47.46,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-09-11",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 47.46,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-09-14",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 47.46,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-09-15",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 47.46,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-09-16",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 47.46,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-09-17",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 47.46,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-09-18",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 47.46,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-09-21",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 47.46,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-09-22",
+      "daily_pnl_pct": 4.19,
+      "cumulative_equity_pct": 51.65,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-09-23",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 51.65,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-09-24",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 51.65,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-09-25",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 51.65,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-09-28",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 51.65,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-09-29",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 51.65,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-09-30",
+      "daily_pnl_pct": 1.47,
+      "cumulative_equity_pct": 53.12,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-10-01",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 53.12,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-10-02",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 53.12,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-10-05",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 53.12,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-10-06",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 53.12,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-10-07",
+      "daily_pnl_pct": 1.51,
+      "cumulative_equity_pct": 54.63,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-10-08",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 54.63,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-10-09",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 54.63,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-10-12",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 54.63,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-10-13",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 54.63,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-10-14",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 54.63,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-10-15",
+      "daily_pnl_pct": 3.9,
+      "cumulative_equity_pct": 58.53,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-10-16",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 58.53,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-10-19",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 58.53,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-10-20",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 58.53,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-10-21",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 58.53,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-10-22",
+      "daily_pnl_pct": 0.72,
+      "cumulative_equity_pct": 59.25,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-10-23",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 59.25,
+      "drawdown_pct": 0.0
+    },
+    {
+      "date": "2026-10-26",
+      "daily_pnl_pct": 0.0,
+      "cumulative_equity_pct": 59.25,
+      "drawdown_pct": 0.0
+    }
+  ],
+  "monthly_returns": {
+    "2025-11": -1.42,
+    "2025-12": 1.68,
+    "2026-01": 2.45,
+    "2026-02": 6.86,
+    "2026-03": 7.11,
+    "2026-04": 6.19,
+    "2026-05": 2.13,
+    "2026-06": 9.76,
+    "2026-07": 7.96,
+    "2026-08": 1.53,
+    "2026-09": 8.87,
+    "2026-10": 6.13
+  },
+  "trades": [
+    {
+      "pair_name": "WEC/XEL",
+      "ticker_a": "WEC",
+      "ticker_b": "XEL",
+      "sector": "Utilities",
+      "entry_date": "2025-11-04",
+      "exit_date": "2025-11-18",
+      "direction": "LONG_A_SHORT_B",
+      "direction_label": "Long WEC / Short XEL",
+      "entry_z": -2.68,
+      "exit_z": -1.877,
+      "hedge_ratio": 0.782,
+      "entry_price_a": 108.17,
+      "entry_price_b": 79.13,
+      "exit_price_a": 108.78,
+      "exit_price_b": 78.56,
+      "outcome": "WIN",
+      "exit_reason": "TIME_STOP",
+      "status_reason": "2x Half-Life Time Stop (T_max = 10d) on Day 10",
+      "holding_days": 10,
+      "raw_return_pct": 0.62,
+      "realized_return_pct": 0.78,
+      "sizing_multiplier": 1.25,
+      "spread_vol_pct": 1.21,
+      "half_life_days": 4.0,
+      "max_holding_limit": 10,
+      "is_dampened": false,
+      "momentum_slope": 0.7396,
+      "composite_score": 93.2,
+      "trajectory": [
+        {
+          "date": "2025-11-05",
+          "days_elapsed": 1,
+          "price_a": 108.15,
+          "price_b": 78.74,
+          "spread": 46.574,
+          "z_score": -2.4653
+        },
+        {
+          "date": "2025-11-06",
+          "days_elapsed": 2,
+          "price_a": 107.12,
+          "price_b": 78.11,
+          "spread": 46.0324,
+          "z_score": -2.8783
+        },
+        {
+          "date": "2025-11-07",
+          "days_elapsed": 3,
+          "price_a": 109.14,
+          "price_b": 78.47,
+          "spread": 47.7726,
+          "z_score": -1.5516
+        },
+        {
+          "date": "2025-11-10",
+          "days_elapsed": 4,
+          "price_a": 108.7,
+          "price_b": 77.98,
+          "spread": 47.7243,
+          "z_score": -1.5884
+        },
+        {
+          "date": "2025-11-11",
+          "days_elapsed": 5,
+          "price_a": 108.78,
+          "price_b": 78.71,
+          "spread": 47.2253,
+          "z_score": -1.9689
+        },
+        {
+          "date": "2025-11-12",
+          "days_elapsed": 6,
+          "price_a": 108.4,
+          "price_b": 78.29,
+          "spread": 47.1819,
+          "z_score": -2.0019
+        },
+        {
+          "date": "2025-11-13",
+          "days_elapsed": 7,
+          "price_a": 108.05,
+          "price_b": 77.73,
+          "spread": 47.264,
+          "z_score": -1.9393
+        },
+        {
+          "date": "2025-11-14",
+          "days_elapsed": 8,
+          "price_a": 108.17,
+          "price_b": 78.15,
+          "spread": 47.0502,
+          "z_score": -2.1023
+        },
+        {
+          "date": "2025-11-17",
+          "days_elapsed": 9,
+          "price_a": 109.06,
+          "price_b": 78.86,
+          "spread": 47.3933,
+          "z_score": -1.8408
+        },
+        {
+          "date": "2025-11-18",
+          "days_elapsed": 10,
+          "price_a": 108.78,
+          "price_b": 78.56,
+          "spread": 47.3457,
+          "z_score": -1.877
+        }
+      ],
+      "id": "WEC_XEL_2025-11-04"
+    },
+    {
+      "pair_name": "DELL/MRVL",
+      "ticker_a": "DELL",
+      "ticker_b": "MRVL",
+      "sector": "Information Technology",
+      "entry_date": "2025-11-11",
+      "exit_date": "2025-11-17",
+      "direction": "LONG_A_SHORT_B",
+      "direction_label": "Long DELL / Short MRVL",
+      "entry_z": -2.133,
+      "exit_z": -3.283,
+      "hedge_ratio": 1.2811,
+      "entry_price_a": 137.31,
+      "entry_price_b": 89.18,
+      "exit_price_a": 121.2,
+      "exit_price_b": 83.31,
+      "outcome": "LOSS",
+      "exit_reason": "TIGHT_STOP",
+      "status_reason": "Tight Dynamic Stop Loss (|z| >= 3.28) on Day 4",
+      "holding_days": 4,
+      "raw_return_pct": -2.66,
+      "realized_return_pct": -2.2,
+      "sizing_multiplier": 0.83,
+      "spread_vol_pct": 4.24,
+      "half_life_days": 4.2,
+      "max_holding_limit": 11,
+      "is_dampened": false,
+      "momentum_slope": 0.1889,
+      "composite_score": 75.3,
+      "trajectory": [
+        {
+          "date": "2025-11-12",
+          "days_elapsed": 1,
+          "price_a": 139.24,
+          "price_b": 89.18,
+          "spread": 24.9937,
+          "z_score": -1.8025
+        },
+        {
+          "date": "2025-11-13",
+          "days_elapsed": 2,
+          "price_a": 132.54,
+          "price_b": 87.37,
+          "spread": 20.6092,
+          "z_score": -2.5548
+        },
+        {
+          "date": "2025-11-14",
+          "days_elapsed": 3,
+          "price_a": 132.36,
+          "price_b": 86.3,
+          "spread": 21.7995,
+          "z_score": -2.3505
+        },
+        {
+          "date": "2025-11-17",
+          "days_elapsed": 4,
+          "price_a": 121.2,
+          "price_b": 83.31,
+          "spread": 14.4741,
+          "z_score": -3.6074
+        }
+      ],
+      "id": "DELL_MRVL_2025-11-11"
+    },
+    {
+      "pair_name": "KEYS/LITE",
+      "ticker_a": "KEYS",
+      "ticker_b": "LITE",
+      "sector": "Information Technology",
+      "entry_date": "2025-12-04",
+      "exit_date": "2025-12-16",
+      "direction": "SHORT_A_LONG_B",
+      "direction_label": "Short KEYS / Long LITE",
+      "entry_z": 2.427,
+      "exit_z": 1.978,
+      "hedge_ratio": 0.1574,
+      "entry_price_a": 209.07,
+      "entry_price_b": 327.85,
+      "exit_price_a": 204.87,
+      "exit_price_b": 316.15,
+      "outcome": "WIN",
+      "exit_reason": "TIME_STOP",
+      "status_reason": "2x Half-Life Time Stop (T_max = 8d) on Day 8",
+      "holding_days": 8,
+      "raw_return_pct": 0.91,
+      "realized_return_pct": 1.14,
+      "sizing_multiplier": 1.25,
+      "spread_vol_pct": 2.53,
+      "half_life_days": 3.4,
+      "max_holding_limit": 8,
+      "is_dampened": false,
+      "momentum_slope": 0.2732,
+      "composite_score": 76.1,
+      "trajectory": [
+        {
+          "date": "2025-12-05",
+          "days_elapsed": 1,
+          "price_a": 210.49,
+          "price_b": 331.41,
+          "spread": 158.3261,
+          "z_score": 2.5872
+        },
+        {
+          "date": "2025-12-08",
+          "days_elapsed": 2,
+          "price_a": 209.62,
+          "price_b": 342.56,
+          "spread": 155.7011,
+          "z_score": 2.0907
+        },
+        {
+          "date": "2025-12-09",
+          "days_elapsed": 3,
+          "price_a": 210.46,
+          "price_b": 360.33,
+          "spread": 153.7441,
+          "z_score": 1.7205
+        },
+        {
+          "date": "2025-12-10",
+          "days_elapsed": 4,
+          "price_a": 212.78,
+          "price_b": 366.0,
+          "spread": 155.1716,
+          "z_score": 1.9905
+        },
+        {
+          "date": "2025-12-11",
+          "days_elapsed": 5,
+          "price_a": 214.14,
+          "price_b": 372.09,
+          "spread": 155.573,
+          "z_score": 2.0664
+        },
+        {
+          "date": "2025-12-12",
+          "days_elapsed": 6,
+          "price_a": 208.81,
+          "price_b": 324.35,
+          "spread": 157.7573,
+          "z_score": 2.4796
+        },
+        {
+          "date": "2025-12-15",
+          "days_elapsed": 7,
+          "price_a": 207.48,
+          "price_b": 334.69,
+          "spread": 154.7998,
+          "z_score": 1.9202
+        },
+        {
+          "date": "2025-12-16",
+          "days_elapsed": 8,
+          "price_a": 204.87,
+          "price_b": 316.15,
+          "spread": 155.108,
+          "z_score": 1.9785
+        }
+      ],
+      "id": "KEYS_LITE_2025-12-04"
+    },
+    {
+      "pair_name": "ETR/LNT",
+      "ticker_a": "ETR",
+      "ticker_b": "LNT",
+      "sector": "Utilities",
+      "entry_date": "2025-12-08",
+      "exit_date": "2025-12-26",
+      "direction": "SHORT_A_LONG_B",
+      "direction_label": "Short ETR / Long LNT",
+      "entry_z": 2.127,
+      "exit_z": 1.523,
+      "hedge_ratio": 1.9072,
+      "entry_price_a": 91.25,
+      "entry_price_b": 63.3,
+      "exit_price_a": 91.2,
+      "exit_price_b": 63.75,
+      "outcome": "WIN",
+      "exit_reason": "TIME_STOP",
+      "status_reason": "2x Half-Life Time Stop (T_max = 13d) on Day 13",
+      "holding_days": 13,
+      "raw_return_pct": 0.43,
+      "realized_return_pct": 0.54,
+      "sizing_multiplier": 1.25,
+      "spread_vol_pct": 1.64,
+      "half_life_days": 5.0,
+      "max_holding_limit": 13,
+      "is_dampened": false,
+      "momentum_slope": 0.0296,
+      "composite_score": 76.6,
+      "trajectory": [
+        {
+          "date": "2025-12-09",
+          "days_elapsed": 1,
+          "price_a": 91.57,
+          "price_b": 63.41,
+          "spread": -29.3567,
+          "z_score": 2.2069
+        },
+        {
+          "date": "2025-12-10",
+          "days_elapsed": 2,
+          "price_a": 91.67,
+          "price_b": 63.33,
+          "spread": -29.1094,
+          "z_score": 2.3719
+        },
+        {
+          "date": "2025-12-11",
+          "days_elapsed": 3,
+          "price_a": 91.66,
+          "price_b": 63.45,
+          "spread": -29.3429,
+          "z_score": 2.2162
+        },
+        {
+          "date": "2025-12-12",
+          "days_elapsed": 4,
+          "price_a": 90.71,
+          "price_b": 63.84,
+          "spread": -31.0411,
+          "z_score": 1.0832
+        },
+        {
+          "date": "2025-12-15",
+          "days_elapsed": 5,
+          "price_a": 92.08,
+          "price_b": 64.13,
+          "spread": -30.225,
+          "z_score": 1.6276
+        },
+        {
+          "date": "2025-12-16",
+          "days_elapsed": 6,
+          "price_a": 91.16,
+          "price_b": 63.77,
+          "spread": -30.4588,
+          "z_score": 1.4717
+        },
+        {
+          "date": "2025-12-17",
+          "days_elapsed": 7,
+          "price_a": 90.2,
+          "price_b": 63.98,
+          "spread": -31.8314,
+          "z_score": 0.556
+        },
+        {
+          "date": "2025-12-18",
+          "days_elapsed": 8,
+          "price_a": 90.57,
+          "price_b": 64.19,
+          "spread": -31.8495,
+          "z_score": 0.5439
+        },
+        {
+          "date": "2025-12-19",
+          "days_elapsed": 9,
+          "price_a": 89.87,
+          "price_b": 63.15,
+          "spread": -30.5714,
+          "z_score": 1.3966
+        },
+        {
+          "date": "2025-12-22",
+          "days_elapsed": 10,
+          "price_a": 90.35,
+          "price_b": 63.54,
+          "spread": -30.8356,
+          "z_score": 1.2203
+        },
+        {
+          "date": "2025-12-23",
+          "days_elapsed": 11,
+          "price_a": 90.69,
+          "price_b": 63.77,
+          "spread": -30.9302,
+          "z_score": 1.1572
+        },
+        {
+          "date": "2025-12-24",
+          "days_elapsed": 12,
+          "price_a": 91.02,
+          "price_b": 63.95,
+          "spread": -30.9504,
+          "z_score": 1.1437
+        },
+        {
+          "date": "2025-12-26",
+          "days_elapsed": 13,
+          "price_a": 91.2,
+          "price_b": 63.75,
+          "spread": -30.3822,
+          "z_score": 1.5228
+        }
+      ],
+      "id": "ETR_LNT_2025-12-08"
+    },
+    {
+      "pair_name": "BNY/PFG",
+      "ticker_a": "BNY",
+      "ticker_b": "PFG",
+      "sector": "Financials",
+      "entry_date": "2026-01-14",
+      "exit_date": "2026-01-21",
+      "direction": "SHORT_A_LONG_B",
+      "direction_label": "Short BNY / Long PFG",
+      "entry_z": 2.709,
+      "exit_z": 0.4,
+      "hedge_ratio": 1.1764,
+      "entry_price_a": 122.42,
+      "entry_price_b": 89.0,
+      "exit_price_a": 117.73,
+      "exit_price_b": 88.89,
+      "outcome": "WIN",
+      "exit_reason": "REVERSION_TARGET",
+      "status_reason": "Realistic Reversion Target (|z| <= 0.40) on Day 4",
+      "holding_days": 4,
+      "raw_return_pct": 1.96,
+      "realized_return_pct": 2.45,
+      "sizing_multiplier": 1.25,
+      "spread_vol_pct": 1.57,
+      "half_life_days": 4.1,
+      "max_holding_limit": 10,
+      "is_dampened": false,
+      "momentum_slope": 0.458,
+      "composite_score": 89.5,
+      "trajectory": [
+        {
+          "date": "2026-01-15",
+          "days_elapsed": 1,
+          "price_a": 121.81,
+          "price_b": 88.78,
+          "spread": 17.373,
+          "z_score": 2.5291
+        },
+        {
+          "date": "2026-01-16",
+          "days_elapsed": 2,
+          "price_a": 119.22,
+          "price_b": 86.34,
+          "spread": 17.6488,
+          "z_score": 2.6723
+        },
+        {
+          "date": "2026-01-20",
+          "days_elapsed": 3,
+          "price_a": 118.63,
+          "price_b": 86.4,
+          "spread": 16.9911,
+          "z_score": 2.3307
+        },
+        {
+          "date": "2026-01-21",
+          "days_elapsed": 4,
+          "price_a": 117.73,
+          "price_b": 88.89,
+          "spread": 13.1595,
+          "z_score": 0.3408
+        }
+      ],
+      "id": "BNY_PFG_2026-01-14"
+    },
+    {
+      "pair_name": "COF/WFC",
+      "ticker_a": "COF",
+      "ticker_b": "WFC",
+      "sector": "Financials",
+      "entry_date": "2026-01-30",
+      "exit_date": "2026-02-09",
+      "direction": "LONG_A_SHORT_B",
+      "direction_label": "Long COF / Short WFC",
+      "entry_z": -2.197,
+      "exit_z": -3.347,
+      "hedge_ratio": 2.7024,
+      "entry_price_a": 216.4,
+      "entry_price_b": 89.02,
+      "exit_price_a": 220.18,
+      "exit_price_b": 93.54,
+      "outcome": "LOSS",
+      "exit_reason": "TIGHT_STOP",
+      "status_reason": "Tight Dynamic Stop Loss (|z| >= 3.35) on Day 6",
+      "holding_days": 6,
+      "raw_return_pct": -1.6,
+      "realized_return_pct": -1.9,
+      "sizing_multiplier": 1.19,
+      "spread_vol_pct": 2.94,
+      "half_life_days": 3.2,
+      "max_holding_limit": 8,
+      "is_dampened": false,
+      "momentum_slope": 0.004,
+      "composite_score": 83.5,
+      "trajectory": [
+        {
+          "date": "2026-02-02",
+          "days_elapsed": 1,
+          "price_a": 221.09,
+          "price_b": 90.78,
+          "spread": -24.2178,
+          "z_score": -2.2035
+        },
+        {
+          "date": "2026-02-03",
+          "days_elapsed": 2,
+          "price_a": 220.76,
+          "price_b": 90.81,
+          "spread": -24.6602,
+          "z_score": -2.2731
+        },
+        {
+          "date": "2026-02-04",
+          "days_elapsed": 3,
+          "price_a": 222.85,
+          "price_b": 91.63,
+          "spread": -24.7714,
+          "z_score": -2.2905
+        },
+        {
+          "date": "2026-02-05",
+          "days_elapsed": 4,
+          "price_a": 214.42,
+          "price_b": 90.52,
+          "spread": -30.1985,
+          "z_score": -3.1435
+        },
+        {
+          "date": "2026-02-06",
+          "days_elapsed": 5,
+          "price_a": 220.21,
+          "price_b": 92.9,
+          "spread": -30.8451,
+          "z_score": -3.2452
+        },
+        {
+          "date": "2026-02-09",
+          "days_elapsed": 6,
+          "price_a": 220.18,
+          "price_b": 93.54,
+          "spread": -32.5846,
+          "z_score": -3.5186
+        }
+      ],
+      "id": "COF_WFC_2026-01-30"
+    },
+    {
+      "pair_name": "KLAC/WDC",
+      "ticker_a": "KLAC",
+      "ticker_b": "WDC",
+      "sector": "Information Technology",
+      "entry_date": "2026-02-05",
+      "exit_date": "2026-02-24",
+      "direction": "LONG_A_SHORT_B",
+      "direction_label": "Long KLAC / Short WDC",
+      "entry_z": -2.52,
+      "exit_z": -0.4,
+      "hedge_ratio": 0.297,
+      "entry_price_a": 132.61,
+      "entry_price_b": 259.91,
+      "exit_price_a": 150.3,
+      "exit_price_b": 270.28,
+      "outcome": "WIN",
+      "exit_reason": "REVERSION_TARGET",
+      "status_reason": "Realistic Reversion Target (|z| <= 0.40) on Day 12",
+      "holding_days": 12,
+      "raw_return_pct": 6.95,
+      "realized_return_pct": 4.69,
+      "sizing_multiplier": 0.67,
+      "spread_vol_pct": 5.19,
+      "half_life_days": 5.5,
+      "max_holding_limit": 14,
+      "is_dampened": false,
+      "momentum_slope": 0.742,
+      "composite_score": 83.2,
+      "trajectory": [
+        {
+          "date": "2026-02-06",
+          "days_elapsed": 1,
+          "price_a": 143.76,
+          "price_b": 282.28,
+          "spread": 59.9242,
+          "z_score": -1.8635
+        },
+        {
+          "date": "2026-02-09",
+          "days_elapsed": 2,
+          "price_a": 143.48,
+          "price_b": 285.69,
+          "spread": 58.6346,
+          "z_score": -2.051
+        },
+        {
+          "date": "2026-02-10",
+          "days_elapsed": 3,
+          "price_a": 142.56,
+          "price_b": 262.28,
+          "spread": 64.6574,
+          "z_score": -1.1753
+        },
+        {
+          "date": "2026-02-11",
+          "days_elapsed": 4,
+          "price_a": 147.4,
+          "price_b": 273.45,
+          "spread": 66.1884,
+          "z_score": -0.9526
+        },
+        {
+          "date": "2026-02-12",
+          "days_elapsed": 5,
+          "price_a": 144.55,
+          "price_b": 283.8,
+          "spread": 60.2603,
+          "z_score": -1.8146
+        },
+        {
+          "date": "2026-02-13",
+          "days_elapsed": 6,
+          "price_a": 145.87,
+          "price_b": 281.28,
+          "spread": 62.3311,
+          "z_score": -1.5135
+        },
+        {
+          "date": "2026-02-17",
+          "days_elapsed": 7,
+          "price_a": 146.67,
+          "price_b": 283.81,
+          "spread": 62.3746,
+          "z_score": -1.5072
+        },
+        {
+          "date": "2026-02-18",
+          "days_elapsed": 8,
+          "price_a": 147.67,
+          "price_b": 296.25,
+          "spread": 59.6894,
+          "z_score": -1.8976
+        },
+        {
+          "date": "2026-02-19",
+          "days_elapsed": 9,
+          "price_a": 146.64,
+          "price_b": 284.37,
+          "spread": 62.1795,
+          "z_score": -1.5355
+        },
+        {
+          "date": "2026-02-20",
+          "days_elapsed": 10,
+          "price_a": 149.24,
+          "price_b": 285.22,
+          "spread": 64.5311,
+          "z_score": -1.1936
+        },
+        {
+          "date": "2026-02-23",
+          "days_elapsed": 11,
+          "price_a": 148.41,
+          "price_b": 280.12,
+          "spread": 65.2121,
+          "z_score": -1.0946
+        },
+        {
+          "date": "2026-02-24",
+          "days_elapsed": 12,
+          "price_a": 150.3,
+          "price_b": 270.28,
+          "spread": 70.0289,
+          "z_score": -0.3942
+        }
+      ],
+      "id": "KLAC_WDC_2026-02-05"
+    },
+    {
+      "pair_name": "EXC/WEC",
+      "ticker_a": "EXC",
+      "ticker_b": "WEC",
+      "sector": "Utilities",
+      "entry_date": "2026-02-05",
+      "exit_date": "2026-02-12",
+      "direction": "LONG_A_SHORT_B",
+      "direction_label": "Long EXC / Short WEC",
+      "entry_z": -2.341,
+      "exit_z": -0.4,
+      "hedge_ratio": 0.3177,
+      "entry_price_a": 42.87,
+      "entry_price_b": 109.11,
+      "exit_price_a": 46.27,
+      "exit_price_b": 111.15,
+      "outcome": "WIN",
+      "exit_reason": "REVERSION_TARGET",
+      "status_reason": "Realistic Reversion Target (|z| <= 0.40) on Day 5",
+      "holding_days": 5,
+      "raw_return_pct": 1.73,
+      "realized_return_pct": 2.16,
+      "sizing_multiplier": 1.25,
+      "spread_vol_pct": 1.61,
+      "half_life_days": 4.2,
+      "max_holding_limit": 10,
+      "is_dampened": false,
+      "momentum_slope": 1.5065,
+      "composite_score": 81.4,
+      "trajectory": [
+        {
+          "date": "2026-02-06",
+          "days_elapsed": 1,
+          "price_a": 43.13,
+          "price_b": 108.6,
+          "spread": 8.6301,
+          "z_score": -1.7203
+        },
+        {
+          "date": "2026-02-09",
+          "days_elapsed": 2,
+          "price_a": 42.78,
+          "price_b": 108.51,
+          "spread": 8.3107,
+          "z_score": -2.1832
+        },
+        {
+          "date": "2026-02-10",
+          "days_elapsed": 3,
+          "price_a": 43.44,
+          "price_b": 110.07,
+          "spread": 8.4672,
+          "z_score": -1.9564
+        },
+        {
+          "date": "2026-02-11",
+          "days_elapsed": 4,
+          "price_a": 43.25,
+          "price_b": 110.27,
+          "spread": 8.2173,
+          "z_score": -2.3187
+        },
+        {
+          "date": "2026-02-12",
+          "days_elapsed": 5,
+          "price_a": 46.27,
+          "price_b": 111.15,
+          "spread": 10.9549,
+          "z_score": 1.65
+        }
+      ],
+      "id": "EXC_WEC_2026-02-05"
+    },
+    {
+      "pair_name": "DD/FDX",
+      "ticker_a": "DD",
+      "ticker_b": "FDX",
+      "sector": "Industrials",
+      "entry_date": "2026-02-06",
+      "exit_date": "2026-02-11",
+      "direction": "LONG_A_SHORT_B",
+      "direction_label": "Long DD / Short FDX",
+      "entry_z": -2.375,
+      "exit_z": -0.4,
+      "hedge_ratio": 0.4511,
+      "entry_price_a": 138.47,
+      "entry_price_b": 294.06,
+      "exit_price_a": 152.69,
+      "exit_price_b": 292.41,
+      "outcome": "WIN",
+      "exit_reason": "REVERSION_TARGET",
+      "status_reason": "Realistic Reversion Target (|z| <= 0.40) on Day 3",
+      "holding_days": 3,
+      "raw_return_pct": 3.27,
+      "realized_return_pct": 3.53,
+      "sizing_multiplier": 1.08,
+      "spread_vol_pct": 3.24,
+      "half_life_days": 7.6,
+      "max_holding_limit": 19,
+      "is_dampened": false,
+      "momentum_slope": 0.269,
+      "composite_score": 79.5,
+      "trajectory": [
+        {
+          "date": "2026-02-09",
+          "days_elapsed": 1,
+          "price_a": 139.56,
+          "price_b": 290.37,
+          "spread": 8.5769,
+          "z_score": -1.7574
+        },
+        {
+          "date": "2026-02-10",
+          "days_elapsed": 2,
+          "price_a": 146.47,
+          "price_b": 293.04,
+          "spread": 14.2776,
+          "z_score": -0.487
+        },
+        {
+          "date": "2026-02-11",
+          "days_elapsed": 3,
+          "price_a": 152.69,
+          "price_b": 292.41,
+          "spread": 20.784,
+          "z_score": 0.963
+        }
+      ],
+      "id": "DD_FDX_2026-02-06"
+    },
+    {
+      "pair_name": "KIM/PSA",
+      "ticker_a": "KIM",
+      "ticker_b": "PSA",
+      "sector": "Real Estate",
+      "entry_date": "2026-02-06",
+      "exit_date": "2026-02-17",
+      "direction": "SHORT_A_LONG_B",
+      "direction_label": "Short KIM / Long PSA",
+      "entry_z": 2.62,
+      "exit_z": 3.77,
+      "hedge_ratio": 0.0396,
+      "entry_price_a": 21.1,
+      "entry_price_b": 278.63,
+      "exit_price_a": 22.38,
+      "exit_price_b": 293.2,
+      "outcome": "LOSS",
+      "exit_reason": "TIGHT_STOP",
+      "status_reason": "Tight Dynamic Stop Loss (|z| >= 3.77) on Day 6",
+      "holding_days": 6,
+      "raw_return_pct": -1.08,
+      "realized_return_pct": -1.35,
+      "sizing_multiplier": 1.25,
+      "spread_vol_pct": 1.43,
+      "half_life_days": 3.3,
+      "max_holding_limit": 8,
+      "is_dampened": false,
+      "momentum_slope": 0.0982,
+      "composite_score": 77.5,
+      "trajectory": [
+        {
+          "date": "2026-02-09",
+          "days_elapsed": 1,
+          "price_a": 21.04,
+          "price_b": 280.47,
+          "spread": 9.9306,
+          "z_score": 2.1704
+        },
+        {
+          "date": "2026-02-10",
+          "days_elapsed": 2,
+          "price_a": 21.45,
+          "price_b": 283.81,
+          "spread": 10.214,
+          "z_score": 3.1068
+        },
+        {
+          "date": "2026-02-11",
+          "days_elapsed": 3,
+          "price_a": 21.26,
+          "price_b": 285.27,
+          "spread": 9.9626,
+          "z_score": 2.2763
+        },
+        {
+          "date": "2026-02-12",
+          "days_elapsed": 4,
+          "price_a": 21.58,
+          "price_b": 283.85,
+          "spread": 10.3382,
+          "z_score": 3.5169
+        },
+        {
+          "date": "2026-02-13",
+          "days_elapsed": 5,
+          "price_a": 21.96,
+          "price_b": 291.6,
+          "spread": 10.4084,
+          "z_score": 3.749
+        },
+        {
+          "date": "2026-02-17",
+          "days_elapsed": 6,
+          "price_a": 22.38,
+          "price_b": 293.2,
+          "spread": 10.7704,
+          "z_score": 4.9448
+        }
+      ],
+      "id": "KIM_PSA_2026-02-06"
+    },
+    {
+      "pair_name": "BNY/MS",
+      "ticker_a": "BNY",
+      "ticker_b": "MS",
+      "sector": "Financials",
+      "entry_date": "2026-02-11",
+      "exit_date": "2026-02-24",
+      "direction": "SHORT_A_LONG_B",
+      "direction_label": "Short BNY / Long MS",
+      "entry_z": 2.405,
+      "exit_z": 2.05,
+      "hedge_ratio": 0.5546,
+      "entry_price_a": 120.21,
+      "entry_price_b": 174.77,
+      "exit_price_a": 115.13,
+      "exit_price_b": 166.97,
+      "outcome": "WIN",
+      "exit_reason": "TIME_STOP",
+      "status_reason": "2x Half-Life Time Stop (T_max = 8d) on Day 8",
+      "holding_days": 8,
+      "raw_return_pct": 0.35,
+      "realized_return_pct": 0.44,
+      "sizing_multiplier": 1.25,
+      "spread_vol_pct": 1.76,
+      "half_life_days": 3.2,
+      "max_holding_limit": 8,
+      "is_dampened": false,
+      "momentum_slope": 1.9093,
+      "composite_score": 84.0,
+      "trajectory": [
+        {
+          "date": "2026-02-12",
+          "days_elapsed": 1,
+          "price_a": 113.51,
+          "price_b": 166.25,
+          "spread": 21.3072,
+          "z_score": 1.4733
+        },
+        {
+          "date": "2026-02-13",
+          "days_elapsed": 2,
+          "price_a": 116.3,
+          "price_b": 169.3,
+          "spread": 22.4074,
+          "z_score": 1.9938
+        },
+        {
+          "date": "2026-02-17",
+          "days_elapsed": 3,
+          "price_a": 117.35,
+          "price_b": 169.69,
+          "spread": 23.2405,
+          "z_score": 2.3879
+        },
+        {
+          "date": "2026-02-18",
+          "days_elapsed": 4,
+          "price_a": 118.03,
+          "price_b": 174.68,
+          "spread": 21.1516,
+          "z_score": 1.3997
+        },
+        {
+          "date": "2026-02-19",
+          "days_elapsed": 5,
+          "price_a": 116.72,
+          "price_b": 172.49,
+          "spread": 21.0558,
+          "z_score": 1.3544
+        },
+        {
+          "date": "2026-02-20",
+          "days_elapsed": 6,
+          "price_a": 116.75,
+          "price_b": 173.52,
+          "spread": 20.5148,
+          "z_score": 1.0985
+        },
+        {
+          "date": "2026-02-23",
+          "days_elapsed": 7,
+          "price_a": 114.13,
+          "price_b": 165.0,
+          "spread": 22.6208,
+          "z_score": 2.0947
+        },
+        {
+          "date": "2026-02-24",
+          "days_elapsed": 8,
+          "price_a": 115.13,
+          "price_b": 166.97,
+          "spread": 22.5267,
+          "z_score": 2.0502
+        }
+      ],
+      "id": "BNY_MS_2026-02-11"
+    },
+    {
+      "pair_name": "MTB/PNC",
+      "ticker_a": "MTB",
+      "ticker_b": "PNC",
+      "sector": "Financials",
+      "entry_date": "2026-02-13",
+      "exit_date": "2026-02-23",
+      "direction": "SHORT_A_LONG_B",
+      "direction_label": "Short MTB / Long PNC",
+      "entry_z": 2.131,
+      "exit_z": 2.696,
+      "hedge_ratio": 0.905,
+      "entry_price_a": 224.11,
+      "entry_price_b": 223.71,
+      "exit_price_a": 217.65,
+      "exit_price_b": 215.37,
+      "outcome": "LOSS",
+      "exit_reason": "TIME_STOP",
+      "status_reason": "2x Half-Life Time Stop (T_max = 5d) on Day 5",
+      "holding_days": 5,
+      "raw_return_pct": -0.26,
+      "realized_return_pct": -0.33,
+      "sizing_multiplier": 1.25,
+      "spread_vol_pct": 0.87,
+      "half_life_days": 2.1,
+      "max_holding_limit": 5,
+      "is_dampened": false,
+      "momentum_slope": 1.1978,
+      "composite_score": 93.6,
+      "trajectory": [
+        {
+          "date": "2026-02-17",
+          "days_elapsed": 1,
+          "price_a": 223.76,
+          "price_b": 225.59,
+          "spread": 19.6065,
+          "z_score": 1.0826
+        },
+        {
+          "date": "2026-02-18",
+          "days_elapsed": 2,
+          "price_a": 227.09,
+          "price_b": 227.05,
+          "spread": 21.604,
+          "z_score": 2.1127
+        },
+        {
+          "date": "2026-02-19",
+          "days_elapsed": 3,
+          "price_a": 224.5,
+          "price_b": 224.67,
+          "spread": 21.1713,
+          "z_score": 1.8896
+        },
+        {
+          "date": "2026-02-20",
+          "days_elapsed": 4,
+          "price_a": 227.84,
+          "price_b": 227.28,
+          "spread": 22.1554,
+          "z_score": 2.3971
+        },
+        {
+          "date": "2026-02-23",
+          "days_elapsed": 5,
+          "price_a": 217.65,
+          "price_b": 215.37,
+          "spread": 22.7359,
+          "z_score": 2.6964
+        }
+      ],
+      "id": "MTB_PNC_2026-02-13"
+    },
+    {
+      "pair_name": "EXC/XEL",
+      "ticker_a": "EXC",
+      "ticker_b": "XEL",
+      "sector": "Utilities",
+      "entry_date": "2026-02-13",
+      "exit_date": "2026-02-26",
+      "direction": "SHORT_A_LONG_B",
+      "direction_label": "Short EXC / Long XEL",
+      "entry_z": 2.131,
+      "exit_z": 1.338,
+      "hedge_ratio": 0.4549,
+      "entry_price_a": 47.17,
+      "entry_price_b": 79.74,
+      "exit_price_a": 47.48,
+      "exit_price_b": 81.58,
+      "outcome": "WIN",
+      "exit_reason": "TIME_STOP",
+      "status_reason": "2x Half-Life Time Stop (T_max = 8d) on Day 8",
+      "holding_days": 8,
+      "raw_return_pct": 0.63,
+      "realized_return_pct": 0.79,
+      "sizing_multiplier": 1.25,
+      "spread_vol_pct": 1.41,
+      "half_life_days": 3.4,
+      "max_holding_limit": 8,
+      "is_dampened": false,
+      "momentum_slope": 0.3831,
+      "composite_score": 78.8,
+      "trajectory": [
+        {
+          "date": "2026-02-17",
+          "days_elapsed": 1,
+          "price_a": 46.74,
+          "price_b": 78.92,
+          "spread": 10.842,
+          "z_score": 2.0464
+        },
+        {
+          "date": "2026-02-18",
+          "days_elapsed": 2,
+          "price_a": 45.96,
+          "price_b": 77.88,
+          "spread": 10.5393,
+          "z_score": 1.5903
+        },
+        {
+          "date": "2026-02-19",
+          "days_elapsed": 3,
+          "price_a": 46.08,
+          "price_b": 78.99,
+          "spread": 10.1492,
+          "z_score": 1.0024
+        },
+        {
+          "date": "2026-02-20",
+          "days_elapsed": 4,
+          "price_a": 46.5,
+          "price_b": 79.7,
+          "spread": 10.243,
+          "z_score": 1.1438
+        },
+        {
+          "date": "2026-02-23",
+          "days_elapsed": 5,
+          "price_a": 46.9,
+          "price_b": 81.46,
+          "spread": 9.8417,
+          "z_score": 0.539
+        },
+        {
+          "date": "2026-02-24",
+          "days_elapsed": 6,
+          "price_a": 47.28,
+          "price_b": 82.01,
+          "spread": 9.9722,
+          "z_score": 0.7357
+        },
+        {
+          "date": "2026-02-25",
+          "days_elapsed": 7,
+          "price_a": 47.39,
+          "price_b": 81.66,
+          "spread": 10.2393,
+          "z_score": 1.1382
+        },
+        {
+          "date": "2026-02-26",
+          "days_elapsed": 8,
+          "price_a": 47.48,
+          "price_b": 81.58,
+          "spread": 10.3722,
+          "z_score": 1.3384
+        }
+      ],
+      "id": "EXC_XEL_2026-02-13"
+    },
+    {
+      "pair_name": "AME/WAB",
+      "ticker_a": "AME",
+      "ticker_b": "WAB",
+      "sector": "Industrials",
+      "entry_date": "2026-02-17",
+      "exit_date": "2026-02-23",
+      "direction": "LONG_A_SHORT_B",
+      "direction_label": "Long AME / Short WAB",
+      "entry_z": -2.584,
+      "exit_z": -3.734,
+      "hedge_ratio": 0.871,
+      "entry_price_a": 232.27,
+      "entry_price_b": 259.11,
+      "exit_price_a": 230.4,
+      "exit_price_b": 262.34,
+      "outcome": "LOSS",
+      "exit_reason": "TIGHT_STOP",
+      "status_reason": "Tight Dynamic Stop Loss (|z| >= 3.73) on Day 4",
+      "holding_days": 4,
+      "raw_return_pct": -0.94,
+      "realized_return_pct": -1.17,
+      "sizing_multiplier": 1.25,
+      "spread_vol_pct": 1.6,
+      "half_life_days": 3.1,
+      "max_holding_limit": 8,
+      "is_dampened": false,
+      "momentum_slope": 0.0366,
+      "composite_score": 88.9,
+      "trajectory": [
+        {
+          "date": "2026-02-18",
+          "days_elapsed": 1,
+          "price_a": 233.25,
+          "price_b": 258.75,
+          "spread": 7.8791,
+          "z_score": -2.2402
+        },
+        {
+          "date": "2026-02-19",
+          "days_elapsed": 2,
+          "price_a": 231.7,
+          "price_b": 261.29,
+          "spread": 4.1101,
+          "z_score": -3.2524
+        },
+        {
+          "date": "2026-02-20",
+          "days_elapsed": 3,
+          "price_a": 232.45,
+          "price_b": 264.19,
+          "spread": 2.3464,
+          "z_score": -3.7261
+        },
+        {
+          "date": "2026-02-23",
+          "days_elapsed": 4,
+          "price_a": 230.4,
+          "price_b": 262.34,
+          "spread": 1.9035,
+          "z_score": -3.845
+        }
+      ],
+      "id": "AME_WAB_2026-02-17"
+    },
+    {
+      "pair_name": "AMAT/WDC",
+      "ticker_a": "AMAT",
+      "ticker_b": "WDC",
+      "sector": "Information Technology",
+      "entry_date": "2026-02-25",
+      "exit_date": "2026-03-06",
+      "direction": "SHORT_A_LONG_B",
+      "direction_label": "Short AMAT / Long WDC",
+      "entry_z": 2.42,
+      "exit_z": 0.4,
+      "hedge_ratio": 0.8375,
+      "entry_price_a": 394.04,
+      "entry_price_b": 290.64,
+      "exit_price_a": 323.99,
+      "exit_price_b": 245.11,
+      "outcome": "WIN",
+      "exit_reason": "REVERSION_TARGET",
+      "status_reason": "Realistic Reversion Target (|z| <= 0.40) on Day 7",
+      "holding_days": 7,
+      "raw_return_pct": 4.89,
+      "realized_return_pct": 4.37,
+      "sizing_multiplier": 0.89,
+      "spread_vol_pct": 3.92,
+      "half_life_days": 6.1,
+      "max_holding_limit": 15,
+      "is_dampened": false,
+      "momentum_slope": 0.0046,
+      "composite_score": 88.3,
+      "trajectory": [
+        {
+          "date": "2026-02-26",
+          "days_elapsed": 1,
+          "price_a": 374.85,
+          "price_b": 281.95,
+          "spread": 138.7188,
+          "z_score": 1.6492
+        },
+        {
+          "date": "2026-02-27",
+          "days_elapsed": 2,
+          "price_a": 371.44,
+          "price_b": 279.4,
+          "spread": 137.44,
+          "z_score": 1.5664
+        },
+        {
+          "date": "2026-03-02",
+          "days_elapsed": 3,
+          "price_a": 371.32,
+          "price_b": 269.79,
+          "spread": 145.3685,
+          "z_score": 2.0798
+        },
+        {
+          "date": "2026-03-03",
+          "days_elapsed": 4,
+          "price_a": 350.51,
+          "price_b": 250.34,
+          "spread": 140.8455,
+          "z_score": 1.7869
+        },
+        {
+          "date": "2026-03-04",
+          "days_elapsed": 5,
+          "price_a": 356.93,
+          "price_b": 261.02,
+          "spread": 138.3273,
+          "z_score": 1.6239
+        },
+        {
+          "date": "2026-03-05",
+          "days_elapsed": 6,
+          "price_a": 345.73,
+          "price_b": 258.88,
+          "spread": 128.9185,
+          "z_score": 1.0147
+        },
+        {
+          "date": "2026-03-06",
+          "days_elapsed": 7,
+          "price_a": 323.99,
+          "price_b": 245.11,
+          "spread": 118.7129,
+          "z_score": 0.354
+        }
+      ],
+      "id": "AMAT_WDC_2026-02-25"
+    },
+    {
+      "pair_name": "GDDY/NOW",
+      "ticker_a": "GDDY",
+      "ticker_b": "NOW",
+      "sector": "Information Technology",
+      "entry_date": "2026-02-26",
+      "exit_date": "2026-03-11",
+      "direction": "LONG_A_SHORT_B",
+      "direction_label": "Long GDDY / Short NOW",
+      "entry_z": -2.105,
+      "exit_z": -2.82,
+      "hedge_ratio": 0.5423,
+      "entry_price_a": 86.2,
+      "entry_price_b": 109.3,
+      "exit_price_a": 86.54,
+      "exit_price_b": 115.63,
+      "outcome": "LOSS",
+      "exit_reason": "TIME_STOP",
+      "status_reason": "2x Half-Life Time Stop (T_max = 9d) on Day 9",
+      "holding_days": 9,
+      "raw_return_pct": -2.13,
+      "realized_return_pct": -1.48,
+      "sizing_multiplier": 0.7,
+      "spread_vol_pct": 5.03,
+      "half_life_days": 3.5,
+      "max_holding_limit": 9,
+      "is_dampened": false,
+      "momentum_slope": 1.0007,
+      "composite_score": 76.3,
+      "trajectory": [
+        {
+          "date": "2026-02-27",
+          "days_elapsed": 1,
+          "price_a": 87.16,
+          "price_b": 108.01,
+          "spread": 28.5862,
+          "z_score": -1.7227
+        },
+        {
+          "date": "2026-03-02",
+          "days_elapsed": 2,
+          "price_a": 88.22,
+          "price_b": 109.42,
+          "spread": 28.8815,
+          "z_score": -1.6545
+        },
+        {
+          "date": "2026-03-03",
+          "days_elapsed": 3,
+          "price_a": 89.23,
+          "price_b": 113.19,
+          "spread": 27.8471,
+          "z_score": -1.8933
+        },
+        {
+          "date": "2026-03-04",
+          "days_elapsed": 4,
+          "price_a": 88.66,
+          "price_b": 113.86,
+          "spread": 26.9137,
+          "z_score": -2.1087
+        },
+        {
+          "date": "2026-03-05",
+          "days_elapsed": 5,
+          "price_a": 93.13,
+          "price_b": 120.38,
+          "spread": 27.8479,
+          "z_score": -1.8931
+        },
+        {
+          "date": "2026-03-06",
+          "days_elapsed": 6,
+          "price_a": 93.95,
+          "price_b": 124.34,
+          "spread": 26.5204,
+          "z_score": -2.1995
+        },
+        {
+          "date": "2026-03-09",
+          "days_elapsed": 7,
+          "price_a": 91.69,
+          "price_b": 121.93,
+          "spread": 25.5674,
+          "z_score": -2.4195
+        },
+        {
+          "date": "2026-03-10",
+          "days_elapsed": 8,
+          "price_a": 90.21,
+          "price_b": 116.61,
+          "spread": 26.9724,
+          "z_score": -2.0952
+        },
+        {
+          "date": "2026-03-11",
+          "days_elapsed": 9,
+          "price_a": 86.54,
+          "price_b": 115.63,
+          "spread": 23.8339,
+          "z_score": -2.8196
+        }
+      ],
+      "id": "GDDY_NOW_2026-02-26"
+    },
+    {
+      "pair_name": "OKE/TRGP",
+      "ticker_a": "OKE",
+      "ticker_b": "TRGP",
+      "sector": "Energy",
+      "entry_date": "2026-03-04",
+      "exit_date": "2026-03-06",
+      "direction": "LONG_A_SHORT_B",
+      "direction_label": "Long OKE / Short TRGP",
+      "entry_z": -2.178,
+      "exit_z": -0.4,
+      "hedge_ratio": 0.2519,
+      "entry_price_a": 82.77,
+      "entry_price_b": 240.71,
+      "exit_price_a": 84.89,
+      "exit_price_b": 234.92,
+      "outcome": "WIN",
+      "exit_reason": "REVERSION_TARGET",
+      "status_reason": "Realistic Reversion Target (|z| <= 0.40) on Day 2",
+      "holding_days": 2,
+      "raw_return_pct": 2.05,
+      "realized_return_pct": 2.56,
+      "sizing_multiplier": 1.25,
+      "spread_vol_pct": 2.0,
+      "half_life_days": 4.4,
+      "max_holding_limit": 11,
+      "is_dampened": false,
+      "momentum_slope": 0.1316,
+      "composite_score": 86.9,
+      "trajectory": [
+        {
+          "date": "2026-03-05",
+          "days_elapsed": 1,
+          "price_a": 83.59,
+          "price_b": 236.71,
+          "spread": 23.963,
+          "z_score": -1.0668
+        },
+        {
+          "date": "2026-03-06",
+          "days_elapsed": 2,
+          "price_a": 84.89,
+          "price_b": 234.92,
+          "spread": 25.7133,
+          "z_score": -0.0082
+        }
+      ],
+      "id": "OKE_TRGP_2026-03-04"
+    },
+    {
+      "pair_name": "FITB/MTB",
+      "ticker_a": "FITB",
+      "ticker_b": "MTB",
+      "sector": "Financials",
+      "entry_date": "2026-03-09",
+      "exit_date": "2026-03-12",
+      "direction": "LONG_A_SHORT_B",
+      "direction_label": "Long FITB / Short MTB",
+      "entry_z": -2.158,
+      "exit_z": -3.308,
+      "hedge_ratio": 0.2376,
+      "entry_price_a": 45.85,
+      "entry_price_b": 205.88,
+      "exit_price_a": 42.54,
+      "exit_price_b": 195.56,
+      "outcome": "LOSS",
+      "exit_reason": "TIGHT_STOP",
+      "status_reason": "Tight Dynamic Stop Loss (|z| >= 3.31) on Day 3",
+      "holding_days": 3,
+      "raw_return_pct": -0.78,
+      "realized_return_pct": -0.98,
+      "sizing_multiplier": 1.25,
+      "spread_vol_pct": 1.4,
+      "half_life_days": 3.2,
+      "max_holding_limit": 8,
+      "is_dampened": false,
+      "momentum_slope": 0.1631,
+      "composite_score": 86.8,
+      "trajectory": [
+        {
+          "date": "2026-03-10",
+          "days_elapsed": 1,
+          "price_a": 45.47,
+          "price_b": 201.4,
+          "spread": -2.3836,
+          "z_score": -1.0807
+        },
+        {
+          "date": "2026-03-11",
+          "days_elapsed": 2,
+          "price_a": 43.98,
+          "price_b": 200.51,
+          "spread": -3.6635,
+          "z_score": -3.0811
+        },
+        {
+          "date": "2026-03-12",
+          "days_elapsed": 3,
+          "price_a": 42.54,
+          "price_b": 195.56,
+          "spread": -3.9236,
+          "z_score": -3.4877
+        }
+      ],
+      "id": "FITB_MTB_2026-03-09"
+    },
+    {
+      "pair_name": "AMGN/LH",
+      "ticker_a": "AMGN",
+      "ticker_b": "LH",
+      "sector": "Health Care",
+      "entry_date": "2026-03-11",
+      "exit_date": "2026-03-20",
+      "direction": "SHORT_A_LONG_B",
+      "direction_label": "Short AMGN / Long LH",
+      "entry_z": 2.197,
+      "exit_z": 0.92,
+      "hedge_ratio": 1.8388,
+      "entry_price_a": 372.63,
+      "entry_price_b": 269.1,
+      "exit_price_a": 343.19,
+      "exit_price_b": 261.72,
+      "outcome": "WIN",
+      "exit_reason": "TIME_STOP",
+      "status_reason": "2x Half-Life Time Stop (T_max = 7d) on Day 7",
+      "holding_days": 7,
+      "raw_return_pct": 1.83,
+      "realized_return_pct": 1.92,
+      "sizing_multiplier": 1.05,
+      "spread_vol_pct": 3.33,
+      "half_life_days": 2.7,
+      "max_holding_limit": 7,
+      "is_dampened": false,
+      "momentum_slope": 0.0784,
+      "composite_score": 82.0,
+      "trajectory": [
+        {
+          "date": "2026-03-12",
+          "days_elapsed": 1,
+          "price_a": 362.91,
+          "price_b": 261.63,
+          "spread": -118.1702,
+          "z_score": 2.5221
+        },
+        {
+          "date": "2026-03-13",
+          "days_elapsed": 2,
+          "price_a": 361.35,
+          "price_b": 262.51,
+          "spread": -121.3577,
+          "z_score": 2.2653
+        },
+        {
+          "date": "2026-03-16",
+          "days_elapsed": 3,
+          "price_a": 361.39,
+          "price_b": 265.55,
+          "spread": -126.8993,
+          "z_score": 1.8188
+        },
+        {
+          "date": "2026-03-17",
+          "days_elapsed": 4,
+          "price_a": 356.34,
+          "price_b": 269.3,
+          "spread": -138.8499,
+          "z_score": 0.856
+        },
+        {
+          "date": "2026-03-18",
+          "days_elapsed": 5,
+          "price_a": 346.82,
+          "price_b": 264.54,
+          "spread": -139.6253,
+          "z_score": 0.7935
+        },
+        {
+          "date": "2026-03-19",
+          "days_elapsed": 6,
+          "price_a": 345.28,
+          "price_b": 262.8,
+          "spread": -137.9623,
+          "z_score": 0.9275
+        },
+        {
+          "date": "2026-03-20",
+          "days_elapsed": 7,
+          "price_a": 343.19,
+          "price_b": 261.72,
+          "spread": -138.0597,
+          "z_score": 0.9196
+        }
+      ],
+      "id": "AMGN_LH_2026-03-11"
+    },
+    {
+      "pair_name": "FITB/PNC",
+      "ticker_a": "FITB",
+      "ticker_b": "PNC",
+      "sector": "Financials",
+      "entry_date": "2026-03-16",
+      "exit_date": "2026-03-25",
+      "direction": "LONG_A_SHORT_B",
+      "direction_label": "Long FITB / Short PNC",
+      "entry_z": -2.281,
+      "exit_z": -1.564,
+      "hedge_ratio": 0.2287,
+      "entry_price_a": 43.04,
+      "entry_price_b": 195.84,
+      "exit_price_a": 44.71,
+      "exit_price_b": 200.92,
+      "outcome": "WIN",
+      "exit_reason": "TIME_STOP",
+      "status_reason": "2x Half-Life Time Stop (T_max = 7d) on Day 7",
+      "holding_days": 7,
+      "raw_return_pct": 0.58,
+      "realized_return_pct": 0.72,
+      "sizing_multiplier": 1.25,
+      "spread_vol_pct": 1.64,
+      "half_life_days": 3.0,
+      "max_holding_limit": 7,
+      "is_dampened": false,
+      "momentum_slope": 1.0932,
+      "composite_score": 88.9,
+      "trajectory": [
+        {
+          "date": "2026-03-17",
+          "days_elapsed": 1,
+          "price_a": 43.16,
+          "price_b": 198.94,
+          "spread": -2.3397,
+          "z_score": -3.1218
+        },
+        {
+          "date": "2026-03-18",
+          "days_elapsed": 2,
+          "price_a": 42.84,
+          "price_b": 196.25,
+          "spread": -2.0385,
+          "z_score": -2.6947
+        },
+        {
+          "date": "2026-03-19",
+          "days_elapsed": 3,
+          "price_a": 42.61,
+          "price_b": 197.11,
+          "spread": -2.469,
+          "z_score": -3.3052
+        },
+        {
+          "date": "2026-03-20",
+          "days_elapsed": 4,
+          "price_a": 43.13,
+          "price_b": 196.78,
+          "spread": -1.8759,
+          "z_score": -2.4642
+        },
+        {
+          "date": "2026-03-23",
+          "days_elapsed": 5,
+          "price_a": 44.28,
+          "price_b": 198.95,
+          "spread": -1.2196,
+          "z_score": -1.5337
+        },
+        {
+          "date": "2026-03-24",
+          "days_elapsed": 6,
+          "price_a": 44.88,
+          "price_b": 201.31,
+          "spread": -1.1544,
+          "z_score": -1.4413
+        },
+        {
+          "date": "2026-03-25",
+          "days_elapsed": 7,
+          "price_a": 44.71,
+          "price_b": 200.92,
+          "spread": -1.2408,
+          "z_score": -1.5638
+        }
+      ],
+      "id": "FITB_PNC_2026-03-16"
+    },
+    {
+      "pair_name": "GWW/IEX",
+      "ticker_a": "GWW",
+      "ticker_b": "IEX",
+      "sector": "Industrials",
+      "entry_date": "2026-04-06",
+      "exit_date": "2026-04-23",
+      "direction": "SHORT_A_LONG_B",
+      "direction_label": "Short GWW / Long IEX",
+      "entry_z": 2.245,
+      "exit_z": 1.082,
+      "hedge_ratio": 4.8325,
+      "entry_price_a": 1112.81,
+      "entry_price_b": 188.86,
+      "exit_price_a": 1160.29,
+      "exit_price_b": 204.58,
+      "outcome": "WIN",
+      "exit_reason": "TIME_STOP",
+      "status_reason": "2x Half-Life Time Stop (T_max = 13d) on Day 13",
+      "holding_days": 13,
+      "raw_return_pct": 1.41,
+      "realized_return_pct": 1.76,
+      "sizing_multiplier": 1.25,
+      "spread_vol_pct": 2.2,
+      "half_life_days": 5.0,
+      "max_holding_limit": 13,
+      "is_dampened": false,
+      "momentum_slope": 0.0656,
+      "composite_score": 86.5,
+      "trajectory": [
+        {
+          "date": "2026-04-07",
+          "days_elapsed": 1,
+          "price_a": 1103.76,
+          "price_b": 189.92,
+          "spread": 185.9677,
+          "z_score": 1.6665
+        },
+        {
+          "date": "2026-04-08",
+          "days_elapsed": 2,
+          "price_a": 1142.18,
+          "price_b": 195.88,
+          "spread": 195.5827,
+          "z_score": 2.059
+        },
+        {
+          "date": "2026-04-09",
+          "days_elapsed": 3,
+          "price_a": 1167.56,
+          "price_b": 197.74,
+          "spread": 211.9769,
+          "z_score": 2.7282
+        },
+        {
+          "date": "2026-04-10",
+          "days_elapsed": 4,
+          "price_a": 1167.42,
+          "price_b": 199.09,
+          "spread": 205.3309,
+          "z_score": 2.4569
+        },
+        {
+          "date": "2026-04-13",
+          "days_elapsed": 5,
+          "price_a": 1157.06,
+          "price_b": 203.08,
+          "spread": 175.681,
+          "z_score": 1.2466
+        },
+        {
+          "date": "2026-04-14",
+          "days_elapsed": 6,
+          "price_a": 1150.84,
+          "price_b": 202.86,
+          "spread": 170.5184,
+          "z_score": 1.0359
+        },
+        {
+          "date": "2026-04-15",
+          "days_elapsed": 7,
+          "price_a": 1138.82,
+          "price_b": 197.53,
+          "spread": 184.2361,
+          "z_score": 1.5958
+        },
+        {
+          "date": "2026-04-16",
+          "days_elapsed": 8,
+          "price_a": 1129.03,
+          "price_b": 198.71,
+          "spread": 168.7517,
+          "z_score": 0.9638
+        },
+        {
+          "date": "2026-04-17",
+          "days_elapsed": 9,
+          "price_a": 1158.33,
+          "price_b": 203.87,
+          "spread": 173.1283,
+          "z_score": 1.1424
+        },
+        {
+          "date": "2026-04-20",
+          "days_elapsed": 10,
+          "price_a": 1158.49,
+          "price_b": 204.31,
+          "spread": 171.1826,
+          "z_score": 1.063
+        },
+        {
+          "date": "2026-04-21",
+          "days_elapsed": 11,
+          "price_a": 1166.39,
+          "price_b": 202.75,
+          "spread": 186.5927,
+          "z_score": 1.692
+        },
+        {
+          "date": "2026-04-22",
+          "days_elapsed": 12,
+          "price_a": 1149.61,
+          "price_b": 201.6,
+          "spread": 175.3595,
+          "z_score": 1.2335
+        },
+        {
+          "date": "2026-04-23",
+          "days_elapsed": 13,
+          "price_a": 1160.29,
+          "price_b": 204.58,
+          "spread": 171.6459,
+          "z_score": 1.0819
+        }
+      ],
+      "id": "GWW_IEX_2026-04-06"
+    },
+    {
+      "pair_name": "AME/IEX",
+      "ticker_a": "AME",
+      "ticker_b": "IEX",
+      "sector": "Industrials",
+      "entry_date": "2026-04-10",
+      "exit_date": "2026-04-22",
+      "direction": "SHORT_A_LONG_B",
+      "direction_label": "Short AME / Long IEX",
+      "entry_z": 2.596,
+      "exit_z": 0.633,
+      "hedge_ratio": 0.9666,
+      "entry_price_a": 234.22,
+      "entry_price_b": 199.09,
+      "exit_price_a": 229.78,
+      "exit_price_b": 201.6,
+      "outcome": "WIN",
+      "exit_reason": "TIME_STOP",
+      "status_reason": "2x Half-Life Time Stop (T_max = 8d) on Day 8",
+      "holding_days": 8,
+      "raw_return_pct": 1.61,
+      "realized_return_pct": 2.01,
+      "sizing_multiplier": 1.25,
+      "spread_vol_pct": 1.49,
+      "half_life_days": 3.1,
+      "max_holding_limit": 8,
+      "is_dampened": false,
+      "momentum_slope": 0.0304,
+      "composite_score": 86.7,
+      "trajectory": [
+        {
+          "date": "2026-04-13",
+          "days_elapsed": 1,
+          "price_a": 233.78,
+          "price_b": 203.08,
+          "spread": 37.483,
+          "z_score": 1.3694
+        },
+        {
+          "date": "2026-04-14",
+          "days_elapsed": 2,
+          "price_a": 233.67,
+          "price_b": 202.86,
+          "spread": 37.5839,
+          "z_score": 1.3983
+        },
+        {
+          "date": "2026-04-15",
+          "days_elapsed": 3,
+          "price_a": 229.42,
+          "price_b": 197.53,
+          "spread": 38.485,
+          "z_score": 1.6562
+        },
+        {
+          "date": "2026-04-16",
+          "days_elapsed": 4,
+          "price_a": 229.56,
+          "price_b": 198.71,
+          "spread": 37.4858,
+          "z_score": 1.3702
+        },
+        {
+          "date": "2026-04-17",
+          "days_elapsed": 5,
+          "price_a": 235.56,
+          "price_b": 203.87,
+          "spread": 38.5022,
+          "z_score": 1.6611
+        },
+        {
+          "date": "2026-04-20",
+          "days_elapsed": 6,
+          "price_a": 236.12,
+          "price_b": 204.31,
+          "spread": 38.6395,
+          "z_score": 1.7004
+        },
+        {
+          "date": "2026-04-21",
+          "days_elapsed": 7,
+          "price_a": 232.85,
+          "price_b": 202.75,
+          "spread": 36.8716,
+          "z_score": 1.1944
+        },
+        {
+          "date": "2026-04-22",
+          "days_elapsed": 8,
+          "price_a": 229.78,
+          "price_b": 201.6,
+          "spread": 34.9108,
+          "z_score": 0.6332
+        }
+      ],
+      "id": "AME_IEX_2026-04-10"
+    },
+    {
+      "pair_name": "AME/NDSN",
+      "ticker_a": "AME",
+      "ticker_b": "NDSN",
+      "sector": "Industrials",
+      "entry_date": "2026-04-13",
+      "exit_date": "2026-04-28",
+      "direction": "SHORT_A_LONG_B",
+      "direction_label": "Short AME / Long NDSN",
+      "entry_z": 2.263,
+      "exit_z": 0.439,
+      "hedge_ratio": 0.5814,
+      "entry_price_a": 233.78,
+      "entry_price_b": 276.47,
+      "exit_price_a": 228.27,
+      "exit_price_b": 280.15,
+      "outcome": "WIN",
+      "exit_reason": "TIME_STOP",
+      "status_reason": "2x Half-Life Time Stop (T_max = 11d) on Day 11",
+      "holding_days": 11,
+      "raw_return_pct": 1.94,
+      "realized_return_pct": 2.42,
+      "sizing_multiplier": 1.25,
+      "spread_vol_pct": 1.79,
+      "half_life_days": 4.6,
+      "max_holding_limit": 11,
+      "is_dampened": false,
+      "momentum_slope": 0.494,
+      "composite_score": 91.3,
+      "trajectory": [
+        {
+          "date": "2026-04-14",
+          "days_elapsed": 1,
+          "price_a": 233.67,
+          "price_b": 277.39,
+          "spread": 72.3949,
+          "z_score": 2.1111
+        },
+        {
+          "date": "2026-04-15",
+          "days_elapsed": 2,
+          "price_a": 229.42,
+          "price_b": 273.4,
+          "spread": 70.4653,
+          "z_score": 1.6503
+        },
+        {
+          "date": "2026-04-16",
+          "days_elapsed": 3,
+          "price_a": 229.56,
+          "price_b": 275.09,
+          "spread": 69.6223,
+          "z_score": 1.4489
+        },
+        {
+          "date": "2026-04-17",
+          "days_elapsed": 4,
+          "price_a": 235.56,
+          "price_b": 280.25,
+          "spread": 72.6246,
+          "z_score": 2.166
+        },
+        {
+          "date": "2026-04-20",
+          "days_elapsed": 5,
+          "price_a": 236.12,
+          "price_b": 281.43,
+          "spread": 72.4951,
+          "z_score": 2.1351
+        },
+        {
+          "date": "2026-04-21",
+          "days_elapsed": 6,
+          "price_a": 232.85,
+          "price_b": 281.08,
+          "spread": 69.4328,
+          "z_score": 1.4037
+        },
+        {
+          "date": "2026-04-22",
+          "days_elapsed": 7,
+          "price_a": 229.78,
+          "price_b": 277.83,
+          "spread": 68.2521,
+          "z_score": 1.1217
+        },
+        {
+          "date": "2026-04-23",
+          "days_elapsed": 8,
+          "price_a": 234.31,
+          "price_b": 282.18,
+          "spread": 70.2469,
+          "z_score": 1.5981
+        },
+        {
+          "date": "2026-04-24",
+          "days_elapsed": 9,
+          "price_a": 232.26,
+          "price_b": 280.72,
+          "spread": 69.0527,
+          "z_score": 1.3129
+        },
+        {
+          "date": "2026-04-27",
+          "days_elapsed": 10,
+          "price_a": 232.28,
+          "price_b": 281.78,
+          "spread": 68.4541,
+          "z_score": 1.1699
+        },
+        {
+          "date": "2026-04-28",
+          "days_elapsed": 11,
+          "price_a": 228.27,
+          "price_b": 280.15,
+          "spread": 65.3939,
+          "z_score": 0.4391
+        }
+      ],
+      "id": "AME_NDSN_2026-04-13"
+    },
+    {
+      "pair_name": "DUK/SO",
+      "ticker_a": "DUK",
+      "ticker_b": "SO",
+      "sector": "Utilities",
+      "entry_date": "2026-05-05",
+      "exit_date": "2026-05-07",
+      "direction": "LONG_A_SHORT_B",
+      "direction_label": "Long DUK / Short SO",
+      "entry_z": -2.378,
+      "exit_z": -0.4,
+      "hedge_ratio": 1.3828,
+      "entry_price_a": 125.38,
+      "entry_price_b": 94.33,
+      "exit_price_a": 122.72,
+      "exit_price_b": 90.92,
+      "outcome": "WIN",
+      "exit_reason": "REVERSION_TARGET",
+      "status_reason": "Realistic Reversion Target (|z| <= 0.40) on Day 2",
+      "holding_days": 2,
+      "raw_return_pct": 0.68,
+      "realized_return_pct": 0.85,
+      "sizing_multiplier": 1.25,
+      "spread_vol_pct": 0.7,
+      "half_life_days": 2.1,
+      "max_holding_limit": 5,
+      "is_dampened": false,
+      "momentum_slope": 0.2813,
+      "composite_score": 94.3,
+      "trajectory": [
+        {
+          "date": "2026-05-06",
+          "days_elapsed": 1,
+          "price_a": 123.38,
+          "price_b": 91.98,
+          "spread": -3.8138,
+          "z_score": -0.959
+        },
+        {
+          "date": "2026-05-07",
+          "days_elapsed": 2,
+          "price_a": 122.72,
+          "price_b": 90.92,
+          "spread": -3.0033,
+          "z_score": -0.0377
+        }
+      ],
+      "id": "DUK_SO_2026-05-05"
+    },
+    {
+      "pair_name": "MU/TXN",
+      "ticker_a": "MU",
+      "ticker_b": "TXN",
+      "sector": "Information Technology",
+      "entry_date": "2026-05-07",
+      "exit_date": "2026-05-08",
+      "direction": "SHORT_A_LONG_B",
+      "direction_label": "Short MU / Long TXN",
+      "entry_z": 2.176,
+      "exit_z": 3.326,
+      "hedge_ratio": 2.1223,
+      "entry_price_a": 646.43,
+      "entry_price_b": 283.79,
+      "exit_price_a": 746.58,
+      "exit_price_b": 286.33,
+      "outcome": "LOSS",
+      "exit_reason": "TIGHT_STOP",
+      "status_reason": "Tight Dynamic Stop Loss (|z| >= 3.33) on Day 1",
+      "holding_days": 1,
+      "raw_return_pct": -3.27,
+      "realized_return_pct": -2.08,
+      "sizing_multiplier": 0.64,
+      "spread_vol_pct": 5.5,
+      "half_life_days": 4.6,
+      "max_holding_limit": 12,
+      "is_dampened": false,
+      "momentum_slope": 0.3121,
+      "composite_score": 78.5,
+      "trajectory": [
+        {
+          "date": "2026-05-08",
+          "days_elapsed": 1,
+          "price_a": 746.58,
+          "price_b": 286.33,
+          "spread": 138.8912,
+          "z_score": 4.8429
+        }
+      ],
+      "id": "MU_TXN_2026-05-07"
+    },
+    {
+      "pair_name": "DUK/SO",
+      "ticker_a": "DUK",
+      "ticker_b": "SO",
+      "sector": "Utilities",
+      "entry_date": "2026-05-19",
+      "exit_date": "2026-06-01",
+      "direction": "LONG_A_SHORT_B",
+      "direction_label": "Long DUK / Short SO",
+      "entry_z": -2.267,
+      "exit_z": -0.4,
+      "hedge_ratio": 1.3527,
+      "entry_price_a": 123.47,
+      "entry_price_b": 93.37,
+      "exit_price_a": 118.85,
+      "exit_price_b": 88.3,
+      "outcome": "WIN",
+      "exit_reason": "REVERSION_TARGET",
+      "status_reason": "Realistic Reversion Target (|z| <= 0.40) on Day 8",
+      "holding_days": 8,
+      "raw_return_pct": 0.82,
+      "realized_return_pct": 1.02,
+      "sizing_multiplier": 1.25,
+      "spread_vol_pct": 0.89,
+      "half_life_days": 3.1,
+      "max_holding_limit": 8,
+      "is_dampened": false,
+      "momentum_slope": 1.0328,
+      "composite_score": 87.0,
+      "trajectory": [
+        {
+          "date": "2026-05-20",
+          "days_elapsed": 1,
+          "price_a": 122.73,
+          "price_b": 92.85,
+          "spread": -2.8717,
+          "z_score": -2.3131
+        },
+        {
+          "date": "2026-05-21",
+          "days_elapsed": 2,
+          "price_a": 123.57,
+          "price_b": 93.47,
+          "spread": -2.8609,
+          "z_score": -2.3033
+        },
+        {
+          "date": "2026-05-22",
+          "days_elapsed": 3,
+          "price_a": 124.57,
+          "price_b": 93.78,
+          "spread": -2.2756,
+          "z_score": -1.7696
+        },
+        {
+          "date": "2026-05-26",
+          "days_elapsed": 4,
+          "price_a": 123.88,
+          "price_b": 93.32,
+          "spread": -2.3524,
+          "z_score": -1.8396
+        },
+        {
+          "date": "2026-05-27",
+          "days_elapsed": 5,
+          "price_a": 124.26,
+          "price_b": 92.97,
+          "spread": -1.5061,
+          "z_score": -1.068
+        },
+        {
+          "date": "2026-05-28",
+          "days_elapsed": 6,
+          "price_a": 122.68,
+          "price_b": 91.76,
+          "spread": -1.4455,
+          "z_score": -1.0127
+        },
+        {
+          "date": "2026-05-29",
+          "days_elapsed": 7,
+          "price_a": 121.66,
+          "price_b": 91.3,
+          "spread": -1.836,
+          "z_score": -1.3687
+        },
+        {
+          "date": "2026-06-01",
+          "days_elapsed": 8,
+          "price_a": 118.85,
+          "price_b": 88.3,
+          "spread": -0.5995,
+          "z_score": -0.2413
+        }
+      ],
+      "id": "DUK_SO_2026-05-19"
+    },
+    {
+      "pair_name": "CSCO/MU",
+      "ticker_a": "CSCO",
+      "ticker_b": "MU",
+      "sector": "Information Technology",
+      "entry_date": "2026-05-19",
+      "exit_date": "2026-05-27",
+      "direction": "SHORT_A_LONG_B",
+      "direction_label": "Short CSCO / Long MU",
+      "entry_z": 2.865,
+      "exit_z": 0.4,
+      "hedge_ratio": 0.0736,
+      "entry_price_a": 114.51,
+      "entry_price_b": 698.52,
+      "exit_price_a": 118.76,
+      "exit_price_b": 928.12,
+      "outcome": "WIN",
+      "exit_reason": "REVERSION_TARGET",
+      "status_reason": "Realistic Reversion Target (|z| <= 0.40) on Day 5",
+      "holding_days": 5,
+      "raw_return_pct": 7.16,
+      "realized_return_pct": 5.95,
+      "sizing_multiplier": 0.83,
+      "spread_vol_pct": 4.21,
+      "half_life_days": 5.3,
+      "max_holding_limit": 13,
+      "is_dampened": false,
+      "momentum_slope": 0.9872,
+      "composite_score": 85.7,
+      "trajectory": [
+        {
+          "date": "2026-05-20",
+          "days_elapsed": 1,
+          "price_a": 113.48,
+          "price_b": 731.76,
+          "spread": 59.6262,
+          "z_score": 2.1502
+        },
+        {
+          "date": "2026-05-21",
+          "days_elapsed": 2,
+          "price_a": 117.3,
+          "price_b": 761.86,
+          "spread": 61.2316,
+          "z_score": 2.4832
+        },
+        {
+          "date": "2026-05-22",
+          "days_elapsed": 3,
+          "price_a": 119.5,
+          "price_b": 750.77,
+          "spread": 64.2416,
+          "z_score": 3.1074
+        },
+        {
+          "date": "2026-05-26",
+          "days_elapsed": 4,
+          "price_a": 117.43,
+          "price_b": 895.6,
+          "spread": 51.5175,
+          "z_score": 0.4687
+        },
+        {
+          "date": "2026-05-27",
+          "days_elapsed": 5,
+          "price_a": 118.76,
+          "price_b": 928.12,
+          "spread": 50.4539,
+          "z_score": 0.2481
+        }
+      ],
+      "id": "CSCO_MU_2026-05-19"
+    },
+    {
+      "pair_name": "CSCO/STX",
+      "ticker_a": "CSCO",
+      "ticker_b": "STX",
+      "sector": "Information Technology",
+      "entry_date": "2026-05-20",
+      "exit_date": "2026-06-17",
+      "direction": "SHORT_A_LONG_B",
+      "direction_label": "Short CSCO / Long STX",
+      "entry_z": 2.939,
+      "exit_z": 0.4,
+      "hedge_ratio": 0.0607,
+      "entry_price_a": 113.48,
+      "entry_price_b": 749.93,
+      "exit_price_a": 116.44,
+      "exit_price_b": 1064.46,
+      "outcome": "WIN",
+      "exit_reason": "REVERSION_TARGET",
+      "status_reason": "Realistic Reversion Target (|z| <= 0.40) on Day 19",
+      "holding_days": 19,
+      "raw_return_pct": 7.75,
+      "realized_return_pct": 6.34,
+      "sizing_multiplier": 0.82,
+      "spread_vol_pct": 4.28,
+      "half_life_days": 7.4,
+      "max_holding_limit": 19,
+      "is_dampened": false,
+      "momentum_slope": 0.4366,
+      "composite_score": 83.7,
+      "trajectory": [
+        {
+          "date": "2026-05-21",
+          "days_elapsed": 1,
+          "price_a": 117.3,
+          "price_b": 809.23,
+          "spread": 68.1842,
+          "z_score": 2.9893
+        },
+        {
+          "date": "2026-05-22",
+          "days_elapsed": 2,
+          "price_a": 119.5,
+          "price_b": 811.5,
+          "spread": 70.2399,
+          "z_score": 3.413
+        },
+        {
+          "date": "2026-05-26",
+          "days_elapsed": 3,
+          "price_a": 117.43,
+          "price_b": 844.48,
+          "spread": 66.1738,
+          "z_score": 2.5749
+        },
+        {
+          "date": "2026-05-27",
+          "days_elapsed": 4,
+          "price_a": 118.76,
+          "price_b": 869.34,
+          "spread": 65.9945,
+          "z_score": 2.538
+        },
+        {
+          "date": "2026-05-28",
+          "days_elapsed": 5,
+          "price_a": 117.74,
+          "price_b": 879.39,
+          "spread": 64.3626,
+          "z_score": 2.2017
+        },
+        {
+          "date": "2026-05-29",
+          "days_elapsed": 6,
+          "price_a": 119.51,
+          "price_b": 878.47,
+          "spread": 66.1848,
+          "z_score": 2.5772
+        },
+        {
+          "date": "2026-06-01",
+          "days_elapsed": 7,
+          "price_a": 120.41,
+          "price_b": 919.87,
+          "spread": 64.5751,
+          "z_score": 2.2455
+        },
+        {
+          "date": "2026-06-02",
+          "days_elapsed": 8,
+          "price_a": 127.03,
+          "price_b": 925.21,
+          "spread": 70.8703,
+          "z_score": 3.5429
+        },
+        {
+          "date": "2026-06-03",
+          "days_elapsed": 9,
+          "price_a": 125.54,
+          "price_b": 939.27,
+          "spread": 68.5283,
+          "z_score": 3.0602
+        },
+        {
+          "date": "2026-06-04",
+          "days_elapsed": 10,
+          "price_a": 129.02,
+          "price_b": 924.59,
+          "spread": 72.8928,
+          "z_score": 3.9597
+        },
+        {
+          "date": "2026-06-05",
+          "days_elapsed": 11,
+          "price_a": 120.72,
+          "price_b": 846.19,
+          "spread": 69.355,
+          "z_score": 3.2306
+        },
+        {
+          "date": "2026-06-08",
+          "days_elapsed": 12,
+          "price_a": 123.21,
+          "price_b": 875.44,
+          "spread": 70.0702,
+          "z_score": 3.378
+        },
+        {
+          "date": "2026-06-09",
+          "days_elapsed": 13,
+          "price_a": 119.45,
+          "price_b": 844.73,
+          "spread": 68.1732,
+          "z_score": 2.987
+        },
+        {
+          "date": "2026-06-10",
+          "days_elapsed": 14,
+          "price_a": 117.9,
+          "price_b": 814.76,
+          "spread": 68.4445,
+          "z_score": 3.0429
+        },
+        {
+          "date": "2026-06-11",
+          "days_elapsed": 15,
+          "price_a": 120.91,
+          "price_b": 866.78,
+          "spread": 68.2939,
+          "z_score": 3.0119
+        },
+        {
+          "date": "2026-06-12",
+          "days_elapsed": 16,
+          "price_a": 120.18,
+          "price_b": 929.63,
+          "spread": 63.7541,
+          "z_score": 2.0763
+        },
+        {
+          "date": "2026-06-15",
+          "days_elapsed": 17,
+          "price_a": 119.26,
+          "price_b": 1017.26,
+          "spread": 57.5122,
+          "z_score": 0.7898
+        },
+        {
+          "date": "2026-06-16",
+          "days_elapsed": 18,
+          "price_a": 118.66,
+          "price_b": 1029.78,
+          "spread": 56.1567,
+          "z_score": 0.5105
+        },
+        {
+          "date": "2026-06-17",
+          "days_elapsed": 19,
+          "price_a": 116.44,
+          "price_b": 1064.46,
+          "spread": 51.8288,
+          "z_score": -0.3815
+        }
+      ],
+      "id": "CSCO_STX_2026-05-20"
+    },
+    {
+      "pair_name": "NTAP/PANW",
+      "ticker_a": "NTAP",
+      "ticker_b": "PANW",
+      "sector": "Information Technology",
+      "entry_date": "2026-05-28",
+      "exit_date": "2026-05-29",
+      "direction": "SHORT_A_LONG_B",
+      "direction_label": "Short NTAP / Long PANW",
+      "entry_z": 2.357,
+      "exit_z": 3.507,
+      "hedge_ratio": 0.3047,
+      "entry_price_a": 141.65,
+      "entry_price_b": 257.77,
+      "exit_price_a": 173.37,
+      "exit_price_b": 281.69,
+      "outcome": "LOSS",
+      "exit_reason": "TIGHT_STOP",
+      "status_reason": "Tight Dynamic Stop Loss (|z| >= 3.51) on Day 1",
+      "holding_days": 1,
+      "raw_return_pct": -2.75,
+      "realized_return_pct": -2.59,
+      "sizing_multiplier": 0.94,
+      "spread_vol_pct": 3.72,
+      "half_life_days": 4.7,
+      "max_holding_limit": 12,
+      "is_dampened": false,
+      "momentum_slope": 0.603,
+      "composite_score": 81.8,
+      "trajectory": [
+        {
+          "date": "2026-05-29",
+          "days_elapsed": 1,
+          "price_a": 173.37,
+          "price_b": 281.69,
+          "spread": 87.5402,
+          "z_score": 6.9939
+        }
+      ],
+      "id": "NTAP_PANW_2026-05-28"
+    },
+    {
+      "pair_name": "OKE/TRGP",
+      "ticker_a": "OKE",
+      "ticker_b": "TRGP",
+      "sector": "Energy",
+      "entry_date": "2026-06-01",
+      "exit_date": "2026-06-16",
+      "direction": "LONG_A_SHORT_B",
+      "direction_label": "Long OKE / Short TRGP",
+      "entry_z": -2.364,
+      "exit_z": -1.741,
+      "hedge_ratio": 0.195,
+      "entry_price_a": 83.95,
+      "entry_price_b": 257.87,
+      "exit_price_a": 85.29,
+      "exit_price_b": 258.47,
+      "outcome": "WIN",
+      "exit_reason": "TIME_STOP",
+      "status_reason": "2x Half-Life Time Stop (T_max = 11d) on Day 11",
+      "holding_days": 11,
+      "raw_return_pct": 0.92,
+      "realized_return_pct": 1.15,
+      "sizing_multiplier": 1.25,
+      "spread_vol_pct": 2.36,
+      "half_life_days": 4.4,
+      "max_holding_limit": 11,
+      "is_dampened": false,
+      "momentum_slope": 0.1084,
+      "composite_score": 88.4,
+      "trajectory": [
+        {
+          "date": "2026-06-02",
+          "days_elapsed": 1,
+          "price_a": 85.7,
+          "price_b": 262.07,
+          "spread": 34.5939,
+          "z_score": -1.8909
+        },
+        {
+          "date": "2026-06-03",
+          "days_elapsed": 2,
+          "price_a": 85.73,
+          "price_b": 261.47,
+          "spread": 34.7419,
+          "z_score": -1.8161
+        },
+        {
+          "date": "2026-06-04",
+          "days_elapsed": 3,
+          "price_a": 87.9,
+          "price_b": 266.12,
+          "spread": 36.0076,
+          "z_score": -1.1759
+        },
+        {
+          "date": "2026-06-05",
+          "days_elapsed": 4,
+          "price_a": 87.21,
+          "price_b": 262.86,
+          "spread": 35.9525,
+          "z_score": -1.2038
+        },
+        {
+          "date": "2026-06-08",
+          "days_elapsed": 5,
+          "price_a": 87.11,
+          "price_b": 262.9,
+          "spread": 35.8459,
+          "z_score": -1.2577
+        },
+        {
+          "date": "2026-06-09",
+          "days_elapsed": 6,
+          "price_a": 86.76,
+          "price_b": 262.94,
+          "spread": 35.4824,
+          "z_score": -1.4416
+        },
+        {
+          "date": "2026-06-10",
+          "days_elapsed": 7,
+          "price_a": 89.5,
+          "price_b": 271.27,
+          "spread": 36.6051,
+          "z_score": -0.8738
+        },
+        {
+          "date": "2026-06-11",
+          "days_elapsed": 8,
+          "price_a": 88.15,
+          "price_b": 268.12,
+          "spread": 35.8665,
+          "z_score": -1.2473
+        },
+        {
+          "date": "2026-06-12",
+          "days_elapsed": 9,
+          "price_a": 89.52,
+          "price_b": 271.33,
+          "spread": 36.6132,
+          "z_score": -0.8697
+        },
+        {
+          "date": "2026-06-15",
+          "days_elapsed": 10,
+          "price_a": 86.42,
+          "price_b": 261.11,
+          "spread": 35.5035,
+          "z_score": -1.4309
+        },
+        {
+          "date": "2026-06-16",
+          "days_elapsed": 11,
+          "price_a": 85.29,
+          "price_b": 258.47,
+          "spread": 34.8913,
+          "z_score": -1.7405
+        }
+      ],
+      "id": "OKE_TRGP_2026-06-01"
+    },
+    {
+      "pair_name": "NTAP/PANW",
+      "ticker_a": "NTAP",
+      "ticker_b": "PANW",
+      "sector": "Information Technology",
+      "entry_date": "2026-06-02",
+      "exit_date": "2026-06-03",
+      "direction": "SHORT_A_LONG_B",
+      "direction_label": "Short NTAP / Long PANW",
+      "entry_z": 2.823,
+      "exit_z": 3.973,
+      "hedge_ratio": 0.4077,
+      "entry_price_a": 174.71,
+      "entry_price_b": 297.18,
+      "exit_price_a": 180.13,
+      "exit_price_b": 280.43,
+      "outcome": "LOSS",
+      "exit_reason": "TIGHT_STOP",
+      "status_reason": "Tight Dynamic Stop Loss (|z| >= 3.97) on Day 1",
+      "holding_days": 1,
+      "raw_return_pct": -2.76,
+      "realized_return_pct": -2.37,
+      "sizing_multiplier": 0.86,
+      "spread_vol_pct": 4.07,
+      "half_life_days": 6.1,
+      "max_holding_limit": 15,
+      "is_dampened": false,
+      "momentum_slope": 0.3785,
+      "composite_score": 87.4,
+      "trajectory": [
+        {
+          "date": "2026-06-03",
+          "days_elapsed": 1,
+          "price_a": 180.13,
+          "price_b": 280.43,
+          "spread": 65.7941,
+          "z_score": 4.5443
+        }
+      ],
+      "id": "NTAP_PANW_2026-06-02"
+    },
+    {
+      "pair_name": "BNY/GL",
+      "ticker_a": "BNY",
+      "ticker_b": "GL",
+      "sector": "Financials",
+      "entry_date": "2026-06-03",
+      "exit_date": "2026-06-05",
+      "direction": "SHORT_A_LONG_B",
+      "direction_label": "Short BNY / Long GL",
+      "entry_z": 2.229,
+      "exit_z": 0.4,
+      "hedge_ratio": 1.2951,
+      "entry_price_a": 139.41,
+      "entry_price_b": 150.62,
+      "exit_price_a": 141.21,
+      "exit_price_b": 158.57,
+      "outcome": "WIN",
+      "exit_reason": "REVERSION_TARGET",
+      "status_reason": "Realistic Reversion Target (|z| <= 0.40) on Day 2",
+      "holding_days": 2,
+      "raw_return_pct": 2.08,
+      "realized_return_pct": 2.6,
+      "sizing_multiplier": 1.25,
+      "spread_vol_pct": 2.73,
+      "half_life_days": 3.2,
+      "max_holding_limit": 8,
+      "is_dampened": false,
+      "momentum_slope": 0.2358,
+      "composite_score": 80.2,
+      "trajectory": [
+        {
+          "date": "2026-06-04",
+          "days_elapsed": 1,
+          "price_a": 142.83,
+          "price_b": 153.72,
+          "spread": -56.2572,
+          "z_score": 2.0732
+        },
+        {
+          "date": "2026-06-05",
+          "days_elapsed": 2,
+          "price_a": 141.21,
+          "price_b": 158.57,
+          "spread": -64.1568,
+          "z_score": -0.0027
+        }
+      ],
+      "id": "BNY_GL_2026-06-03"
+    },
+    {
+      "pair_name": "GL/IBKR",
+      "ticker_a": "GL",
+      "ticker_b": "IBKR",
+      "sector": "Financials",
+      "entry_date": "2026-06-11",
+      "exit_date": "2026-06-22",
+      "direction": "SHORT_A_LONG_B",
+      "direction_label": "Short GL / Long IBKR",
+      "entry_z": 2.287,
+      "exit_z": 2.404,
+      "hedge_ratio": 0.8223,
+      "entry_price_a": 164.47,
+      "entry_price_b": 88.75,
+      "exit_price_a": 171.39,
+      "exit_price_b": 96.73,
+      "outcome": "LOSS",
+      "exit_reason": "TIME_STOP",
+      "status_reason": "2x Half-Life Time Stop (T_max = 6d) on Day 6",
+      "holding_days": 6,
+      "raw_return_pct": -0.15,
+      "realized_return_pct": -0.19,
+      "sizing_multiplier": 1.25,
+      "spread_vol_pct": 1.88,
+      "half_life_days": 2.5,
+      "max_holding_limit": 6,
+      "is_dampened": false,
+      "momentum_slope": 0.0751,
+      "composite_score": 85.9,
+      "trajectory": [
+        {
+          "date": "2026-06-12",
+          "days_elapsed": 1,
+          "price_a": 166.12,
+          "price_b": 90.73,
+          "spread": 91.518,
+          "z_score": 2.2963
+        },
+        {
+          "date": "2026-06-15",
+          "days_elapsed": 2,
+          "price_a": 166.75,
+          "price_b": 92.68,
+          "spread": 90.5436,
+          "z_score": 1.9814
+        },
+        {
+          "date": "2026-06-16",
+          "days_elapsed": 3,
+          "price_a": 168.52,
+          "price_b": 93.02,
+          "spread": 92.0375,
+          "z_score": 2.4642
+        },
+        {
+          "date": "2026-06-17",
+          "days_elapsed": 4,
+          "price_a": 170.6,
+          "price_b": 95.0,
+          "spread": 92.4746,
+          "z_score": 2.6054
+        },
+        {
+          "date": "2026-06-18",
+          "days_elapsed": 5,
+          "price_a": 170.11,
+          "price_b": 95.91,
+          "spread": 91.2389,
+          "z_score": 2.2061
+        },
+        {
+          "date": "2026-06-22",
+          "days_elapsed": 6,
+          "price_a": 171.39,
+          "price_b": 96.73,
+          "spread": 91.8503,
+          "z_score": 2.4037
+        }
+      ],
+      "id": "GL_IBKR_2026-06-11"
+    },
+    {
+      "pair_name": "GL/NTRS",
+      "ticker_a": "GL",
+      "ticker_b": "NTRS",
+      "sector": "Financials",
+      "entry_date": "2026-06-12",
+      "exit_date": "2026-06-17",
+      "direction": "SHORT_A_LONG_B",
+      "direction_label": "Short GL / Long NTRS",
+      "entry_z": 2.922,
+      "exit_z": 4.072,
+      "hedge_ratio": 0.5341,
+      "entry_price_a": 166.12,
+      "entry_price_b": 173.52,
+      "exit_price_a": 170.6,
+      "exit_price_b": 174.13,
+      "outcome": "LOSS",
+      "exit_reason": "TIGHT_STOP",
+      "status_reason": "Tight Dynamic Stop Loss (|z| >= 4.07) on Day 3",
+      "holding_days": 3,
+      "raw_return_pct": -1.13,
+      "realized_return_pct": -1.41,
+      "sizing_multiplier": 1.25,
+      "spread_vol_pct": 1.53,
+      "half_life_days": 2.0,
+      "max_holding_limit": 5,
+      "is_dampened": false,
+      "momentum_slope": 0.1031,
+      "composite_score": 85.5,
+      "trajectory": [
+        {
+          "date": "2026-06-15",
+          "days_elapsed": 1,
+          "price_a": 166.75,
+          "price_b": 171.91,
+          "spread": 74.9345,
+          "z_score": 3.5094
+        },
+        {
+          "date": "2026-06-16",
+          "days_elapsed": 2,
+          "price_a": 168.52,
+          "price_b": 174.02,
+          "spread": 75.5807,
+          "z_score": 3.763
+        },
+        {
+          "date": "2026-06-17",
+          "days_elapsed": 3,
+          "price_a": 170.6,
+          "price_b": 174.13,
+          "spread": 77.5943,
+          "z_score": 4.553
+        }
+      ],
+      "id": "GL_NTRS_2026-06-12"
+    },
+    {
+      "pair_name": "GL/STT",
+      "ticker_a": "GL",
+      "ticker_b": "STT",
+      "sector": "Financials",
+      "entry_date": "2026-06-16",
+      "exit_date": "2026-06-18",
+      "direction": "SHORT_A_LONG_B",
+      "direction_label": "Short GL / Long STT",
+      "entry_z": 2.362,
+      "exit_z": 3.512,
+      "hedge_ratio": 0.481,
+      "entry_price_a": 168.52,
+      "entry_price_b": 169.54,
+      "exit_price_a": 170.11,
+      "exit_price_b": 166.59,
+      "outcome": "LOSS",
+      "exit_reason": "TIGHT_STOP",
+      "status_reason": "Tight Dynamic Stop Loss (|z| >= 3.51) on Day 2",
+      "holding_days": 2,
+      "raw_return_pct": -1.2,
+      "realized_return_pct": -1.5,
+      "sizing_multiplier": 1.25,
+      "spread_vol_pct": 1.55,
+      "half_life_days": 2.9,
+      "max_holding_limit": 7,
+      "is_dampened": false,
+      "momentum_slope": 0.0364,
+      "composite_score": 84.9,
+      "trajectory": [
+        {
+          "date": "2026-06-17",
+          "days_elapsed": 1,
+          "price_a": 170.6,
+          "price_b": 169.36,
+          "spread": 89.1365,
+          "z_score": 3.1917
+        },
+        {
+          "date": "2026-06-18",
+          "days_elapsed": 2,
+          "price_a": 170.11,
+          "price_b": 166.59,
+          "spread": 89.9766,
+          "z_score": 3.5137
+        }
+      ],
+      "id": "GL_STT_2026-06-16"
+    },
+    {
+      "pair_name": "BX/KKR",
+      "ticker_a": "BX",
+      "ticker_b": "KKR",
+      "sector": "Financials",
+      "entry_date": "2026-06-17",
+      "exit_date": "2026-06-24",
+      "direction": "SHORT_A_LONG_B",
+      "direction_label": "Short BX / Long KKR",
+      "entry_z": 2.232,
+      "exit_z": 0.4,
+      "hedge_ratio": 1.2207,
+      "entry_price_a": 123.75,
+      "entry_price_b": 96.99,
+      "exit_price_a": 111.85,
+      "exit_price_b": 91.34,
+      "outcome": "WIN",
+      "exit_reason": "REVERSION_TARGET",
+      "status_reason": "Realistic Reversion Target (|z| <= 0.40) on Day 4",
+      "holding_days": 4,
+      "raw_return_pct": 1.82,
+      "realized_return_pct": 2.27,
+      "sizing_multiplier": 1.25,
+      "spread_vol_pct": 1.94,
+      "half_life_days": 3.5,
+      "max_holding_limit": 9,
+      "is_dampened": false,
+      "momentum_slope": 0.2645,
+      "composite_score": 79.8,
+      "trajectory": [
+        {
+          "date": "2026-06-18",
+          "days_elapsed": 1,
+          "price_a": 122.54,
+          "price_b": 96.83,
+          "spread": 4.3445,
+          "z_score": 1.8099
+        },
+        {
+          "date": "2026-06-22",
+          "days_elapsed": 2,
+          "price_a": 122.02,
+          "price_b": 96.72,
+          "spread": 3.9539,
+          "z_score": 1.6474
+        },
+        {
+          "date": "2026-06-23",
+          "days_elapsed": 3,
+          "price_a": 118.86,
+          "price_b": 93.32,
+          "spread": 4.9386,
+          "z_score": 2.0571
+        },
+        {
+          "date": "2026-06-24",
+          "days_elapsed": 4,
+          "price_a": 111.85,
+          "price_b": 91.34,
+          "spread": 0.3547,
+          "z_score": 0.1501
+        }
+      ],
+      "id": "BX_KKR_2026-06-17"
+    },
+    {
+      "pair_name": "GL/PFG",
+      "ticker_a": "GL",
+      "ticker_b": "PFG",
+      "sector": "Financials",
+      "entry_date": "2026-06-22",
+      "exit_date": "2026-06-24",
+      "direction": "SHORT_A_LONG_B",
+      "direction_label": "Short GL / Long PFG",
+      "entry_z": 2.309,
+      "exit_z": 3.459,
+      "hedge_ratio": 1.1419,
+      "entry_price_a": 171.39,
+      "entry_price_b": 110.39,
+      "exit_price_a": 174.97,
+      "exit_price_b": 105.89,
+      "outcome": "LOSS",
+      "exit_reason": "TIGHT_STOP",
+      "status_reason": "Tight Dynamic Stop Loss (|z| >= 3.46) on Day 2",
+      "holding_days": 2,
+      "raw_return_pct": -0.93,
+      "realized_return_pct": -1.16,
+      "sizing_multiplier": 1.25,
+      "spread_vol_pct": 1.41,
+      "half_life_days": 3.4,
+      "max_holding_limit": 8,
+      "is_dampened": false,
+      "momentum_slope": 0.2457,
+      "composite_score": 92.6,
+      "trajectory": [
+        {
+          "date": "2026-06-23",
+          "days_elapsed": 1,
+          "price_a": 174.91,
+          "price_b": 111.51,
+          "spread": 47.5743,
+          "z_score": 3.2338
+        },
+        {
+          "date": "2026-06-24",
+          "days_elapsed": 2,
+          "price_a": 174.97,
+          "price_b": 105.89,
+          "spread": 54.0484,
+          "z_score": 5.9163
+        }
+      ],
+      "id": "GL_PFG_2026-06-22"
+    },
+    {
+      "pair_name": "KEYS/LITE",
+      "ticker_a": "KEYS",
+      "ticker_b": "LITE",
+      "sector": "Information Technology",
+      "entry_date": "2026-06-22",
+      "exit_date": "2026-06-29",
+      "direction": "SHORT_A_LONG_B",
+      "direction_label": "Short KEYS / Long LITE",
+      "entry_z": 2.237,
+      "exit_z": 0.834,
+      "hedge_ratio": 0.2647,
+      "entry_price_a": 373.34,
+      "entry_price_b": 893.93,
+      "exit_price_a": 340.13,
+      "exit_price_b": 851.4,
+      "outcome": "WIN",
+      "exit_reason": "TIME_STOP",
+      "status_reason": "2x Half-Life Time Stop (T_max = 5d) on Day 5",
+      "holding_days": 5,
+      "raw_return_pct": 3.6,
+      "realized_return_pct": 3.01,
+      "sizing_multiplier": 0.84,
+      "spread_vol_pct": 4.19,
+      "half_life_days": 2.1,
+      "max_holding_limit": 5,
+      "is_dampened": false,
+      "momentum_slope": 0.1261,
+      "composite_score": 84.9,
+      "trajectory": [
+        {
+          "date": "2026-06-23",
+          "days_elapsed": 1,
+          "price_a": 352.58,
+          "price_b": 827.92,
+          "spread": 133.4296,
+          "z_score": 2.0273
+        },
+        {
+          "date": "2026-06-24",
+          "days_elapsed": 2,
+          "price_a": 351.3,
+          "price_b": 842.53,
+          "spread": 128.2823,
+          "z_score": 1.6982
+        },
+        {
+          "date": "2026-06-25",
+          "days_elapsed": 3,
+          "price_a": 360.06,
+          "price_b": 861.97,
+          "spread": 131.8965,
+          "z_score": 1.9293
+        },
+        {
+          "date": "2026-06-26",
+          "days_elapsed": 4,
+          "price_a": 328.66,
+          "price_b": 816.98,
+          "spread": 112.4054,
+          "z_score": 0.6828
+        },
+        {
+          "date": "2026-06-29",
+          "days_elapsed": 5,
+          "price_a": 340.13,
+          "price_b": 851.4,
+          "spread": 114.7644,
+          "z_score": 0.8337
+        }
+      ],
+      "id": "KEYS_LITE_2026-06-22"
+    },
+    {
+      "pair_name": "CMS/PPL",
+      "ticker_a": "CMS",
+      "ticker_b": "PPL",
+      "sector": "Utilities",
+      "entry_date": "2026-06-30",
+      "exit_date": "2026-07-13",
+      "direction": "SHORT_A_LONG_B",
+      "direction_label": "Short CMS / Long PPL",
+      "entry_z": 2.122,
+      "exit_z": 1.77,
+      "hedge_ratio": 1.3874,
+      "entry_price_a": 75.89,
+      "entry_price_b": 36.05,
+      "exit_price_a": 75.14,
+      "exit_price_b": 35.77,
+      "outcome": "WIN",
+      "exit_reason": "TIME_STOP",
+      "status_reason": "2x Half-Life Time Stop (T_max = 8d) on Day 8",
+      "holding_days": 8,
+      "raw_return_pct": 0.28,
+      "realized_return_pct": 0.35,
+      "sizing_multiplier": 1.25,
+      "spread_vol_pct": 1.34,
+      "half_life_days": 3.3,
+      "max_holding_limit": 8,
+      "is_dampened": false,
+      "momentum_slope": 0.8686,
+      "composite_score": 79.5,
+      "trajectory": [
+        {
+          "date": "2026-07-01",
+          "days_elapsed": 1,
+          "price_a": 75.31,
+          "price_b": 35.33,
+          "spread": 26.3007,
+          "z_score": 2.5447
+        },
+        {
+          "date": "2026-07-02",
+          "days_elapsed": 2,
+          "price_a": 77.11,
+          "price_b": 36.59,
+          "spread": 26.3487,
+          "z_score": 2.592
+        },
+        {
+          "date": "2026-07-06",
+          "days_elapsed": 3,
+          "price_a": 75.68,
+          "price_b": 35.81,
+          "spread": 25.9935,
+          "z_score": 2.2425
+        },
+        {
+          "date": "2026-07-07",
+          "days_elapsed": 4,
+          "price_a": 76.4,
+          "price_b": 36.09,
+          "spread": 26.3324,
+          "z_score": 2.5759
+        },
+        {
+          "date": "2026-07-08",
+          "days_elapsed": 5,
+          "price_a": 75.58,
+          "price_b": 35.69,
+          "spread": 26.0594,
+          "z_score": 2.3074
+        },
+        {
+          "date": "2026-07-09",
+          "days_elapsed": 6,
+          "price_a": 74.4,
+          "price_b": 35.37,
+          "spread": 25.333,
+          "z_score": 1.5927
+        },
+        {
+          "date": "2026-07-10",
+          "days_elapsed": 7,
+          "price_a": 74.8,
+          "price_b": 35.48,
+          "spread": 25.5647,
+          "z_score": 1.8206
+        },
+        {
+          "date": "2026-07-13",
+          "days_elapsed": 8,
+          "price_a": 75.14,
+          "price_b": 35.77,
+          "spread": 25.5129,
+          "z_score": 1.7696
+        }
+      ],
+      "id": "CMS_PPL_2026-06-30"
+    },
+    {
+      "pair_name": "LRCX/WDC",
+      "ticker_a": "LRCX",
+      "ticker_b": "WDC",
+      "sector": "Information Technology",
+      "entry_date": "2026-07-01",
+      "exit_date": "2026-07-07",
+      "direction": "SHORT_A_LONG_B",
+      "direction_label": "Short LRCX / Long WDC",
+      "entry_z": 2.373,
+      "exit_z": 0.4,
+      "hedge_ratio": 0.4117,
+      "entry_price_a": 390.84,
+      "entry_price_b": 598.18,
+      "exit_price_a": 325.78,
+      "exit_price_b": 531.93,
+      "outcome": "WIN",
+      "exit_reason": "REVERSION_TARGET",
+      "status_reason": "Realistic Reversion Target (|z| <= 0.40) on Day 3",
+      "holding_days": 3,
+      "raw_return_pct": 5.14,
+      "realized_return_pct": 4.23,
+      "sizing_multiplier": 0.82,
+      "spread_vol_pct": 4.25,
+      "half_life_days": 4.7,
+      "max_holding_limit": 12,
+      "is_dampened": false,
+      "momentum_slope": 1.5333,
+      "composite_score": 87.6,
+      "trajectory": [
+        {
+          "date": "2026-07-02",
+          "days_elapsed": 1,
+          "price_a": 351.04,
+          "price_b": 538.83,
+          "spread": 129.202,
+          "z_score": 1.4474
+        },
+        {
+          "date": "2026-07-06",
+          "days_elapsed": 2,
+          "price_a": 349.83,
+          "price_b": 577.27,
+          "spread": 112.1644,
+          "z_score": 0.4205
+        },
+        {
+          "date": "2026-07-07",
+          "days_elapsed": 3,
+          "price_a": 325.78,
+          "price_b": 531.93,
+          "spread": 106.7887,
+          "z_score": 0.0965
+        }
+      ],
+      "id": "LRCX_WDC_2026-07-01"
+    },
+    {
+      "pair_name": "AMP/RJF",
+      "ticker_a": "AMP",
+      "ticker_b": "RJF",
+      "sector": "Financials",
+      "entry_date": "2026-07-17",
+      "exit_date": "2026-07-29",
+      "direction": "SHORT_A_LONG_B",
+      "direction_label": "Short AMP / Long RJF",
+      "entry_z": 2.96,
+      "exit_z": 2.278,
+      "hedge_ratio": 2.89,
+      "entry_price_a": 526.23,
+      "entry_price_b": 167.78,
+      "exit_price_a": 538.61,
+      "exit_price_b": 173.56,
+      "outcome": "WIN",
+      "exit_reason": "TIME_STOP",
+      "status_reason": "2x Half-Life Time Stop (T_max = 8d) on Day 8",
+      "holding_days": 8,
+      "raw_return_pct": 0.43,
+      "realized_return_pct": 0.54,
+      "sizing_multiplier": 1.25,
+      "spread_vol_pct": 1.2,
+      "half_life_days": 3.3,
+      "max_holding_limit": 8,
+      "is_dampened": false,
+      "momentum_slope": 0.2312,
+      "composite_score": 90.1,
+      "trajectory": [
+        {
+          "date": "2026-07-20",
+          "days_elapsed": 1,
+          "price_a": 524.58,
+          "price_b": 167.74,
+          "spread": 39.7985,
+          "z_score": 2.7185
+        },
+        {
+          "date": "2026-07-21",
+          "days_elapsed": 2,
+          "price_a": 526.72,
+          "price_b": 167.36,
+          "spread": 43.0652,
+          "z_score": 3.234
+        },
+        {
+          "date": "2026-07-22",
+          "days_elapsed": 3,
+          "price_a": 525.18,
+          "price_b": 167.44,
+          "spread": 41.2896,
+          "z_score": 2.9538
+        },
+        {
+          "date": "2026-07-23",
+          "days_elapsed": 4,
+          "price_a": 518.49,
+          "price_b": 165.57,
+          "spread": 39.9863,
+          "z_score": 2.7482
+        },
+        {
+          "date": "2026-07-24",
+          "days_elapsed": 5,
+          "price_a": 527.25,
+          "price_b": 168.72,
+          "spread": 39.6478,
+          "z_score": 2.6947
+        },
+        {
+          "date": "2026-07-27",
+          "days_elapsed": 6,
+          "price_a": 536.33,
+          "price_b": 173.01,
+          "spread": 36.3449,
+          "z_score": 2.1736
+        },
+        {
+          "date": "2026-07-28",
+          "days_elapsed": 7,
+          "price_a": 544.92,
+          "price_b": 176.57,
+          "spread": 34.6172,
+          "z_score": 1.9009
+        },
+        {
+          "date": "2026-07-29",
+          "days_elapsed": 8,
+          "price_a": 538.61,
+          "price_b": 173.56,
+          "spread": 37.0048,
+          "z_score": 2.2777
+        }
+      ],
+      "id": "AMP_RJF_2026-07-17"
+    },
+    {
+      "pair_name": "BNY/NTRS",
+      "ticker_a": "BNY",
+      "ticker_b": "NTRS",
+      "sector": "Financials",
+      "entry_date": "2026-07-17",
+      "exit_date": "2026-07-22",
+      "direction": "SHORT_A_LONG_B",
+      "direction_label": "Short BNY / Long NTRS",
+      "entry_z": 2.199,
+      "exit_z": 3.349,
+      "hedge_ratio": 0.7764,
+      "entry_price_a": 155.83,
+      "entry_price_b": 183.81,
+      "exit_price_a": 159.06,
+      "exit_price_b": 177.82,
+      "outcome": "LOSS",
+      "exit_reason": "TIGHT_STOP",
+      "status_reason": "Tight Dynamic Stop Loss (|z| >= 3.35) on Day 3",
+      "holding_days": 3,
+      "raw_return_pct": -0.74,
+      "realized_return_pct": -0.93,
+      "sizing_multiplier": 1.25,
+      "spread_vol_pct": 1.23,
+      "half_life_days": 3.3,
+      "max_holding_limit": 8,
+      "is_dampened": false,
+      "momentum_slope": 0.3845,
+      "composite_score": 84.9,
+      "trajectory": [
+        {
+          "date": "2026-07-20",
+          "days_elapsed": 1,
+          "price_a": 155.63,
+          "price_b": 181.92,
+          "spread": 14.3858,
+          "z_score": 2.8643
+        },
+        {
+          "date": "2026-07-21",
+          "days_elapsed": 2,
+          "price_a": 157.57,
+          "price_b": 184.19,
+          "spread": 14.5677,
+          "z_score": 2.9592
+        },
+        {
+          "date": "2026-07-22",
+          "days_elapsed": 3,
+          "price_a": 159.06,
+          "price_b": 177.82,
+          "spread": 21.0009,
+          "z_score": 6.3145
+        }
+      ],
+      "id": "BNY_NTRS_2026-07-17"
+    },
+    {
+      "pair_name": "GIS/MKC",
+      "ticker_a": "GIS",
+      "ticker_b": "MKC",
+      "sector": "Consumer Staples",
+      "entry_date": "2026-07-17",
+      "exit_date": "2026-07-31",
+      "direction": "SHORT_A_LONG_B",
+      "direction_label": "Short GIS / Long MKC",
+      "entry_z": 2.625,
+      "exit_z": 0.627,
+      "hedge_ratio": 0.4524,
+      "entry_price_a": 37.26,
+      "entry_price_b": 51.16,
+      "exit_price_a": 35.08,
+      "exit_price_b": 50.36,
+      "outcome": "WIN",
+      "exit_reason": "TIME_STOP",
+      "status_reason": "2x Half-Life Time Stop (T_max = 10d) on Day 10",
+      "holding_days": 10,
+      "raw_return_pct": 3.02,
+      "realized_return_pct": 3.77,
+      "sizing_multiplier": 1.25,
+      "spread_vol_pct": 2.45,
+      "half_life_days": 4.0,
+      "max_holding_limit": 10,
+      "is_dampened": false,
+      "momentum_slope": 0.194,
+      "composite_score": 78.5,
+      "trajectory": [
+        {
+          "date": "2026-07-20",
+          "days_elapsed": 1,
+          "price_a": 36.88,
+          "price_b": 51.69,
+          "spread": 13.4945,
+          "z_score": 1.9378
+        },
+        {
+          "date": "2026-07-21",
+          "days_elapsed": 2,
+          "price_a": 36.46,
+          "price_b": 51.8,
+          "spread": 13.0233,
+          "z_score": 1.4214
+        },
+        {
+          "date": "2026-07-22",
+          "days_elapsed": 3,
+          "price_a": 36.22,
+          "price_b": 51.47,
+          "spread": 12.9355,
+          "z_score": 1.3251
+        },
+        {
+          "date": "2026-07-23",
+          "days_elapsed": 4,
+          "price_a": 34.89,
+          "price_b": 49.66,
+          "spread": 12.42,
+          "z_score": 0.7602
+        },
+        {
+          "date": "2026-07-24",
+          "days_elapsed": 5,
+          "price_a": 35.36,
+          "price_b": 49.43,
+          "spread": 12.994,
+          "z_score": 1.3893
+        },
+        {
+          "date": "2026-07-27",
+          "days_elapsed": 6,
+          "price_a": 35.93,
+          "price_b": 50.08,
+          "spread": 13.2722,
+          "z_score": 1.6942
+        },
+        {
+          "date": "2026-07-28",
+          "days_elapsed": 7,
+          "price_a": 36.95,
+          "price_b": 50.99,
+          "spread": 13.881,
+          "z_score": 2.3615
+        },
+        {
+          "date": "2026-07-29",
+          "days_elapsed": 8,
+          "price_a": 37.21,
+          "price_b": 51.44,
+          "spread": 13.94,
+          "z_score": 2.4262
+        },
+        {
+          "date": "2026-07-30",
+          "days_elapsed": 9,
+          "price_a": 35.74,
+          "price_b": 50.42,
+          "spread": 12.9291,
+          "z_score": 1.3182
+        },
+        {
+          "date": "2026-07-31",
+          "days_elapsed": 10,
+          "price_a": 35.08,
+          "price_b": 50.36,
+          "spread": 12.2984,
+          "z_score": 0.627
+        }
+      ],
+      "id": "GIS_MKC_2026-07-17"
+    },
+    {
+      "pair_name": "CMS/DUK",
+      "ticker_a": "CMS",
+      "ticker_b": "DUK",
+      "sector": "Utilities",
+      "entry_date": "2026-07-22",
+      "exit_date": "2026-08-10",
+      "direction": "LONG_A_SHORT_B",
+      "direction_label": "Long CMS / Short DUK",
+      "entry_z": -2.343,
+      "exit_z": -1.965,
+      "hedge_ratio": 0.6974,
+      "entry_price_a": 73.39,
+      "entry_price_b": 126.83,
+      "exit_price_a": 69.06,
+      "exit_price_b": 120.13,
+      "outcome": "WIN",
+      "exit_reason": "TIME_STOP",
+      "status_reason": "2x Half-Life Time Stop (T_max = 13d) on Day 13",
+      "holding_days": 13,
+      "raw_return_pct": 0.22,
+      "realized_return_pct": 0.28,
+      "sizing_multiplier": 1.25,
+      "spread_vol_pct": 1.26,
+      "half_life_days": 5.2,
+      "max_holding_limit": 13,
+      "is_dampened": false,
+      "momentum_slope": 0.0582,
+      "composite_score": 87.1,
+      "trajectory": [
+        {
+          "date": "2026-07-23",
+          "days_elapsed": 1,
+          "price_a": 73.56,
+          "price_b": 128.13,
+          "spread": -15.8039,
+          "z_score": -3.135
+        },
+        {
+          "date": "2026-07-24",
+          "days_elapsed": 2,
+          "price_a": 74.1,
+          "price_b": 129.38,
+          "spread": -16.1293,
+          "z_score": -3.4868
+        },
+        {
+          "date": "2026-07-27",
+          "days_elapsed": 3,
+          "price_a": 73.68,
+          "price_b": 127.71,
+          "spread": -15.3876,
+          "z_score": -2.6852
+        },
+        {
+          "date": "2026-07-28",
+          "days_elapsed": 4,
+          "price_a": 73.77,
+          "price_b": 128.11,
+          "spread": -15.5718,
+          "z_score": -2.8843
+        },
+        {
+          "date": "2026-07-29",
+          "days_elapsed": 5,
+          "price_a": 73.76,
+          "price_b": 127.95,
+          "spread": -15.4711,
+          "z_score": -2.7755
+        },
+        {
+          "date": "2026-07-30",
+          "days_elapsed": 6,
+          "price_a": 71.68,
+          "price_b": 125.17,
+          "spread": -15.6117,
+          "z_score": -2.9274
+        },
+        {
+          "date": "2026-07-31",
+          "days_elapsed": 7,
+          "price_a": 71.41,
+          "price_b": 124.34,
+          "spread": -15.2988,
+          "z_score": -2.5893
+        },
+        {
+          "date": "2026-08-03",
+          "days_elapsed": 8,
+          "price_a": 71.17,
+          "price_b": 123.2,
+          "spread": -14.7518,
+          "z_score": -1.9982
+        },
+        {
+          "date": "2026-08-04",
+          "days_elapsed": 9,
+          "price_a": 71.16,
+          "price_b": 123.19,
+          "spread": -14.7548,
+          "z_score": -2.0014
+        },
+        {
+          "date": "2026-08-05",
+          "days_elapsed": 10,
+          "price_a": 71.02,
+          "price_b": 122.27,
+          "spread": -14.2507,
+          "z_score": -1.4567
+        },
+        {
+          "date": "2026-08-06",
+          "days_elapsed": 11,
+          "price_a": 70.63,
+          "price_b": 122.82,
+          "spread": -15.0248,
+          "z_score": -2.2931
+        },
+        {
+          "date": "2026-08-07",
+          "days_elapsed": 12,
+          "price_a": 71.03,
+          "price_b": 123.76,
+          "spread": -15.2815,
+          "z_score": -2.5706
+        },
+        {
+          "date": "2026-08-10",
+          "days_elapsed": 13,
+          "price_a": 69.06,
+          "price_b": 120.13,
+          "spread": -14.7213,
+          "z_score": -1.9652
+        }
+      ],
+      "id": "CMS_DUK_2026-07-22"
+    },
+    {
+      "pair_name": "IBKR/PFG",
+      "ticker_a": "IBKR",
+      "ticker_b": "PFG",
+      "sector": "Financials",
+      "entry_date": "2026-08-04",
+      "exit_date": "2026-08-17",
+      "direction": "LONG_A_SHORT_B",
+      "direction_label": "Long IBKR / Short PFG",
+      "entry_z": -2.174,
+      "exit_z": -0.4,
+      "hedge_ratio": 0.9776,
+      "entry_price_a": 88.55,
+      "entry_price_b": 114.38,
+      "exit_price_a": 94.24,
+      "exit_price_b": 112.12,
+      "outcome": "WIN",
+      "exit_reason": "REVERSION_TARGET",
+      "status_reason": "Realistic Reversion Target (|z| <= 0.40) on Day 9",
+      "holding_days": 9,
+      "raw_return_pct": 3.13,
+      "realized_return_pct": 2.74,
+      "sizing_multiplier": 0.88,
+      "spread_vol_pct": 4.0,
+      "half_life_days": 3.6,
+      "max_holding_limit": 9,
+      "is_dampened": false,
+      "momentum_slope": 0.2162,
+      "composite_score": 85.1,
+      "trajectory": [
+        {
+          "date": "2026-08-05",
+          "days_elapsed": 1,
+          "price_a": 88.66,
+          "price_b": 113.98,
+          "spread": -22.7703,
+          "z_score": -2.0341
+        },
+        {
+          "date": "2026-08-06",
+          "days_elapsed": 2,
+          "price_a": 85.94,
+          "price_b": 114.54,
+          "spread": -26.0312,
+          "z_score": -2.9553
+        },
+        {
+          "date": "2026-08-07",
+          "days_elapsed": 3,
+          "price_a": 87.75,
+          "price_b": 112.54,
+          "spread": -22.2727,
+          "z_score": -1.8935
+        },
+        {
+          "date": "2026-08-10",
+          "days_elapsed": 4,
+          "price_a": 90.58,
+          "price_b": 112.95,
+          "spread": -19.843,
+          "z_score": -1.2071
+        },
+        {
+          "date": "2026-08-11",
+          "days_elapsed": 5,
+          "price_a": 89.7,
+          "price_b": 112.18,
+          "spread": -19.9655,
+          "z_score": -1.2417
+        },
+        {
+          "date": "2026-08-12",
+          "days_elapsed": 6,
+          "price_a": 91.58,
+          "price_b": 112.91,
+          "spread": -18.8051,
+          "z_score": -0.9139
+        },
+        {
+          "date": "2026-08-13",
+          "days_elapsed": 7,
+          "price_a": 91.34,
+          "price_b": 114.06,
+          "spread": -20.1704,
+          "z_score": -1.2996
+        },
+        {
+          "date": "2026-08-14",
+          "days_elapsed": 8,
+          "price_a": 91.98,
+          "price_b": 113.12,
+          "spread": -18.6092,
+          "z_score": -0.8586
+        },
+        {
+          "date": "2026-08-17",
+          "days_elapsed": 9,
+          "price_a": 94.24,
+          "price_b": 112.12,
+          "spread": -15.3614,
+          "z_score": 0.059
+        }
+      ],
+      "id": "IBKR_PFG_2026-08-04"
+    },
+    {
+      "pair_name": "FITB/PNC",
+      "ticker_a": "FITB",
+      "ticker_b": "PNC",
+      "sector": "Financials",
+      "entry_date": "2026-08-06",
+      "exit_date": "2026-08-14",
+      "direction": "LONG_A_SHORT_B",
+      "direction_label": "Long FITB / Short PNC",
+      "entry_z": -2.556,
+      "exit_z": -2.398,
+      "hedge_ratio": 0.2489,
+      "entry_price_a": 56.49,
+      "entry_price_b": 250.46,
+      "exit_price_a": 57.58,
+      "exit_price_b": 254.63,
+      "outcome": "WIN",
+      "exit_reason": "TIME_STOP",
+      "status_reason": "2x Half-Life Time Stop (T_max = 6d) on Day 6",
+      "holding_days": 6,
+      "raw_return_pct": 0.05,
+      "realized_return_pct": 0.06,
+      "sizing_multiplier": 1.25,
+      "spread_vol_pct": 0.68,
+      "half_life_days": 2.3,
+      "max_holding_limit": 6,
+      "is_dampened": false,
+      "momentum_slope": 0.002,
+      "composite_score": 94.8,
+      "trajectory": [
+        {
+          "date": "2026-08-07",
+          "days_elapsed": 1,
+          "price_a": 56.62,
+          "price_b": 250.26,
+          "spread": -5.6698,
+          "z_score": -2.0705
+        },
+        {
+          "date": "2026-08-10",
+          "days_elapsed": 2,
+          "price_a": 56.66,
+          "price_b": 249.47,
+          "spread": -5.4328,
+          "z_score": -1.4537
+        },
+        {
+          "date": "2026-08-11",
+          "days_elapsed": 3,
+          "price_a": 57.13,
+          "price_b": 251.91,
+          "spread": -5.5759,
+          "z_score": -1.826
+        },
+        {
+          "date": "2026-08-12",
+          "days_elapsed": 4,
+          "price_a": 57.53,
+          "price_b": 253.13,
+          "spread": -5.4726,
+          "z_score": -1.5573
+        },
+        {
+          "date": "2026-08-13",
+          "days_elapsed": 5,
+          "price_a": 57.46,
+          "price_b": 252.87,
+          "spread": -5.4779,
+          "z_score": -1.5711
+        },
+        {
+          "date": "2026-08-14",
+          "days_elapsed": 6,
+          "price_a": 57.58,
+          "price_b": 254.63,
+          "spread": -5.7954,
+          "z_score": -2.3975
+        }
+      ],
+      "id": "FITB_PNC_2026-08-06"
+    },
+    {
+      "pair_name": "AMGN/DGX",
+      "ticker_a": "AMGN",
+      "ticker_b": "DGX",
+      "sector": "Health Care",
+      "entry_date": "2026-08-14",
+      "exit_date": "2026-08-19",
+      "direction": "SHORT_A_LONG_B",
+      "direction_label": "Short AMGN / Long DGX",
+      "entry_z": 2.194,
+      "exit_z": 3.344,
+      "hedge_ratio": 1.4404,
+      "entry_price_a": 412.8,
+      "entry_price_b": 233.53,
+      "exit_price_a": 439.79,
+      "exit_price_b": 240.86,
+      "outcome": "LOSS",
+      "exit_reason": "TIGHT_STOP",
+      "status_reason": "Tight Dynamic Stop Loss (|z| >= 3.34) on Day 3",
+      "holding_days": 3,
+      "raw_return_pct": -1.21,
+      "realized_return_pct": -1.51,
+      "sizing_multiplier": 1.25,
+      "spread_vol_pct": 1.91,
+      "half_life_days": 2.3,
+      "max_holding_limit": 6,
+      "is_dampened": false,
+      "momentum_slope": 0.0345,
+      "composite_score": 90.9,
+      "trajectory": [
+        {
+          "date": "2026-08-17",
+          "days_elapsed": 1,
+          "price_a": 416.94,
+          "price_b": 234.65,
+          "spread": 78.9567,
+          "z_score": 2.5183
+        },
+        {
+          "date": "2026-08-18",
+          "days_elapsed": 2,
+          "price_a": 422.81,
+          "price_b": 235.38,
+          "spread": 83.7748,
+          "z_score": 3.1306
+        },
+        {
+          "date": "2026-08-19",
+          "days_elapsed": 3,
+          "price_a": 439.79,
+          "price_b": 240.86,
+          "spread": 92.8484,
+          "z_score": 4.2838
+        }
+      ],
+      "id": "AMGN_DGX_2026-08-14"
+    },
+    {
+      "pair_name": "AMGN/DGX",
+      "ticker_a": "AMGN",
+      "ticker_b": "DGX",
+      "sector": "Health Care",
+      "entry_date": "2026-08-20",
+      "exit_date": "2026-08-31",
+      "direction": "SHORT_A_LONG_B",
+      "direction_label": "Short AMGN / Long DGX",
+      "entry_z": 2.214,
+      "exit_z": 2.24,
+      "hedge_ratio": 1.5842,
+      "entry_price_a": 431.21,
+      "entry_price_b": 240.41,
+      "exit_price_a": 429.88,
+      "exit_price_b": 239.41,
+      "outcome": "LOSS",
+      "exit_reason": "TIME_STOP",
+      "status_reason": "2x Half-Life Time Stop (T_max = 7d) on Day 7",
+      "holding_days": 7,
+      "raw_return_pct": -0.03,
+      "realized_return_pct": -0.04,
+      "sizing_multiplier": 1.25,
+      "spread_vol_pct": 2.11,
+      "half_life_days": 2.7,
+      "max_holding_limit": 7,
+      "is_dampened": false,
+      "momentum_slope": 0.8641,
+      "composite_score": 89.3,
+      "trajectory": [
+        {
+          "date": "2026-08-21",
+          "days_elapsed": 1,
+          "price_a": 439.33,
+          "price_b": 243.48,
+          "spread": 53.6011,
+          "z_score": 2.5702
+        },
+        {
+          "date": "2026-08-24",
+          "days_elapsed": 2,
+          "price_a": 443.84,
+          "price_b": 242.97,
+          "spread": 58.9319,
+          "z_score": 3.1574
+        },
+        {
+          "date": "2026-08-25",
+          "days_elapsed": 3,
+          "price_a": 442.24,
+          "price_b": 243.6,
+          "spread": 56.3218,
+          "z_score": 2.8699
+        },
+        {
+          "date": "2026-08-26",
+          "days_elapsed": 4,
+          "price_a": 440.34,
+          "price_b": 244.09,
+          "spread": 53.6484,
+          "z_score": 2.5754
+        },
+        {
+          "date": "2026-08-27",
+          "days_elapsed": 5,
+          "price_a": 436.99,
+          "price_b": 243.7,
+          "spread": 50.9139,
+          "z_score": 2.2742
+        },
+        {
+          "date": "2026-08-28",
+          "days_elapsed": 6,
+          "price_a": 432.42,
+          "price_b": 241.86,
+          "spread": 49.2639,
+          "z_score": 2.0925
+        },
+        {
+          "date": "2026-08-31",
+          "days_elapsed": 7,
+          "price_a": 429.88,
+          "price_b": 239.41,
+          "spread": 50.6066,
+          "z_score": 2.2403
+        }
+      ],
+      "id": "AMGN_DGX_2026-08-20"
+    },
+    {
+      "pair_name": "GIS/MKC",
+      "ticker_a": "GIS",
+      "ticker_b": "MKC",
+      "sector": "Consumer Staples",
+      "entry_date": "2026-09-01",
+      "exit_date": "2026-09-10",
+      "direction": "SHORT_A_LONG_B",
+      "direction_label": "Short GIS / Long MKC",
+      "entry_z": 2.612,
+      "exit_z": 0.4,
+      "hedge_ratio": 0.7449,
+      "entry_price_a": 40.32,
+      "entry_price_b": 53.69,
+      "exit_price_a": 35.29,
+      "exit_price_b": 50.56,
+      "outcome": "WIN",
+      "exit_reason": "REVERSION_TARGET",
+      "status_reason": "Realistic Reversion Target (|z| <= 0.40) on Day 6",
+      "holding_days": 6,
+      "raw_return_pct": 2.57,
+      "realized_return_pct": 3.21,
+      "sizing_multiplier": 1.25,
+      "spread_vol_pct": 2.31,
+      "half_life_days": 3.6,
+      "max_holding_limit": 9,
+      "is_dampened": false,
+      "momentum_slope": 0.1482,
+      "composite_score": 83.6,
+      "trajectory": [
+        {
+          "date": "2026-09-02",
+          "days_elapsed": 1,
+          "price_a": 39.82,
+          "price_b": 53.23,
+          "spread": 0.1694,
+          "z_score": 2.4397
+        },
+        {
+          "date": "2026-09-03",
+          "days_elapsed": 2,
+          "price_a": 38.53,
+          "price_b": 52.03,
+          "spread": -0.2268,
+          "z_score": 2.015
+        },
+        {
+          "date": "2026-09-04",
+          "days_elapsed": 3,
+          "price_a": 37.58,
+          "price_b": 51.53,
+          "spread": -0.8101,
+          "z_score": 1.3895
+        },
+        {
+          "date": "2026-09-08",
+          "days_elapsed": 4,
+          "price_a": 36.99,
+          "price_b": 51.35,
+          "spread": -1.2663,
+          "z_score": 0.9004
+        },
+        {
+          "date": "2026-09-09",
+          "days_elapsed": 5,
+          "price_a": 36.4,
+          "price_b": 50.94,
+          "spread": -1.5455,
+          "z_score": 0.601
+        },
+        {
+          "date": "2026-09-10",
+          "days_elapsed": 6,
+          "price_a": 35.29,
+          "price_b": 50.56,
+          "spread": -2.3743,
+          "z_score": -0.2876
+        }
+      ],
+      "id": "GIS_MKC_2026-09-01"
+    },
+    {
+      "pair_name": "PFG/STT",
+      "ticker_a": "PFG",
+      "ticker_b": "STT",
+      "sector": "Financials",
+      "entry_date": "2026-09-16",
+      "exit_date": "2026-09-30",
+      "direction": "SHORT_A_LONG_B",
+      "direction_label": "Short PFG / Long STT",
+      "entry_z": 2.18,
+      "exit_z": 1.338,
+      "hedge_ratio": 0.3168,
+      "entry_price_a": 116.64,
+      "entry_price_b": 181.94,
+      "exit_price_a": 111.96,
+      "exit_price_b": 173.67,
+      "outcome": "WIN",
+      "exit_reason": "TIME_STOP",
+      "status_reason": "2x Half-Life Time Stop (T_max = 10d) on Day 10",
+      "holding_days": 10,
+      "raw_return_pct": 1.18,
+      "realized_return_pct": 1.47,
+      "sizing_multiplier": 1.25,
+      "spread_vol_pct": 2.09,
+      "half_life_days": 4.0,
+      "max_holding_limit": 10,
+      "is_dampened": false,
+      "momentum_slope": 0.4237,
+      "composite_score": 84.1,
+      "trajectory": [
+        {
+          "date": "2026-09-17",
+          "days_elapsed": 1,
+          "price_a": 115.94,
+          "price_b": 182.11,
+          "spread": 58.249,
+          "z_score": 1.8741
+        },
+        {
+          "date": "2026-09-18",
+          "days_elapsed": 2,
+          "price_a": 117.67,
+          "price_b": 181.91,
+          "spread": 60.0421,
+          "z_score": 2.609
+        },
+        {
+          "date": "2026-09-21",
+          "days_elapsed": 3,
+          "price_a": 116.47,
+          "price_b": 183.43,
+          "spread": 58.3599,
+          "z_score": 1.9196
+        },
+        {
+          "date": "2026-09-22",
+          "days_elapsed": 4,
+          "price_a": 113.59,
+          "price_b": 179.3,
+          "spread": 56.7877,
+          "z_score": 1.2752
+        },
+        {
+          "date": "2026-09-23",
+          "days_elapsed": 5,
+          "price_a": 113.92,
+          "price_b": 179.0,
+          "spread": 57.2122,
+          "z_score": 1.4492
+        },
+        {
+          "date": "2026-09-24",
+          "days_elapsed": 6,
+          "price_a": 114.15,
+          "price_b": 180.14,
+          "spread": 57.083,
+          "z_score": 1.3962
+        },
+        {
+          "date": "2026-09-25",
+          "days_elapsed": 7,
+          "price_a": 114.77,
+          "price_b": 180.38,
+          "spread": 57.6242,
+          "z_score": 1.618
+        },
+        {
+          "date": "2026-09-28",
+          "days_elapsed": 8,
+          "price_a": 114.64,
+          "price_b": 178.78,
+          "spread": 58.0016,
+          "z_score": 1.7727
+        },
+        {
+          "date": "2026-09-29",
+          "days_elapsed": 9,
+          "price_a": 113.97,
+          "price_b": 176.84,
+          "spread": 57.9461,
+          "z_score": 1.75
+        },
+        {
+          "date": "2026-09-30",
+          "days_elapsed": 10,
+          "price_a": 111.96,
+          "price_b": 173.67,
+          "spread": 56.9413,
+          "z_score": 1.3382
+        }
+      ],
+      "id": "PFG_STT_2026-09-16"
+    },
+    {
+      "pair_name": "AMGN/LH",
+      "ticker_a": "AMGN",
+      "ticker_b": "LH",
+      "sector": "Health Care",
+      "entry_date": "2026-09-17",
+      "exit_date": "2026-09-22",
+      "direction": "LONG_A_SHORT_B",
+      "direction_label": "Long AMGN / Short LH",
+      "entry_z": -2.803,
+      "exit_z": -0.4,
+      "hedge_ratio": 1.1811,
+      "entry_price_a": 379.78,
+      "entry_price_b": 322.73,
+      "exit_price_a": 410.24,
+      "exit_price_b": 311.54,
+      "outcome": "WIN",
+      "exit_reason": "REVERSION_TARGET",
+      "status_reason": "Realistic Reversion Target (|z| <= 0.40) on Day 3",
+      "holding_days": 3,
+      "raw_return_pct": 3.6,
+      "realized_return_pct": 4.19,
+      "sizing_multiplier": 1.16,
+      "spread_vol_pct": 3.01,
+      "half_life_days": 3.9,
+      "max_holding_limit": 10,
+      "is_dampened": false,
+      "momentum_slope": 0.4833,
+      "composite_score": 85.4,
+      "trajectory": [
+        {
+          "date": "2026-09-18",
+          "days_elapsed": 1,
+          "price_a": 385.65,
+          "price_b": 320.71,
+          "spread": 6.8594,
+          "z_score": -2.0784
+        },
+        {
+          "date": "2026-09-21",
+          "days_elapsed": 2,
+          "price_a": 393.16,
+          "price_b": 320.99,
+          "spread": 14.0387,
+          "z_score": -1.4495
+        },
+        {
+          "date": "2026-09-22",
+          "days_elapsed": 3,
+          "price_a": 410.24,
+          "price_b": 311.54,
+          "spread": 42.2801,
+          "z_score": 1.0244
+        }
+      ],
+      "id": "AMGN_LH_2026-09-17"
+    },
+    {
+      "pair_name": "A/WAT",
+      "ticker_a": "A",
+      "ticker_b": "WAT",
+      "sector": "Health Care",
+      "entry_date": "2026-09-25",
+      "exit_date": "2026-10-07",
+      "direction": "SHORT_A_LONG_B",
+      "direction_label": "Short A / Long WAT",
+      "entry_z": 2.495,
+      "exit_z": 1.274,
+      "hedge_ratio": 0.4902,
+      "entry_price_a": 172.53,
+      "entry_price_b": 433.54,
+      "exit_price_a": 169.09,
+      "exit_price_b": 435.99,
+      "outcome": "WIN",
+      "exit_reason": "TIME_STOP",
+      "status_reason": "2x Half-Life Time Stop (T_max = 8d) on Day 8",
+      "holding_days": 8,
+      "raw_return_pct": 1.21,
+      "realized_return_pct": 1.51,
+      "sizing_multiplier": 1.25,
+      "spread_vol_pct": 2.21,
+      "half_life_days": 3.0,
+      "max_holding_limit": 8,
+      "is_dampened": false,
+      "momentum_slope": 0.4269,
+      "composite_score": 87.1,
+      "trajectory": [
+        {
+          "date": "2026-09-28",
+          "days_elapsed": 1,
+          "price_a": 174.95,
+          "price_b": 442.94,
+          "spread": -42.18,
+          "z_score": 1.9172
+        },
+        {
+          "date": "2026-09-29",
+          "days_elapsed": 2,
+          "price_a": 174.77,
+          "price_b": 443.26,
+          "spread": -42.5166,
+          "z_score": 1.8289
+        },
+        {
+          "date": "2026-09-30",
+          "days_elapsed": 3,
+          "price_a": 172.05,
+          "price_b": 439.39,
+          "spread": -43.3355,
+          "z_score": 1.6141
+        },
+        {
+          "date": "2026-10-01",
+          "days_elapsed": 4,
+          "price_a": 166.43,
+          "price_b": 425.53,
+          "spread": -42.163,
+          "z_score": 1.9217
+        },
+        {
+          "date": "2026-10-02",
+          "days_elapsed": 5,
+          "price_a": 167.53,
+          "price_b": 425.21,
+          "spread": -40.9077,
+          "z_score": 2.2509
+        },
+        {
+          "date": "2026-10-05",
+          "days_elapsed": 6,
+          "price_a": 171.04,
+          "price_b": 440.12,
+          "spread": -44.7118,
+          "z_score": 1.2531
+        },
+        {
+          "date": "2026-10-06",
+          "days_elapsed": 7,
+          "price_a": 169.33,
+          "price_b": 436.43,
+          "spread": -44.608,
+          "z_score": 1.2803
+        },
+        {
+          "date": "2026-10-07",
+          "days_elapsed": 8,
+          "price_a": 169.09,
+          "price_b": 435.99,
+          "spread": -44.6323,
+          "z_score": 1.2739
+        }
+      ],
+      "id": "A_WAT_2026-09-25"
+    },
+    {
+      "pair_name": "HPE/TWLO",
+      "ticker_a": "HPE",
+      "ticker_b": "TWLO",
+      "sector": "Information Technology",
+      "entry_date": "2026-10-08",
+      "exit_date": "2026-10-15",
+      "direction": "SHORT_A_LONG_B",
+      "direction_label": "Short HPE / Long TWLO",
+      "entry_z": 2.349,
+      "exit_z": 0.4,
+      "hedge_ratio": 0.1923,
+      "entry_price_a": 71.0,
+      "entry_price_b": 275.77,
+      "exit_price_a": 58.63,
+      "exit_price_b": 273.4,
+      "outcome": "WIN",
+      "exit_reason": "REVERSION_TARGET",
+      "status_reason": "Realistic Reversion Target (|z| <= 0.40) on Day 5",
+      "holding_days": 5,
+      "raw_return_pct": 5.72,
+      "realized_return_pct": 3.9,
+      "sizing_multiplier": 0.68,
+      "spread_vol_pct": 5.13,
+      "half_life_days": 2.7,
+      "max_holding_limit": 7,
+      "is_dampened": false,
+      "momentum_slope": 0.4485,
+      "composite_score": 78.7,
+      "trajectory": [
+        {
+          "date": "2026-10-09",
+          "days_elapsed": 1,
+          "price_a": 73.46,
+          "price_b": 289.47,
+          "spread": 17.7949,
+          "z_score": 2.304
+        },
+        {
+          "date": "2026-10-12",
+          "days_elapsed": 2,
+          "price_a": 70.33,
+          "price_b": 282.66,
+          "spread": 15.9745,
+          "z_score": 1.804
+        },
+        {
+          "date": "2026-10-13",
+          "days_elapsed": 3,
+          "price_a": 68.81,
+          "price_b": 281.59,
+          "spread": 14.6602,
+          "z_score": 1.4431
+        },
+        {
+          "date": "2026-10-14",
+          "days_elapsed": 4,
+          "price_a": 63.11,
+          "price_b": 271.12,
+          "spread": 10.9736,
+          "z_score": 0.4305
+        },
+        {
+          "date": "2026-10-15",
+          "days_elapsed": 5,
+          "price_a": 58.63,
+          "price_b": 273.4,
+          "spread": 6.0552,
+          "z_score": -0.9203
+        }
+      ],
+      "id": "HPE_TWLO_2026-10-08"
+    },
+    {
+      "pair_name": "CMS/PPL",
+      "ticker_a": "CMS",
+      "ticker_b": "PPL",
+      "sector": "Utilities",
+      "entry_date": "2026-10-12",
+      "exit_date": "2026-10-22",
+      "direction": "LONG_A_SHORT_B",
+      "direction_label": "Long CMS / Short PPL",
+      "entry_z": -2.313,
+      "exit_z": -1.497,
+      "hedge_ratio": 3.3572,
+      "entry_price_a": 65.86,
+      "entry_price_b": 34.34,
+      "exit_price_a": 70.3,
+      "exit_price_b": 35.35,
+      "outcome": "WIN",
+      "exit_reason": "TIME_STOP",
+      "status_reason": "2x Half-Life Time Stop (T_max = 8d) on Day 8",
+      "holding_days": 8,
+      "raw_return_pct": 0.58,
+      "realized_return_pct": 0.72,
+      "sizing_multiplier": 1.25,
+      "spread_vol_pct": 1.95,
+      "half_life_days": 3.0,
+      "max_holding_limit": 8,
+      "is_dampened": false,
+      "momentum_slope": 0.0535,
+      "composite_score": 86.0,
+      "trajectory": [
+        {
+          "date": "2026-10-13",
+          "days_elapsed": 1,
+          "price_a": 66.3,
+          "price_b": 34.63,
+          "spread": -49.9598,
+          "z_score": -2.7286
+        },
+        {
+          "date": "2026-10-14",
+          "days_elapsed": 2,
+          "price_a": 66.82,
+          "price_b": 34.75,
+          "spread": -49.8427,
+          "z_score": -2.6375
+        },
+        {
+          "date": "2026-10-15",
+          "days_elapsed": 3,
+          "price_a": 66.94,
+          "price_b": 34.48,
+          "spread": -48.8163,
+          "z_score": -1.8389
+        },
+        {
+          "date": "2026-10-16",
+          "days_elapsed": 4,
+          "price_a": 68.7,
+          "price_b": 35.17,
+          "spread": -49.3727,
+          "z_score": -2.2718
+        },
+        {
+          "date": "2026-10-19",
+          "days_elapsed": 5,
+          "price_a": 67.37,
+          "price_b": 34.31,
+          "spread": -47.8155,
+          "z_score": -1.0604
+        },
+        {
+          "date": "2026-10-20",
+          "days_elapsed": 6,
+          "price_a": 68.42,
+          "price_b": 34.61,
+          "spread": -47.7727,
+          "z_score": -1.0271
+        },
+        {
+          "date": "2026-10-21",
+          "days_elapsed": 7,
+          "price_a": 68.13,
+          "price_b": 34.58,
+          "spread": -47.962,
+          "z_score": -1.1743
+        },
+        {
+          "date": "2026-10-22",
+          "days_elapsed": 8,
+          "price_a": 70.3,
+          "price_b": 35.35,
+          "spread": -48.377,
+          "z_score": -1.4972
+        }
+      ],
+      "id": "CMS_PPL_2026-10-12"
+    }
+  ],
+  "meta": {
+    "config": {
+      "version": "4.0.0",
+      "strategy_name": "Cointegrated Stat-Arb v4 (Risk-Engineered Pure Alpha)",
+      "description": "Institutional Quantitative Pairs Trading Strategy engineered to solve the 78% drawdown and 44% win-rate bottlenecks of Strategy 1 and Strategy 3. Features Volatility-Inverse Sizing, Tight Dynamic Stops (2.85 sigma), 2x Half-Life Time Stops, Momentum Flattening Confirmation, Realistic Exits (Z=0.40), Earnings Shield, and VIX Macro Overlay.",
+      "z_score_entry_hurdle": 2.1,
+      "z_score_entry_max": 3.0,
+      "max_entry_momentum_slope": 0.05,
+      "z_score_exit_target": 0.4,
+      "z_score_stop_loss_barrier": 2.85,
+      "stop_loss_cushion": 1.15,
+      "fill_at_barrier": true,
+      "lookback_days": 90,
+      "target_spread_vol_pct": 3.5,
+      "min_capital_multiplier": 0.4,
+      "max_capital_multiplier": 1.25,
+      "drawdown_dampener_enabled": true,
+      "drawdown_threshold_pct": 20.0,
+      "drawdown_scaling_factor": 0.7,
+      "half_life_time_stop_multiplier": 2.5,
+      "min_holding_days_floor": 4,
+      "max_holding_days_cap": 22,
+      "earnings_blackout_days_pre": 5,
+      "earnings_blackout_days_post": 2,
+      "vix_overlay_enabled": true,
+      "vix_panic_threshold": 25.0,
+      "max_allowed_spread_vol_pct": 5.5
+    },
+    "total_trades": 54
+  }
+}

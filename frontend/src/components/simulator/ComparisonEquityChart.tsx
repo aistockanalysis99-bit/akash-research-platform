@@ -7,6 +7,7 @@ interface ComparisonEquityChartProps {
   v1Label?: string;
   v2Label?: string;
   v3Label?: string;
+  v4Label?: string;
 }
 
 export default function ComparisonEquityChart({
@@ -15,28 +16,33 @@ export default function ComparisonEquityChart({
   v1Label = "Strategy 1 (Baseline)",
   v2Label = "Strategy 2 (Failed Staged)",
   v3Label = "Strategy 3 (Alpha Maximizer)",
+  v4Label = "Strategy 4 (Risk-Engineered)",
 }: ComparisonEquityChartProps) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
-  const { pointsV1, pointsV2, pointsV3, v3Area, minVal, maxVal, range, hasV3 } = useMemo(() => {
+  const { pointsV1, pointsV2, pointsV3, pointsV4, v4Area, minVal, maxVal, range, hasV3, hasV4 } = useMemo(() => {
     if (!data || data.length === 0) {
       return {
         pointsV1: "",
         pointsV2: "",
         pointsV3: "",
-        v3Area: "",
+        pointsV4: "",
+        v4Area: "",
         minVal: 0,
         maxVal: 100,
         range: 100,
         hasV3: false,
+        hasV4: false,
       };
     }
 
     const checkHasV3 = data.some((d) => d.v3_equity !== undefined && d.v3_equity !== null);
+    const checkHasV4 = data.some((d) => d.v4_equity !== undefined && d.v4_equity !== null);
     const allValues = data.flatMap((d) => [
       d.v1_equity,
       d.v2_equity,
       ...(checkHasV3 && d.v3_equity !== undefined ? [d.v3_equity] : []),
+      ...(checkHasV4 && d.v4_equity !== undefined ? [d.v4_equity] : []),
     ]);
 
     const computedMin = Math.min(0, ...allValues);
@@ -54,10 +60,13 @@ export default function ComparisonEquityChart({
     const v3Pts = checkHasV3
       ? data.map((d, i) => `${i},${toY(d.v3_equity ?? d.v1_equity)}`).join(" ")
       : "";
+    const v4Pts = checkHasV4
+      ? data.map((d, i) => `${i},${toY(d.v4_equity ?? d.v1_equity)}`).join(" ")
+      : "";
 
-    // Area fill under v3 (or v2 if no v3) down to zero line
+    // Area fill under v4 (or v3/v2) down to zero line
     const zeroY = toY(0);
-    const primaryPts = checkHasV3 ? v3Pts : v2Pts;
+    const primaryPts = checkHasV4 ? v4Pts : (checkHasV3 ? v3Pts : v2Pts);
     const area = primaryPts
       ? `0,${zeroY} ${primaryPts} ${data.length - 1},${zeroY}`
       : "";
@@ -66,11 +75,13 @@ export default function ComparisonEquityChart({
       pointsV1: v1Pts,
       pointsV2: v2Pts,
       pointsV3: v3Pts,
-      v3Area: area,
+      pointsV4: v4Pts,
+      v4Area: area,
       minVal: effMin,
       maxVal: effMax,
       range: effRange,
       hasV3: checkHasV3,
+      hasV4: checkHasV4,
     };
   }, [data]);
 
@@ -87,10 +98,16 @@ export default function ComparisonEquityChart({
     );
   }
 
-  // Delta between Strategy 3 and Strategy 1 on hover
+  // Delta between Strategy 4 / 3 and Strategy 1 on hover
+  const s4Spread = activePoint && activePoint.v4_equity !== undefined
+    ? activePoint.v4_equity - activePoint.v1_equity
+    : (activePoint ? (activePoint.v4_spread_alpha ?? 0) : 0);
+
   const v3Spread = activePoint && activePoint.v3_equity !== undefined
     ? activePoint.v3_equity - activePoint.v1_equity
     : (activePoint ? activePoint.spread_alpha : 0);
+
+  const activeAlphaSpread = hasV4 ? s4Spread : v3Spread;
 
   return (
     <div className="w-full space-y-3">
@@ -117,10 +134,18 @@ export default function ComparisonEquityChart({
             </div>
           )}
 
+          {/* Strategy 4: Radiant Cyan */}
+          {hasV4 && (
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-1.5 rounded-full bg-cyan-400 shadow-sm shadow-cyan-500/50"></span>
+              <span className="text-cyan-300 font-bold">{v4Label}</span>
+            </div>
+          )}
+
           {/* Alpha indicator */}
           <div className="hidden sm:flex items-center gap-1.5 text-[11px] text-gray-400">
-            <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500/20 border border-emerald-500/40"></span>
-            <span>Alpha Spread vs Baseline</span>
+            <span className="w-2.5 h-2.5 rounded-sm bg-cyan-500/20 border border-cyan-500/40"></span>
+            <span>Pure Alpha vs Baseline</span>
           </div>
         </div>
 
@@ -139,13 +164,18 @@ export default function ComparisonEquityChart({
                 S3: {activePoint.v3_equity >= 0 ? `+${activePoint.v3_equity.toFixed(1)}%` : `${activePoint.v3_equity.toFixed(1)}%`}
               </span>
             )}
-            <span className={`font-extrabold ${v3Spread >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
-              {hasV3 ? "S3 Alpha:" : "Alpha:"} {v3Spread >= 0 ? `+${v3Spread.toFixed(1)}%` : `${v3Spread.toFixed(1)}%`}
+            {activePoint.v4_equity !== undefined && (
+              <span className="text-cyan-400 font-bold">
+                S4: {activePoint.v4_equity >= 0 ? `+${activePoint.v4_equity.toFixed(1)}%` : `${activePoint.v4_equity.toFixed(1)}%`}
+              </span>
+            )}
+            <span className={`font-extrabold ${activeAlphaSpread >= 0 ? (hasV4 ? "text-cyan-400" : "text-emerald-400") : "text-rose-400"}`}>
+              {hasV4 ? "S4 Alpha:" : (hasV3 ? "S3 Alpha:" : "Alpha:")} {activeAlphaSpread >= 0 ? `+${activeAlphaSpread.toFixed(1)}%` : `${activeAlphaSpread.toFixed(1)}%`}
             </span>
           </div>
         ) : (
           <div className="text-[11px] text-gray-500 font-mono">
-            Hover over chart to inspect synchronized 3-way equity & alpha
+            Hover over chart to inspect synchronized 4-way equity & alpha
           </div>
         )}
       </div>
@@ -175,6 +205,15 @@ export default function ComparisonEquityChart({
             <filter id="emeraldGlow" x="-20%" y="-20%" width="140%" height="140%">
               <feDropShadow dx="0" dy="0" stdDeviation="2.5" floodColor="#10b981" floodOpacity="0.7" />
             </filter>
+            {/* Glow Filter for Strategy 4 Cyan Line */}
+            <filter id="cyanGlow" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="0" stdDeviation="2.5" floodColor="#06b6d4" floodOpacity="0.8" />
+            </filter>
+            {/* Alpha Fill Gradient for S4 */}
+            <linearGradient id="v4AreaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.25" />
+              <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.0" />
+            </linearGradient>
             {/* Alpha Fill Gradient for S3 */}
             <linearGradient id="v3AreaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
               <stop offset="0%" stopColor="#10b981" stopOpacity="0.25" />
@@ -196,11 +235,11 @@ export default function ComparisonEquityChart({
             />
           )}
 
-          {/* Area Fill for Strategy 3 */}
-          {v3Area && (
+          {/* Area Fill for Strategy 4 or 3 */}
+          {v4Area && (
             <polygon
-              points={v3Area}
-              fill="url(#v3AreaGrad)"
+              points={v4Area}
+              fill="url(#v4AreaGrad)"
               vectorEffect="non-scaling-stroke"
             />
           )}
@@ -235,9 +274,23 @@ export default function ComparisonEquityChart({
             <polyline
               fill="none"
               stroke="#10b981"
-              strokeWidth="3.0"
-              filter="url(#emeraldGlow)"
+              strokeWidth="2.5"
+              strokeOpacity="0.9"
               points={pointsV3}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              vectorEffect="non-scaling-stroke"
+            />
+          )}
+
+          {/* Strategy 4 Curve: Radiant Glowing Cyan (#06B6D4) */}
+          {hasV4 && pointsV4 && (
+            <polyline
+              fill="none"
+              stroke="#06b6d4"
+              strokeWidth="3.2"
+              filter="url(#cyanGlow)"
+              points={pointsV4}
               strokeLinecap="round"
               strokeLinejoin="round"
               vectorEffect="non-scaling-stroke"
@@ -262,7 +315,7 @@ export default function ComparisonEquityChart({
         {/* X-Axis Start and End Date Markers */}
         <div className="absolute bottom-2 left-4 right-4 flex items-center justify-between text-[10px] text-gray-500 font-mono pointer-events-none">
           <span>Start: {data[0]?.date}</span>
-          <span>3-Way Synchronized Trajectory ({data.length} Aligned Date Points)</span>
+          <span>{hasV4 ? "4-Way" : "3-Way"} Synchronized Trajectory ({data.length} Aligned Date Points)</span>
           <span>End: {data[data.length - 1]?.date}</span>
         </div>
       </div>

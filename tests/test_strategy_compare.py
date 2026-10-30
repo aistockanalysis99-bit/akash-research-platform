@@ -177,3 +177,43 @@ def test_frontend_routes_accessibility(api_client):
         # In SPA mode, GET /route returns 200 with HTML dist/index.html
         assert res.status_code == 200
         assert "text/html" in res.headers.get("content-type", "")
+
+
+def test_trade_chart_endpoint(api_client):
+    """Verify GET /simulator/trade-chart accurately slices [entry - 60d, exit + 15d] window."""
+    res = api_client.get("/simulator/trade-chart", params={
+        "ticker_a": "WEC",
+        "ticker_b": "XEL",
+        "entry_date": "2025-11-04",
+        "exit_date": "2025-11-18",
+        "pre_days": 60,
+        "post_days": 15,
+    })
+    assert res.status_code == 200
+    data = res.json()
+    assert data["pair_name"] == "WEC/XEL"
+    assert data["total_bars"] >= 80
+    assert data["entry_index"] >= 50
+    assert data["exit_index"] >= data["entry_index"]
+    assert data["bars"][data["entry_index"]]["date"] == "2025-11-04"
+    assert data["bars"][data["entry_index"]]["is_entry"] is True
+    assert data["bars"][data["exit_index"]]["date"] == "2025-11-18"
+    assert data["bars"][data["exit_index"]]["is_exit"] is True
+    assert data["hedge_ratio"] > 0
+    assert data["spread_std"] > 0
+
+    # Error handling tests
+    err_same = api_client.get("/simulator/trade-chart", params={
+        "ticker_a": "AAPL",
+        "ticker_b": "AAPL",
+        "entry_date": "2025-11-04"
+    })
+    assert err_same.status_code == 400
+
+    err_fake = api_client.get("/simulator/trade-chart", params={
+        "ticker_a": "FAKE_TICKER_XYZ",
+        "ticker_b": "AAPL",
+        "entry_date": "2025-11-04"
+    })
+    assert err_fake.status_code == 404
+

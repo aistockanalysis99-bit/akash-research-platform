@@ -37,6 +37,7 @@ import BacktestDashboardPage from "./pages/BacktestDashboardPage";
 import StrategyV1Page from "./pages/StrategyV1Page";
 import StrategyV2Page from "./pages/StrategyV2Page";
 import StrategyV3Page from "./pages/StrategyV3Page";
+import StrategyV4Page from "./pages/StrategyV4Page";
 import StrategyComparePage from "./pages/StrategyComparePage";
 
 export default function App() {
@@ -88,6 +89,8 @@ export default function App() {
         <Route path="/backtest/strategy-2" element={<StrategyV2Page />} />
         <Route path="/backtest/strategy-v3" element={<StrategyV3Page />} />
         <Route path="/backtest/strategy-3" element={<StrategyV3Page />} />
+        <Route path="/backtest/strategy-v4" element={<StrategyV4Page />} />
+        <Route path="/backtest/strategy-4" element={<StrategyV4Page />} />
         <Route path="/backtest/compare-strategies" element={<StrategyComparePage />} />
         <Route path="/backtest/compare" element={<StrategyComparePage />} />
         <Route path="/runs" element={<RunsPage />} />

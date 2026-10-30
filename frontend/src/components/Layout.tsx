@@ -64,6 +64,7 @@ const SECTIONS: {
       { label: "Strategy 1 (Baseline)", to: "/backtest/strategy-v1" },
       { label: "Strategy 2 (Staged)", to: "/backtest/strategy-v2" },
       { label: "Strategy 3 (Alpha)", to: "/backtest/strategy-v3" },
+      { label: "Strategy 4 (Risk-Engineered)", to: "/backtest/strategy-v4" },
       { label: "Compare Strategies", to: "/backtest/compare-strategies" },
     ],
   },
