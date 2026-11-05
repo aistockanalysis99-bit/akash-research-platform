@@ -53,7 +53,7 @@ import pandas as pd
 from engine.config import DATA_CACHE_DIR, PROJECT_ROOT
 from engine.logging_setup import get_logger
 from engine.simulator_engine import PointInTimeEngine, PointInTimeSetup
-from engine.strategy_v2_engine import EarningsCalendar
+from engine.earnings_calendar import EarningsCalendar
 
 logger = get_logger("strategy_v4_engine")
 
@@ -185,6 +185,92 @@ class StrategyV4TradeResult:
 class StrategyV4EvaluationOutcome:
     trade_result: StrategyV4TradeResult
     exit_timestamp: pd.Timestamp
+
+
+@dataclass(frozen=True)
+class StrategyV4EntryDecision:
+    """Shared entry-gate result used by both backtest and live dry scans."""
+
+    accepted: bool
+    reason: str
+    momentum_slope: float = 0.0
+    sizing_multiplier: float = 0.0
+    is_dampened: bool = False
+    max_holding_days: int = 0
+    stop_z: float = 0.0
+
+
+def evaluate_strategy_v4_entry(
+    setup: PointInTimeSetup,
+    config: StrategyV4Config,
+    *,
+    previous_z: Optional[float],
+    market_vol_pct: float,
+    earnings_blackout: bool,
+    current_drawdown_pct: float = 0.0,
+) -> StrategyV4EntryDecision:
+    """Apply the canonical Strategy 4 entry rules with no forward data."""
+    max_holding = max(
+        config.min_holding_days_floor,
+        min(
+            config.max_holding_days_cap,
+            int(round(config.half_life_time_stop_multiplier * setup.half_life_days)),
+        ),
+    )
+    stop_z = max(
+        config.z_score_stop_loss_barrier,
+        abs(setup.current_z_score) + config.stop_loss_cushion,
+    )
+
+    if config.vix_overlay_enabled and market_vol_pct > config.vix_panic_threshold:
+        return StrategyV4EntryDecision(False, "VIX_PANIC_FREEZE", max_holding_days=max_holding, stop_z=stop_z)
+    if abs(setup.current_z_score) < config.z_score_entry_hurdle:
+        return StrategyV4EntryDecision(False, "ENTRY_Z_BELOW_HURDLE", max_holding_days=max_holding, stop_z=stop_z)
+    if abs(setup.current_z_score) >= config.z_score_entry_max:
+        return StrategyV4EntryDecision(False, "ENTRY_Z_ABOVE_MAX", max_holding_days=max_holding, stop_z=stop_z)
+    if setup.relative_spread_vol_pct > config.max_allowed_spread_vol_pct:
+        return StrategyV4EntryDecision(False, "SPREAD_VOLATILITY_CAP", max_holding_days=max_holding, stop_z=stop_z)
+    if earnings_blackout:
+        return StrategyV4EntryDecision(False, "EARNINGS_BLACKOUT", max_holding_days=max_holding, stop_z=stop_z)
+    if previous_z is None or not np.isfinite(previous_z):
+        return StrategyV4EntryDecision(False, "PREVIOUS_Z_UNAVAILABLE", max_holding_days=max_holding, stop_z=stop_z)
+
+    z_curr = setup.current_z_score
+    momentum_slope = abs(z_curr - previous_z)
+    is_reversing = (z_curr > previous_z) if z_curr < 0 else (z_curr < previous_z)
+    is_flattening = momentum_slope <= config.max_entry_momentum_slope
+    if not (is_reversing or is_flattening):
+        return StrategyV4EntryDecision(
+            False,
+            "MOMENTUM_NOT_FLATTENING",
+            momentum_slope=momentum_slope,
+            max_holding_days=max_holding,
+            stop_z=stop_z,
+        )
+
+    is_dampened = (
+        config.drawdown_dampener_enabled
+        and current_drawdown_pct >= config.drawdown_threshold_pct
+    )
+    spread_vol_safe = max(0.01, setup.relative_spread_vol_pct)
+    raw_multiplier = min(
+        config.max_capital_multiplier,
+        max(
+            config.min_capital_multiplier,
+            config.target_spread_vol_pct / spread_vol_safe,
+        ),
+    )
+    sizing_multiplier = raw_multiplier * (
+        config.drawdown_scaling_factor if is_dampened else 1.0)
+    return StrategyV4EntryDecision(
+        True,
+        "QUALIFIED",
+        momentum_slope=momentum_slope,
+        sizing_multiplier=sizing_multiplier,
+        is_dampened=is_dampened,
+        max_holding_days=max_holding,
+        stop_z=stop_z,
+    )
 
 
 class StrategyV4OutcomeEvaluator:
@@ -528,13 +614,10 @@ class StrategyV4Engine:
             for p in closed:
                 del active_positions[p]
 
-            # VIX macro check
+            # Market volatility input for the shared Strategy 4 entry gates.
             curr_vix = self.market_vol_series.get(dt, 15.0)
             if np.isnan(curr_vix):
                 curr_vix = 15.0
-            if self.config.vix_overlay_enabled and curr_vix > self.config.vix_panic_threshold:
-                # Market panic regime, freeze new entries
-                continue
 
             active_setups = self.pit_engine.scan_date(
                 target_date=dt,
@@ -544,21 +627,10 @@ class StrategyV4Engine:
             )
 
             current_dd = max(0.0, peak_pnl - cum_pnl)
-            is_dd_dampened = (
-                self.config.drawdown_dampener_enabled and current_dd >= self.config.drawdown_threshold_pct
-            )
 
             for setup in active_setups:
                 pname = setup.pair_name
                 if pname in active_positions:
-                    continue
-
-                # Divergence hurdle: 2.10 <= |Z| < 3.00
-                if abs(setup.current_z_score) < self.config.z_score_entry_hurdle or abs(setup.current_z_score) >= self.config.z_score_entry_max:
-                    continue
-
-                # Volatility cap: spread vol <= 5.5%
-                if setup.relative_spread_vol_pct > self.config.max_allowed_spread_vol_pct:
                     continue
 
                 # Earnings blackout entry veto (5d pre)
@@ -568,9 +640,6 @@ class StrategyV4Engine:
                     dt,
                     blackout_days=self.config.earnings_blackout_days_pre,
                 )
-                if in_blackout:
-                    continue
-
                 # Momentum Flattening Confirmation (Check T-1 spread)
                 dt_pos = date_index.get_loc(dt)
                 if dt_pos < 1:
@@ -588,31 +657,22 @@ class StrategyV4Engine:
 
                 s_prev = pa_prev - setup.hedge_ratio * pb_prev
                 z_prev = (s_prev - setup.spread_mean) / setup.spread_std
-                z_curr = setup.current_z_score
-
-                # Momentum Confirmation:
-                # 1. Reversing towards mean (Delta Z in favorable direction), OR
-                # 2. 2-day spread velocity is flattening (|Z_t - Z_{t-1}| <= max_entry_momentum_slope)
-                is_reversing = (z_curr > z_prev) if z_curr < 0 else (z_curr < z_prev)
-                is_flattening = abs(z_curr - z_prev) <= self.config.max_entry_momentum_slope
-
-                if not (is_reversing or is_flattening):
-                    # Accelerating runaway knife, skip!
-                    continue
-
-                # Volatility-Inverse Sizing
-                spread_vol_safe = max(0.01, setup.relative_spread_vol_pct)
-                raw_mult = min(
-                    self.config.max_capital_multiplier,
-                    max(self.config.min_capital_multiplier, self.config.target_spread_vol_pct / spread_vol_safe),
+                entry = evaluate_strategy_v4_entry(
+                    setup,
+                    self.config,
+                    previous_z=z_prev,
+                    market_vol_pct=float(curr_vix),
+                    earnings_blackout=in_blackout,
+                    current_drawdown_pct=current_dd,
                 )
-                final_mult = raw_mult * (self.config.drawdown_scaling_factor if is_dd_dampened else 1.0)
+                if not entry.accepted:
+                    continue
 
                 outcome = self.evaluator.evaluate_setup(
                     setup=setup,
-                    sizing_multiplier=final_mult,
-                    is_dampened=is_dd_dampened,
-                    momentum_slope=abs(z_curr - z_prev),
+                    sizing_multiplier=entry.sizing_multiplier,
+                    is_dampened=entry.is_dampened,
+                    momentum_slope=entry.momentum_slope,
                 )
 
                 trade_res = outcome.trade_result

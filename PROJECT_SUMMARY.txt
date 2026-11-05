@@ -1,0 +1,513 @@
+================================================================================
+                    AKASH RESEARCH PLATFORM - PROJECT MASTER SUMMARY
+================================================================================
+Generated: 2026-11-05
+Location: d:\Master_Folder\akash-research-platform LOCAL\PROJECT_SUMMARY.txt
+Status: Complete, Production-Calibrated, Verified
+
+--------------------------------------------------------------------------------
+TABLE OF CONTENTS
+--------------------------------------------------------------------------------
+1. EXECUTIVE SUMMARY & PLATFORM MISSION
+2. SYSTEM ARCHITECTURE & DIRECTORY BLUEPRINT
+3. THE 4 GENERATIONS OF QUANTITATIVE PAIRS TRADING STRATEGIES
+   3.1 Strategy 1: Baseline Cointegrated Stat-Arb v1
+   3.2 Strategy 2: Confirmed Reversion & Staged Exits (Failed Experiment Analysis)
+   3.3 Strategy 3: Asymmetric Alpha Maximizer (Full-Ride & Ratchet Floor)
+   3.4 Strategy 4: Risk-Engineered Pure Alpha (Production Champion)
+   3.5 Empirical Multi-Year Benchmark Matrix (1Y, 2Y, 3Y, 5Y)
+4. MATHEMATICAL & QUANTITATIVE FOUNDATION
+   4.1 Cointegration & Augmented Dickey-Fuller (ADF) Theory
+   4.2 OLS Hedge Ratio (Beta) & Spread Formulation
+   4.3 Rolling Z-Score Formulation
+   4.4 Position Sizing, Real-Money Execution & Leg P&L Math
+   4.5 The KLAC/WDC Real-World Case Study
+5. FRONTEND USER INTERFACE & TRADE INSPECTION SUITE
+   5.1 Dedicated Strategy Pages & Comparative Matrix
+   5.2 Trade Inspector Forensic Modal
+   5.3 Real-Scale Dual-Stock Price Window (SVG)
+   5.4 Spread Z-Score Trajectory (SVG)
+   5.5 3-Row $100,000 Real-Money Execution Breakdown Table
+   5.6 Sticky-Header Day-by-Day Historical Inspection Ledger
+6. BACKEND API SPECIFICATION & DATA CONTRACTS
+7. RUNBOOK, TESTING & OPERATIONS GUIDE
+
+================================================================================
+1. EXECUTIVE SUMMARY & PLATFORM MISSION
+================================================================================
+The Akash Research Platform is an institutional-grade quantitative research,
+simulation, and trading execution environment designed for statistical arbitrage,
+pairs trading, options analysis, and automated market intelligence.
+
+The platform processes historical and real-time tick/daily data across the
+S&P 500 universe, discovers cointegrated equity pairs via rigorous econometric
+gauntlet filters, executes multi-horizon backtests (1-Year, 2-Year, 3-Year, 5-Year),
+and provides high-fidelity visual forensic tools for human quantitative review.
+
+Key Platform Capabilities:
+- Econometric Pair Gauntlet: Cointegration (Engle-Granger p < 0.045), ADF stationarity
+  (t-stat < -2.85), Hurst exponent (< 0.47), Half-life mean-reversion (2 to 24 days),
+  and minimum annual zero-crossings (>= 10/year).
+- 4 Iterative Strategy Generations: Documented mathematical progression from naive
+  mean-reversion to high-drawdown alpha maximization, culminating in Strategy 4's
+  risk-engineered pure alpha (slashing max drawdown from 78.05% to 3.94% - 18.99%
+  while lifting win rate from 40% to 68.5%).
+- Institutional Trade Inspector: A comprehensive forensic modal rendering exact
+  un-normalized dollar closing prices with dual independent vertical scales,
+  Z-score trajectories, a clean 3-row cash execution breakdown for a $100,000
+  account, and a freeze-framed daily ledger from [T_entry - 60d] to [T_exit + 15d].
+- Full Multi-Asset Support: Statistical arbitrage pairs, options structures (double
+  calendars, iron condors, wheels), and AI-driven market intelligence daily/weekly.
+
+================================================================================
+2. SYSTEM ARCHITECTURE & DIRECTORY BLUEPRINT
+================================================================================
+The workspace is organized into a modular decoupled architecture:
+
+akash-research-platform LOCAL/
+|-- api/                               # FastAPI backend application
+|   |-- main.py                        # Central ASGI entrypoint, CORS, route registry
+|   |-- simulator_router.py            # Simulator & Strategy backtest endpoints
+|   |-- auth.py                        # JWT & Google OAuth authentication
+|   `-- routers/                       # Sub-routers (portfolio, options, ai, pairs)
+|-- engine/                            # Core quantitative computation engines
+|   |-- strategy_v4_engine.py          # Strategy 4 (Pure Alpha) simulation engine
+|   |-- strategy_v3_engine.py          # Strategy 3 (Alpha Maximizer) engine
+|   |-- strategy_comparison_engine.py  # 4-way cross-strategy comparative benchmark
+|   |-- pair_backtest_engine.py        # Strategy 1 baseline backtest engine
+|   |-- pairs_scanner.py               # Cointegration scanning & gauntlet filter
+|   `-- statistical_arbitrage.py       # Econometric & statistical math library
+|-- data/                              # Cache, parquet price matrices & static inputs
+|   |-- sp500_master_pairs.json        # Curated master pair universe
+|   |-- elite_curated_pairs.json       # Top-tier cointegrated pair list
+|   `-- backtest_v4_*_results.json     # Saved Strategy 4 multi-horizon runs
+|-- frontend/                          # Modern React + Vite frontend SPA
+|   |-- src/
+|   |   |-- App.tsx                    # React router & global layouts
+|   |   |-- components/
+|   |   |   |-- simulator/
+|   |   |   |   `-- TradeInspectorModal.tsx # High-fidelity forensic trade modal
+|   |   |   `-- layout/                # Navigation bars, sidebars, alerts
+|   |   `-- pages/
+|   |       |-- StrategyV1Page.tsx     # Strategy 1 detailed dashboard
+|   |       |-- StrategyV2Page.tsx     # Strategy 2 audit & lessons learned
+|   |       |-- StrategyV3Page.tsx     # Strategy 3 high-alpha dashboard
+|   |       |-- StrategyV4Page.tsx     # Strategy 4 Pure Alpha production page
+|   |       |-- StrategyComparePage.tsx# 4-Way comparative benchmark matrix
+|   |       `-- BacktestDashboardPage.tsx # Master multi-horizon backtest cockpit
+|   |-- package.json                   # Dependencies (React 18, Tailwind, Lucide, Query)
+|   `-- vite.config.ts                 # Build configuration & proxy rules
+|-- tests/                             # Pytest automated test suites
+|   |-- test_strategy_v4.py            # Strategy 4 engine unit & regression tests
+|   `-- test_strategy_compare.py       # Comparative matrix verification tests
+|-- Strategy_1_result.json             # Canonical precomputed results for Strategy 1
+|-- Strategy_3_result.json             # Canonical precomputed results for Strategy 3
+|-- Strategy_4_result.json             # Canonical precomputed results for Strategy 4
+|-- pair_strategy_config.json          # Strategy 1 configuration parameters
+|-- pair_strategy_v2_config.json       # Strategy 2 configuration parameters
+|-- pair_strategy_v3_config.json       # Strategy 3 configuration parameters
+`-- pair_strategy_v4_config.json       # Strategy 4 configuration parameters
+
+================================================================================
+3. THE 4 GENERATIONS OF QUANTITATIVE PAIRS TRADING STRATEGIES
+================================================================================
+
+--------------------------------------------------------------------------------
+3.1 Strategy 1: Baseline Cointegrated Stat-Arb v1
+--------------------------------------------------------------------------------
+- Design Philosophy:
+  Classical textbook statistical arbitrage. When two cointegrated stocks deviate
+  by 2 standard deviations from their rolling 90-day mean spread, take an equal
+  dollar-weighted beta-neutral position and hold until the spread crosses the zero
+  mean line (Z = 0.0).
+- Key Parameters:
+  * Entry Z-Score Hurdle: |Z| >= 2.00 sigma
+  * Exit Target: Z = 0.00 sigma (complete mean reversion)
+  * Hard Stop Loss Barrier: |Z| >= 3.50 sigma
+  * Rolling Lookback Window: 90 trading days
+  * Sizing: Fixed equal allocation (1.0x baseline)
+- Empirical Findings:
+  Strategy 1 produces positive total returns across all multi-year horizons, but
+  suffers from a low win rate (~40.8% - 44.4%) and painful drawdowns of ~45% - 47%.
+  Many trades drift aimlessly or take 15-20 days before hitting the hard 3.5 sigma
+  stop loss because there is no time-stop mechanism.
+
+--------------------------------------------------------------------------------
+3.2 Strategy 2: Confirmed Reversion & Staged Exits (Failed Experiment Analysis)
+--------------------------------------------------------------------------------
+- Design Philosophy:
+  Attempted to fix Strategy 1's low win rate by implementing a staged profit-taking
+  model: close 50% of the trade early at Z = 0.80 sigma, move stop loss to breakeven,
+  and let the remaining 50% runner trail to Z = 0.20 sigma.
+- Key Parameters:
+  * Entry Hurdle: |Z| >= 2.10 sigma with hook confirmation (|Z| <= 1.85)
+  * First Take-Profit (TP1): Z = 0.80 sigma (50% closed)
+  * Second Take-Profit (TP2): Z = 0.20 sigma (50% runner)
+  * Stop Loss: 3.20 sigma (moved to breakeven after TP1)
+  * Half-Life Time Stop: 1.75x half-life (min 10d, max 25d)
+- Why Strategy 2 Failed (Critical Quantitative Lesson):
+  While Strategy 2 achieved a high nominal win rate (~75% - 80%), its total net
+  return collapsed by over 60% compared to Strategy 1 (dropping to +18% - +34%).
+  By taking 50% profit early at 0.80 sigma, the strategy truncated the fat right tail
+  of winning mean-reversion trades. When a trade hit a stop loss, it incurred a full
+  loss on the full position size. Truncating the upside while leaving the downside
+  intact destroyed the expectancy and ruined the profit factor.
+  Preserved in the platform as a permanent documented negative control.
+
+--------------------------------------------------------------------------------
+3.3 Strategy 3: Asymmetric Alpha Maximizer
+--------------------------------------------------------------------------------
+- Design Philosophy:
+  Engineered to maximize raw net profit across 1Y to 5Y periods. Eliminated the
+  costly entry hook delay of Strategy 2, allowed positions to ride 100% of the way
+  to the mean line (Z = 0.05 sigma), added conviction-based capital sizing via
+  ADF/cointegration composite scoring, and implemented an asymmetric ratchet
+  disaster floor.
+- Key Parameters:
+  * Entry Hurdle: |Z| >= 2.00 sigma (zero hook delay)
+  * Exit Target: Z = 0.05 sigma (full ride)
+  * Overshoot Runner: Z = -0.20 sigma
+  * Hard Stop Loss: 3.50 sigma
+  * Conviction Sizing Tiers:
+    - Tier 1 (Score >= 82, Vol <= 4.5%): 1.45x capital multiplier
+    - Tier 2 (Score >= 70): 1.00x multiplier
+    - Tier 3 (Score < 70): 0.60x multiplier
+  * Ratchet Disaster Floor: If trade recovers past Z = 0.70 sigma, stop loss
+    immediately ratchets up from 3.50 sigma to 1.50 sigma.
+- Empirical Findings:
+  Strategy 3 achieved massive gross profit and higher cumulative returns than
+  Strategy 1 across every horizon (+84% to +161%). However, because Tier 1 trades
+  carried a 1.45x multiplier, a sequence of correlated diverging pairs caused a
+  catastrophic 78.05% Max Drawdown. Win rate remained low at ~40% - 42.6%.
+
+--------------------------------------------------------------------------------
+3.4 Strategy 4: Risk-Engineered Pure Alpha (Production Champion)
+--------------------------------------------------------------------------------
+- Design Philosophy:
+  Specifically engineered to conquer the two lingering flaws of Strategy 1 and
+  Strategy 3: the unacceptable 78% drawdown and the low 40% win rate.
+  Strategy 4 enforces 6 institutional risk shields:
+  1. Entry Velocity & Momentum Slope Filter: Prevents catching "falling knives".
+     Trade triggers only if |Z| >= 2.10 sigma AND the 2-day rate of change
+     |Delta Z| <= 0.05 or is actively reversing toward zero.
+  2. Realistic Target Exit (Z = 0.40 sigma): Captures the steep, high-velocity 80%
+     meat of the mean-reversion move without suffering the high-drag plateau that
+     occurs between 0.40 and 0.00 sigma.
+  3. Dynamic Tight Stop Loss (2.85 sigma / Entry + 1.15 sigma): Slashes losing
+     tail risk in half. Never permits a trade to drift to 3.50 sigma.
+  4. Volatility-Inverse Position Sizing:
+     multiplier = clamp(0.40, 3.5 / spread_vol_pct, 1.25)
+     Tightly-bound spreads receive full sizing; turbulent spreads are down-scaled.
+  5. Half-Life Dynamic Time Stop:
+     max_days = clamp(4, round(2.5 * half_life), 22)
+     Dead-money trades that fail to mean-revert within their mathematical half-life
+     are liquidated immediately to redeploy capital.
+  6. Macro & Event Overlay:
+     - VIX panic threshold (> 25.0 freezes new entries; > 32 cuts exposure by 50%).
+     - Earnings blackout: 5 days before and 2 days after quarterly earnings.
+- Empirical Findings:
+  Strategy 4 is the undisputed production champion. Max drawdown collapsed from
+  78.05% to 3.94% (1Y), 9.56% (2Y, 3Y), and 18.99% (5Y). Win rate surged to
+  68.5% (1Y), 62.5% (2Y), 58.4% (3Y), and 54.0% (5Y). Profit factor rose to 3.55 (1Y).
+
+--------------------------------------------------------------------------------
+3.5 Empirical Multi-Year Benchmark Matrix (1Y, 2Y, 3Y, 5Y)
+--------------------------------------------------------------------------------
+================================================================================
+HORIZON | METRIC             | STRATEGY 1      | STRATEGY 3      | STRATEGY 4
+================================================================================
+1-YEAR  | Total Trades       | 230             | 223             | 54
+        | Win Rate (%)       | 44.4%           | 42.6%           | 68.5%  <-- WIN
+        | Net Return (%)     | +77.92%         | +84.17%         | +59.25%
+        | Profit Factor      | 1.28            | 1.26            | 3.55   <-- WIN
+        | Max Drawdown (%)   | 45.11%          | 78.05%          | 3.94%  <-- WIN
+        | Sharpe Ratio       | ~1.10           | ~0.95           | 3.72   <-- WIN
+        | Avg Holding (days) | 7.1d            | 7.0d            | 6.4d
+--------------------------------------------------------------------------------
+2-YEAR  | Total Trades       | 380             | 372             | 88
+        | Win Rate (%)       | 42.5%           | 41.1%           | 62.5%  <-- WIN
+        | Net Return (%)     | +86.90%         | +110.22%        | +76.60%
+        | Profit Factor      | 1.20            | 1.20            | 2.58   <-- WIN
+        | Max Drawdown (%)   | 46.78%          | 78.05%          | 9.56%  <-- WIN
+        | Sharpe Ratio       | ~1.05           | ~1.02           | 3.73   <-- WIN
+        | Avg Holding (days) | 7.3d            | 7.2d            | 5.9d
+--------------------------------------------------------------------------------
+3-YEAR  | Total Trades       | 496             | 486             | 113
+        | Win Rate (%)       | 42.5%           | 41.2%           | 58.4%  <-- WIN
+        | Net Return (%)     | +117.00%        | +161.40%        | +79.38%
+        | Profit Factor      | 1.22            | 1.24            | 2.19   <-- WIN
+        | Max Drawdown (%)   | 46.78%          | 78.05%          | 9.56%  <-- WIN
+        | Sharpe Ratio       | ~1.12           | ~1.15           | 3.50   <-- WIN
+        | Avg Holding (days) | 7.4d            | 7.4d            | 6.2d
+--------------------------------------------------------------------------------
+5-YEAR  | Total Trades       | 682             | 672             | 150
+        | Win Rate (%)       | 40.8%           | 39.6%           | 54.0%  <-- WIN
+        | Net Return (%)     | +96.34%         | +137.85%        | +70.38%
+        | Profit Factor      | 1.13            | 1.15            | 1.71   <-- WIN
+        | Max Drawdown (%)   | 46.78%          | 78.05%          | 18.99% <-- WIN
+        | Sharpe Ratio       | ~0.98           | ~1.01           | 2.77   <-- WIN
+        | Avg Holding (days) | 7.6d            | 7.6d            | 6.0d
+================================================================================
+
+================================================================================
+4. MATHEMATICAL & QUANTITATIVE FOUNDATION
+================================================================================
+
+--------------------------------------------------------------------------------
+4.1 Cointegration & Augmented Dickey-Fuller (ADF) Theory
+--------------------------------------------------------------------------------
+Two non-stationary price series P_A(t) and P_B(t) are integrated of order 1, I(1).
+Under the Engle-Granger two-step theorem, if a linear combination:
+  epsilon(t) = P_A(t) - beta * P_B(t) - alpha
+is stationary, I(0), then P_A and P_B are said to be cointegrated.
+
+The Augmented Dickey-Fuller (ADF) unit-root regression on the residual spread is:
+  Delta epsilon(t) = gamma * epsilon(t-1) + sum_{i=1}^{p} phi_i * Delta epsilon(t-i) + u(t)
+We test the null hypothesis H0: gamma = 0 (unit root, non-stationary) against
+the alternative H1: gamma < 0 (stationary mean-reverting spread).
+A pair qualifies for our universe only when:
+  ADF t-statistic <= -2.85  and  p-value <= 0.045
+
+The Ornstein-Uhlenbeck (OU) Mean Reversion Half-Life:
+  d epsilon(t) = theta * (mu - epsilon(t)) * dt + sigma * dW(t)
+The discrete-time regression:
+  epsilon(t) - epsilon(t-1) = -lambda * epsilon(t-1) + e(t)
+Yields the half-life of mean reversion:
+  Half-Life = ln(2) / lambda
+Only pairs with 2.0 <= Half-Life <= 24.0 trading days pass the gauntlet filter.
+
+--------------------------------------------------------------------------------
+4.2 OLS Hedge Ratio (Beta) & Spread Formulation
+--------------------------------------------------------------------------------
+Over a rolling 90-day lookback window [t-90, t], Ordinary Least Squares (OLS)
+regression derives the optimal hedge ratio beta:
+  P_A(t) = alpha + beta * P_B(t) + epsilon(t)
+where:
+  beta = Cov(P_A, P_B) / Var(P_B)
+  alpha = mean(P_A) - beta * mean(P_B)
+
+The daily spread value S(t) is then:
+  S(t) = P_A(t) - beta * P_B(t) - alpha
+
+--------------------------------------------------------------------------------
+4.3 Rolling Z-Score Formulation
+--------------------------------------------------------------------------------
+To normalize the spread across different stock price regimes:
+  mu_S = (1 / N) * sum_{k=0}^{N-1} S(t-k)    (where N = 90 days)
+  sigma_S = sqrt( (1 / (N-1)) * sum_{k=0}^{N-1} (S(t-k) - mu_S)^2 )
+  Z(t) = (S(t) - mu_S) / sigma_S
+
+--------------------------------------------------------------------------------
+4.4 Position Sizing, Real-Money Execution & Leg P&L Math
+--------------------------------------------------------------------------------
+When Z(t) <= -2.10 sigma (Spread is abnormally undervalued):
+  -> Long Spread: BUY Stock A, SHORT Stock B.
+When Z(t) >= +2.10 sigma (Spread is abnormally overvalued):
+  -> Short Spread: SHORT Stock A, BUY Stock B.
+
+Position Sizing on a $100,000 Portfolio:
+- Baseline allocation per trade: $10,000 (10% of portfolio).
+- Volatility-Inverse Multiplier (Strategy 4):
+    M = clamp(0.40, 3.5 / spread_vol_pct, 1.25)
+- Effective Capital Allocation:
+    Capital_Trade = $10,000 * M
+- Share Quantities (for 1 unit of Long Spread: Buy 1 share A, Short beta shares B):
+    Unit Cost = P_A(entry) + beta * P_B(entry)
+    Spread Units (U) = Capital_Trade / Unit Cost
+    Qty_A = round(U)
+    Qty_B = round(U * beta)
+
+Individual Leg P&L Formulation:
+For a Long A / Short B trade:
+  P&L_A ($) = Qty_A * (P_A(exit) - P_A(entry))
+  P&L_B ($) = Qty_B * (P_B(entry) - P_B(exit))
+  Net P&L ($) = P&L_A + P&L_B
+  Return (%) = Net P&L / (Qty_A * P_A(entry) + Qty_B * P_B(entry))
+
+For a Short A / Long B trade:
+  P&L_A ($) = Qty_A * (P_A(entry) - P_A(exit))
+  P&L_B ($) = Qty_B * (P_B(exit) - P_B(entry))
+  Net P&L ($) = P&L_A + P&L_B
+
+--------------------------------------------------------------------------------
+4.5 The KLAC/WDC Real-World Case Study
+--------------------------------------------------------------------------------
+A common point of confusion is: "If Stock A gained $18/share and Stock B lost
+$11/share, how is this a +4.69% win instead of nearly breakeven?"
+The answer lies entirely in the Hedge Ratio beta (0.2970):
+
+Trade Parameters:
+- Pair: KLAC / WDC (Long KLAC, Short WDC)
+- Hedge Ratio (beta): 0.2970
+- Sizing Multiplier: 0.67x
+- Entry Date: 2026-02-05 (Z = -2.52 sigma)
+- Exit Date: 2026-02-24 (Z = -0.40 sigma, REVERSION_TARGET)
+- KLAC (Stock A) Entry: $179.03 -> Exit: $196.72 (Gain: +$17.69/share)
+- WDC (Stock B) Entry: $103.60 -> Exit: $113.97 (Price rose $10.37 against short)
+
+The Arithmetic Breakdown:
+- Because beta = 0.2970, for every 1.0 share of KLAC bought ($179.03), the strategy
+  only shorts 0.2970 shares of WDC ($30.77).
+- Total spread unit capital outlay = $179.03 + $30.77 = $209.80.
+- KLAC Leg Gain = 1.0 * +$17.69 = +$17.69.
+- WDC Leg Loss = 0.2970 * (-$10.37) = -$3.08 (NOT -$10.37!).
+- Net Spread Profit per Unit = +$17.69 - $3.08 = +$14.61.
+- Raw Spread Return = +$14.61 / $209.80 = +6.96%.
+- Applying the 0.67x sizing multiplier:
+    Realized Trade Net Return = +6.96% * 0.67 = +4.69% WIN.
+
+This demonstrates why cointegrated statistical arbitrage is beta-neutral: the short
+leg strictly hedges the systematic co-movement of the pair, not a 1:1 dollar amount.
+
+================================================================================
+5. FRONTEND USER INTERFACE & TRADE INSPECTION SUITE
+================================================================================
+
+--------------------------------------------------------------------------------
+5.1 Dedicated Strategy Pages & Comparative Matrix
+--------------------------------------------------------------------------------
+- Strategy 1 Page (`/backtest/strategy-v1`): Visualizes baseline performance,
+  trade list, win/loss distributions, and cumulative equity curve.
+- Strategy 2 Page (`/backtest/strategy-v2`): Forensic documentation of the staged
+  profit-taking experiment with post-mortem analytics.
+- Strategy 3 Page (`/backtest/strategy-v3`): High-alpha view detailing conviction
+  tier distributions (Tier 1 vs Tier 2 vs Tier 3) and ratchet floor activations.
+- Strategy 4 Page (`/backtest/strategy-v4`): Pure Alpha command center featuring
+  tight stop triggers, time-stop liquidations, and Sharpe/Calmar metrics.
+- Strategy Compare Page (`/backtest/compare-strategies`): 4-Way comparative table
+  benchmarking all strategies side-by-side across 1Y, 2Y, 3Y, and 5Y horizons.
+
+--------------------------------------------------------------------------------
+5.2 Trade Inspector Forensic Modal (`TradeInspectorModal.tsx`)
+--------------------------------------------------------------------------------
+Triggered by clicking any individual trade across any strategy page.
+Features an expanded 90vw x 90vh full-screen modal with zero truncation:
+
+1. Top Diagnostic Header:
+   Pair tickers, sector, trade sequence number, entry Z-score, exit Z-score,
+   holding days vs time-stop cap, hedge ratio beta, sizing multiplier, and exit catalyst.
+
+2. Real-Scale Dual-Stock Price Window (SVG):
+   - Fully removed normalization. Charts display real, raw dollar closing prices.
+   - Dual Independent Vertical Scales:
+     Left Y-axis (Emerald): Stock A actual prices ($)
+     Right Y-axis (Sky/Cyan): Stock B actual prices ($)
+   - Synchronized timeline spanning [T_entry - 60 trading days] through [T_exit + 15 trading days].
+   - Visual markers: Distinct entry and exit dots for both Stock A and Stock B.
+   - Interactive hover crosshair: Moving cursor across the chart renders a floating
+     HUD displaying exact date, Stock A price, Stock B price, spread, and Z-score.
+   - Interior chart area kept 100% clean of cluttering floating text badges.
+
+3. Spread Z-Score Trajectory (SVG):
+   - Clear visual representation of the mean-reversion curve.
+   - Horizontal reference dashed lines:
+     * Red upper stop barrier (+2.85 sigma or +3.50 sigma)
+     * Amber upper entry hurdle (+2.10 sigma)
+     * Emerald target exit band (+0.40 sigma or 0.00 sigma)
+     * Center mean line (0.00 sigma)
+     * Amber lower entry hurdle (-2.10 sigma)
+     * Red lower stop barrier (-2.85 sigma or -3.50 sigma)
+
+4. Clean 3-Row $100,000 Real-Money Execution Breakdown Table:
+   Row 1 [Stock A]: Action, Entry Price, Qty, Dynamic SL Price, Target Price, Sell Price, P&L ($)
+   Row 2 [Stock B]: Action, Entry Price, Qty, Dynamic SL Price, Target Price, Sell Price, P&L ($)
+   Row 3 [Overall]: Spans table width, showing Portfolio Model ($100k account, 10% base),
+                    Holding Duration, and Net Cash Profit / Loss with percentage return.
+   - Features no-wrap layout (`whitespace-nowrap min-w-[190px]`) preventing line break glitches.
+
+5. Sticky-Header Day-by-Day Historical Inspection Ledger:
+   - Full tabular audit of every single trading day in the window.
+   - Columns: Date, Relative Day (T-x / T+x), Status (Pre-Trade, ACTIVE TRADE, Post-Trade),
+     Stock A Close, Stock B Close, Spread ($), Z-Score (sigma), Running Trade P&L (%).
+   - Solid opaque sticky table header (`bg-slate-900 z-10`) prevents rows beneath
+     from bleeding through when scrolling through 80+ trading days.
+
+================================================================================
+6. BACKEND API SPECIFICATION & DATA CONTRACTS
+================================================================================
+Key REST endpoints exposed by FastAPI backend on port 8000:
+
+- `GET /api/simulator/trade-chart`
+  Query params: `ticker_a`, `ticker_b`, `entry_date`, `exit_date`, `lookback_days`
+  Returns: 80+ bars of daily OHLCV prices for both stocks, calculated spread,
+  rolling mean, rolling standard deviation, Z-score, entry price, exit price,
+  and hedge ratio beta. Used directly by `TradeInspectorModal.tsx`.
+
+- `GET /api/simulator/v1/backtest?horizon=1y|2y|3y|5y`
+  Returns: Precomputed or dynamically evaluated Strategy 1 backtest results,
+  equity curve points, trade list, win rate, and profit factor.
+
+- `GET /api/simulator/v2/backtest`
+  Returns: Strategy 2 staged profit-taking evaluation results and trade ledger.
+
+- `GET /api/simulator/v3/backtest?horizon=1y|2y|3y|5y`
+  Returns: Strategy 3 high-alpha backtest results, conviction tier metrics,
+  and ratchet disaster floor event logs.
+
+- `GET /api/simulator/v4/backtest?horizon=1y|2y|3y|5y`
+  Returns: Strategy 4 Pure Alpha backtest results, exit catalyst breakdown
+  (REVERSION_TARGET, TIGHT_STOP_LOSS, TIME_STOP_EXPIRATION), Sharpe, and Calmar ratios.
+
+- `GET /api/simulator/compare`
+  Returns: 4-way unified comparative JSON comparing Strategy 1, 2, 3, and 4
+  across 1Y, 2Y, 3Y, and 5Y horizons.
+
+- `POST /api/simulator/v4/recalculate`
+  Triggers a full recalculation run of Strategy 4 with custom parameter overrides.
+
+- `GET /api/pairs/elite`
+  Returns: The curated universe of cointegrated S&P 500 equity pairs passing all
+  gauntlet statistical filters.
+
+================================================================================
+7. RUNBOOK, TESTING & OPERATIONS GUIDE
+================================================================================
+
+--------------------------------------------------------------------------------
+7.1 Environment Setup
+--------------------------------------------------------------------------------
+Prerequisites: Python 3.11+, Node.js 18+, npm.
+Working Directory: Always operate inside `d:\Master_Folder\akash-research-platform LOCAL`.
+
+Python Virtual Environment:
+  source venv/bin/activate  (or `venv\Scripts\activate` on Windows)
+  pip install -r requirements.txt
+
+Frontend Dependencies:
+  cd frontend
+  npm install
+
+--------------------------------------------------------------------------------
+7.2 Running the Application
+--------------------------------------------------------------------------------
+1. Start the Backend API Server:
+   From project root:
+   python -m uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+   API documentation available at: http://localhost:8000/docs
+
+2. Start the Frontend Development Server:
+   From project root:
+   npm --prefix frontend run dev
+   Access web interface at: http://localhost:5173
+
+3. Production Frontend Build:
+   npm --prefix frontend run build
+   Compiles zero-warning production bundle into `frontend/dist`.
+
+--------------------------------------------------------------------------------
+7.3 Running Automated Test Suites
+--------------------------------------------------------------------------------
+Run the complete backend regression suite:
+  pytest tests/test_strategy_v4.py tests/test_strategy_compare.py -v
+Expected output: 16 passed, 0 failed.
+
+Tests cover:
+- Strategy 4 velocity momentum filter validation.
+- Tight dynamic stop loss execution at 2.85 sigma.
+- Volatility-inverse sizing multiplier calculation and clamping.
+- Half-life dynamic time stop clamping (4 to 22 days).
+- 4-Way comparative benchmark matrix completeness across all horizons.
+
+================================================================================
+END OF SUMMARY
+================================================================================

@@ -32,16 +32,16 @@ import uuid
 import os
 
 from api.auth.auth import authenticate_user, get_users
-from api.auth.security import create_access_token
+from api.auth.security import create_access_token, decode_access_token
 
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
-from fastapi import BackgroundTasks, FastAPI, HTTPException, Query, Body
+from fastapi import BackgroundTasks, FastAPI, HTTPException, Query, Body, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 
-from engine.config import API_HOST, API_PORT
+from engine.config import API_HOST, API_PORT, load_auto_trade_config
 from engine.core.types import BacktestConfig, StrategyParams
 from engine.data.cache import list_cached, refresh_universe
 from engine.data.universe import get_universe, list_universes
@@ -68,6 +68,45 @@ from engine.live import watchlist as wl
 from engine.live.portfolio import VirtualPortfolio
 from engine.live.telegram import recent_log as telegram_log_rows
 from engine.live.telegram import telegram
+from engine.live.telegram_polling import (
+    start_telegram_polling,
+    stop_telegram_polling,
+)
+from engine.live.auto_trade_readiness import (
+    broker_readiness as auto_trade_broker_readiness,
+    readiness_snapshot as auto_trade_readiness_snapshot,
+    telegram_readiness as probe_auto_trade_telegram_readiness,
+)
+from engine.live.auto_trade_repo import (
+    get_run_bundle as get_auto_trade_run_bundle,
+    latest_run_bundle as latest_auto_trade_run_bundle,
+)
+from engine.live.alpaca import AlpacaPaperClient
+from engine.live.auto_trade_outbox import (
+    deliver_pending as deliver_auto_trade_notifications,
+    enqueue_system_alert,
+)
+from engine.live.auto_trade_phase4 import (
+    broker_snapshot,
+    operational_snapshot,
+    run_today_workflow,
+)
+from engine.live.pair_execution import (
+    PairExecutionError,
+    activate_kill_switch,
+    get_control as get_auto_trade_control,
+    get_pair as get_auto_trade_pair,
+    list_pairs as list_auto_trade_pairs,
+    reconcile_all as reconcile_auto_trade_pairs,
+    request_pair_exit,
+    submit_pair_entry,
+    update_control as update_auto_trade_control,
+)
+from engine.live.strategy_v4_live import (
+    DryScanError,
+    StrategyV4DryScanner,
+    format_dry_scan_telegram,
+)
 from .schemas import (
     BacktestRequest,
     BacktestRunResponse,
@@ -89,6 +128,8 @@ app = FastAPI(
     version="0.1.0",
     description="Trend-Following Momentum backtesting engine.",
 )
+
+_auto_trade_stream_task: asyncio.Task | None = None
 
 app.add_middleware(
     CORSMiddleware,
@@ -115,16 +156,43 @@ async def strip_api_prefix(request, call_next):
 
 @app.on_event("startup")
 async def startup() -> None:
+    global _auto_trade_stream_task
     init_db()
     log.info("API ready at http://%s:%d", API_HOST, API_PORT)
     try:
         live_scheduler.start_scheduler()
     except Exception as e:  # noqa: BLE001 — scheduler is opt-in, never block startup
         log.warning("scheduler failed to start: %s", e)
+    try:
+        start_telegram_polling()
+    except Exception as e:  # noqa: BLE001 — messaging must never block API startup
+        log.warning("telegram polling failed to start: %s", type(e).__name__)
+    try:
+        auto_config = load_auto_trade_config()
+        if auto_config.enabled and auto_config.ready:
+            from engine.live.alpaca_trade_stream import consume_trade_updates
+            _auto_trade_stream_task = asyncio.create_task(
+                consume_trade_updates(config=auto_config),
+                name="alpaca-paper-trade-updates",
+            )
+    except Exception as e:  # stream failure falls back to scheduled REST reconciliation
+        log.warning("Alpaca trade stream failed to start: %s", type(e).__name__)
 
 
 @app.on_event("shutdown")
 async def shutdown() -> None:
+    global _auto_trade_stream_task
+    if _auto_trade_stream_task:
+        _auto_trade_stream_task.cancel()
+        try:
+            await _auto_trade_stream_task
+        except asyncio.CancelledError:
+            pass
+        _auto_trade_stream_task = None
+    try:
+        await stop_telegram_polling()
+    except Exception:  # noqa: BLE001
+        pass
     try:
         live_scheduler.stop_scheduler()
     except Exception:  # noqa: BLE001
@@ -134,6 +202,261 @@ async def shutdown() -> None:
 # --------------- Point-in-Time Simulator Router ---------------
 # strip_api_prefix middleware automatically routes /api/simulator/* to /simulator/*
 app.include_router(simulator_router, prefix="/simulator", tags=["simulator"])
+
+
+# --------------- Strategy 4 auto-trade Phase 3 paper execution ---------------
+
+def require_auto_trade_admin(
+    authorization: str | None = Header(default=None),
+) -> str:
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(401, "Authentication required")
+    claims = decode_access_token(authorization[7:].strip())
+    if not claims:
+        raise HTTPException(401, "Authentication required")
+    email = str(claims.get("email") or "").strip().lower()
+    registered_admin = any(
+        str(user.get("email") or "").strip().lower() == email
+        and str(user.get("role") or "").strip().lower() == "admin"
+        for user in get_users()
+    )
+    if claims.get("role") != "admin" and not registered_admin:
+        raise HTTPException(403, "Administrator access required")
+    return email or "admin"
+
+@app.get("/auto-trade/readiness")
+@app.get("/api/auto-trade/readiness")
+async def auto_trade_readiness() -> dict[str, Any]:
+    """Redacted local readiness for paper execution."""
+    return auto_trade_readiness_snapshot()
+
+
+@app.get("/auto-trade/readiness/alpaca")
+@app.get("/api/auto-trade/readiness/alpaca")
+def auto_trade_alpaca_readiness() -> dict[str, Any]:
+    """Read-only Alpaca paper account and clock connectivity probe."""
+    return auto_trade_broker_readiness()
+
+
+@app.get("/auto-trade/readiness/telegram")
+@app.get("/api/auto-trade/readiness/telegram")
+async def auto_trade_telegram_readiness() -> dict[str, Any]:
+    """Telegram bot identity probe with token and chat details redacted."""
+    return await probe_auto_trade_telegram_readiness()
+
+
+@app.get("/auto-trade/status")
+@app.get("/api/auto-trade/status")
+def auto_trade_status(
+    actor: str = Depends(require_auto_trade_admin),
+) -> dict[str, Any]:
+    """Phase 4 controls, operational health, performance, and latest scan."""
+    snapshot = auto_trade_readiness_snapshot()
+    latest = latest_auto_trade_run_bundle()
+    limits = snapshot["configuration"]["limits"]
+    control = get_auto_trade_control()
+    available = bool(
+        snapshot["configuration"]["enabled"]
+        and snapshot["configuration"]["ready"]
+        and control["armed"]
+        and not control["kill_switch"]
+    )
+    return {
+        "phase": 4,
+        "mode": "paper_execution",
+        "trade_submission_available": available,
+        "armed": bool(control["armed"]),
+        "kill_switch": bool(control["kill_switch"]),
+        "control_updated_at": control["updated_at"],
+        "premarket_offset_minutes": limits["premarket_minutes"],
+        "latest_run": latest,
+        "pairs": list_auto_trade_pairs(),
+        "telegram_preview": format_dry_scan_telegram(latest) if latest else None,
+        "readiness": snapshot,
+        "operations": operational_snapshot(),
+    }
+
+
+@app.get("/auto-trade/broker")
+@app.get("/api/auto-trade/broker")
+def auto_trade_broker_snapshot(
+    actor: str = Depends(require_auto_trade_admin),
+) -> dict[str, Any]:
+    try:
+        return broker_snapshot(AlpacaPaperClient())
+    except Exception as exc:
+        log.warning("Alpaca broker snapshot failed: %s", type(exc).__name__)
+        raise HTTPException(503, "Alpaca paper account is unavailable") from exc
+
+
+@app.post("/auto-trade/telegram/test")
+@app.post("/api/auto-trade/telegram/test")
+async def auto_trade_telegram_test(
+    actor: str = Depends(require_auto_trade_admin),
+) -> dict[str, int]:
+    bucket = datetime.now(timezone.utc).strftime("%Y%m%d%H%M")
+    enqueue_system_alert("test", "Auto Trade Telegram test: delivery is working.", bucket)
+    return await deliver_auto_trade_notifications()
+
+
+@app.post("/auto-trade/run-today")
+@app.post("/api/auto-trade/run-today")
+def auto_trade_run_today(
+    background_tasks: BackgroundTasks,
+    payload: dict[str, Any] = Body(...),
+    actor: str = Depends(require_auto_trade_admin),
+) -> dict[str, Any]:
+    if payload.get("confirm") is not True:
+        raise HTTPException(422, "Today's automatic trade run requires confirmation")
+    try:
+        result = run_today_workflow(AlpacaPaperClient())
+        background_tasks.add_task(deliver_auto_trade_notifications)
+        return result
+    except (DryScanError, PairExecutionError, ValueError) as exc:
+        raise HTTPException(409, str(exc)) from exc
+    except Exception as exc:
+        log.warning("Manual auto-trade run failed: %s", type(exc).__name__)
+        raise HTTPException(503, "Today's automatic trade run failed") from exc
+
+
+@app.get("/auto-trade/dry-runs/{run_id}")
+@app.get("/api/auto-trade/dry-runs/{run_id}")
+def auto_trade_dry_run(
+    run_id: str,
+    actor: str = Depends(require_auto_trade_admin),
+) -> dict[str, Any]:
+    bundle = get_auto_trade_run_bundle(run_id)
+    if not bundle:
+        raise HTTPException(404, "Dry scan not found")
+    return bundle
+
+
+@app.post("/auto-trade/dry-scan")
+@app.post("/api/auto-trade/dry-scan")
+def auto_trade_dry_scan(
+    actor: str = Depends(require_auto_trade_admin),
+) -> dict[str, Any]:
+    """Run Strategy 4 analysis and persist DRAFT intents without broker writes."""
+    try:
+        return StrategyV4DryScanner().run()
+    except DryScanError as exc:
+        raise HTTPException(422, str(exc)) from exc
+    except Exception as exc:  # noqa: BLE001 — sanitize credentials/provider details
+        log.warning("Strategy 4 dry scan failed: %s", type(exc).__name__)
+        raise HTTPException(503, "Strategy 4 dry scan is not ready") from exc
+
+
+@app.post("/auto-trade/control")
+@app.post("/api/auto-trade/control")
+def auto_trade_control(
+    payload: dict[str, Any] = Body(...),
+    actor: str = Depends(require_auto_trade_admin),
+) -> dict[str, Any]:
+    if payload.get("armed") is True and payload.get("confirm") is not True:
+        raise HTTPException(422, "Arming paper execution requires confirmation")
+    try:
+        return update_auto_trade_control(
+            armed=payload.get("armed"),
+            kill_switch=payload.get("kill_switch"),
+            actor=actor,
+        )
+    except PairExecutionError as exc:
+        raise HTTPException(422, str(exc)) from exc
+
+
+@app.post("/auto-trade/kill-switch")
+@app.post("/api/auto-trade/kill-switch")
+def auto_trade_kill_switch(
+    background_tasks: BackgroundTasks,
+    payload: dict[str, Any] = Body(...),
+    actor: str = Depends(require_auto_trade_admin),
+) -> dict[str, Any]:
+    if payload.get("confirm") is not True:
+        raise HTTPException(422, "Kill switch confirmation required")
+    try:
+        broker = AlpacaPaperClient()
+    except Exception:  # kill switch must still engage during broker outages
+        broker = None
+    result = activate_kill_switch(broker, actor)
+    background_tasks.add_task(deliver_auto_trade_notifications)
+    return result
+
+
+@app.get("/auto-trade/pairs")
+@app.get("/api/auto-trade/pairs")
+def auto_trade_pairs(actor: str = Depends(require_auto_trade_admin)) -> list[dict[str, Any]]:
+    return list_auto_trade_pairs()
+
+
+@app.get("/auto-trade/pairs/{pair_trade_id}")
+@app.get("/api/auto-trade/pairs/{pair_trade_id}")
+def auto_trade_pair(
+    pair_trade_id: str,
+    actor: str = Depends(require_auto_trade_admin),
+) -> dict[str, Any]:
+    pair = get_auto_trade_pair(pair_trade_id)
+    if not pair:
+        raise HTTPException(404, "Pair trade not found")
+    return pair
+
+
+@app.post("/auto-trade/pairs/{pair_trade_id}/submit")
+@app.post("/api/auto-trade/pairs/{pair_trade_id}/submit")
+def auto_trade_submit_pair(
+    pair_trade_id: str,
+    background_tasks: BackgroundTasks,
+    payload: dict[str, Any] = Body(...),
+    actor: str = Depends(require_auto_trade_admin),
+) -> dict[str, Any]:
+    if payload.get("confirm") is not True:
+        raise HTTPException(422, "Entry submission confirmation required")
+    try:
+        result = submit_pair_entry(pair_trade_id, AlpacaPaperClient())
+        background_tasks.add_task(deliver_auto_trade_notifications)
+        return result
+    except PairExecutionError as exc:
+        raise HTTPException(409, str(exc)) from exc
+
+
+@app.post("/auto-trade/pairs/{pair_trade_id}/exit")
+@app.post("/api/auto-trade/pairs/{pair_trade_id}/exit")
+def auto_trade_exit_pair(
+    pair_trade_id: str,
+    background_tasks: BackgroundTasks,
+    payload: dict[str, Any] = Body(...),
+    actor: str = Depends(require_auto_trade_admin),
+) -> dict[str, Any]:
+    if payload.get("confirm") is not True:
+        raise HTTPException(422, "Exit confirmation required")
+    try:
+        result = request_pair_exit(
+            pair_trade_id,
+            str(payload.get("reason") or "MANUAL_EXIT")[:50],
+            AlpacaPaperClient(),
+        )
+        background_tasks.add_task(deliver_auto_trade_notifications)
+        return result
+    except PairExecutionError as exc:
+        raise HTTPException(409, str(exc)) from exc
+
+
+@app.post("/auto-trade/reconcile")
+@app.post("/api/auto-trade/reconcile")
+def auto_trade_reconcile(
+    background_tasks: BackgroundTasks,
+    actor: str = Depends(require_auto_trade_admin),
+) -> list[dict[str, Any]]:
+    result = reconcile_auto_trade_pairs(AlpacaPaperClient())
+    background_tasks.add_task(deliver_auto_trade_notifications)
+    return result
+
+
+@app.post("/auto-trade/notifications/deliver")
+@app.post("/api/auto-trade/notifications/deliver")
+async def auto_trade_deliver_notifications(
+    actor: str = Depends(require_auto_trade_admin),
+) -> dict[str, int]:
+    return await deliver_auto_trade_notifications()
 
 
 # --------------- Universe ---------------
@@ -2136,8 +2459,9 @@ async def google_login(payload: dict):
 
     role = "guest"
 
+    clean_email = str(email).strip().lower()
     for user in users:
-        if user["email"] == email:
+        if str(user.get("email") or "").strip().lower() == clean_email:
             role = user["role"]
             break
 

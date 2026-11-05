@@ -27,6 +27,8 @@ import type {
   Backtest1YResponse,
   TradeChartDataResponse,
 } from "./simulatorTypes";
+import type { AutoTradeRun, AutoTradeStatus } from "./autoTradeTypes";
+import { getToken, logout } from "../auth/auth";
 
 // In dev + single-service prod, Vite/FastAPI handle "/api".
 // On Vercel (frontend split from backend), set VITE_API_BASE to the Render
@@ -34,10 +36,22 @@ import type {
 const BASE = (import.meta.env.VITE_API_BASE as string | undefined)?.replace(/\/$/, "") || "/api";
 
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
+  const token = getToken();
   const res = await fetch(`${BASE}${path}`, {
-    headers: { "Content-Type": "application/json" },
     ...init,
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(init?.headers || {}),
+    },
   });
+  if (res.status === 401) {
+    logout();
+    if (window.location.pathname !== "/login") {
+      window.location.replace("/login?session=expired");
+    }
+    throw new Error("Your session expired. Please sign in again.");
+  }
   if (!res.ok) {
     const text = await res.text().catch(() => "");
     throw new Error(`${res.status} ${res.statusText}: ${text.slice(0, 200)}`);
@@ -57,6 +71,24 @@ const del = <T>(p: string) => req<T>(p, { method: "DELETE" });
 
 export const api = {
   health: () => get<Health>("/health"),
+
+  // Strategy 4 Alpaca paper automation.
+  autoTradeStatus: () => get<AutoTradeStatus>("/auto-trade/status"),
+  autoTradeBroker: () => get<import("./autoTradeTypes").AutoTradeBrokerSnapshot>("/auto-trade/broker"),
+  autoTradeTelegramTest: () => post<{ claimed: number; sent: number; failed: number }>("/auto-trade/telegram/test"),
+  autoTradeRunToday: () => post<{ stage: string; session_date: string; qualified_pairs: number; submitted_pairs: number; message: string }>("/auto-trade/run-today", { confirm: true }),
+  autoTradeDryScan: () => post<AutoTradeRun>("/auto-trade/dry-scan"),
+  autoTradeDryRun: (runId: string) =>
+    get<AutoTradeRun>(`/auto-trade/dry-runs/${encodeURIComponent(runId)}`),
+  autoTradeControl: (body: { armed?: boolean; kill_switch?: boolean; confirm?: boolean }) =>
+    post<{ armed: number; kill_switch: number }>("/auto-trade/control", body),
+  autoTradeKillSwitch: () =>
+    post<{ armed: number; kill_switch: number }>("/auto-trade/kill-switch", { confirm: true }),
+  autoTradeSubmitPair: (pairId: string) =>
+    post(`/auto-trade/pairs/${encodeURIComponent(pairId)}/submit`, { confirm: true }),
+  autoTradeExitPair: (pairId: string) =>
+    post(`/auto-trade/pairs/${encodeURIComponent(pairId)}/exit`, { confirm: true, reason: "MANUAL_EXIT" }),
+  autoTradeReconcile: () => post("/auto-trade/reconcile"),
 
   // Pairs Trading
   pairs: (params?: { sector?: string; min_corr?: number; search?: string; elite?: boolean }) => {

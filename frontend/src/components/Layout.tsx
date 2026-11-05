@@ -28,6 +28,7 @@ const SECTIONS: {
     items: [
       { label: "Pairs", to: "/pairs" },
       { label: "Setups", to: "/setups" },
+      { label: "Auto Trade", to: "/auto-trade" },
     ],
   },
   {
@@ -75,7 +76,8 @@ function sectionForPath(path: string): string {
   if (
     path.startsWith("/pairs") ||
     path.startsWith("/pair-trading") ||
-    path.startsWith("/setups")
+    path.startsWith("/setups") ||
+    path.startsWith("/auto-trade")
   )
     return "Pair Trading";
   if (

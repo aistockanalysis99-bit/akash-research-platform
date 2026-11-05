@@ -9,9 +9,15 @@ import logging
 import os
 import secrets
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from typing import Optional
 
 from jose import JWTError, jwt
+from dotenv import load_dotenv
+
+# Authentication is imported before engine.config, so load the project .env
+# here as well. This keeps JWT signing stable across backend restarts.
+load_dotenv(Path(__file__).resolve().parents[2] / ".env", override=False)
 
 log = logging.getLogger(__name__)
 

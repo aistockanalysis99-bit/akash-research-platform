@@ -143,12 +143,13 @@ def validate_target_date(date_str: str, engine: PointInTimeEngine) -> pd.Timesta
     if not trading_dates:
         raise HTTPException(500, "No trading dates loaded in dataset.")
 
-    if ts < trading_dates[0] or ts > trading_dates[-1]:
+    if ts < trading_dates[0]:
         raise HTTPException(
             400,
-            f"Date {date_str} is out of bounds. Available range: "
-            f"{trading_dates[0].strftime('%Y-%m-%d')} to {trading_dates[-1].strftime('%Y-%m-%d')}."
+            f"Date {date_str} is earlier than earliest available date: {trading_dates[0].strftime('%Y-%m-%d')}."
         )
+    if ts > trading_dates[-1]:
+        return trading_dates[-1]
     return ts
 
 

@@ -20,6 +20,7 @@ from zoneinfo import ZoneInfo
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
+from apscheduler.triggers.interval import IntervalTrigger
 
 from . import settings as live_settings
 from .quant_source import find_candidates_today
@@ -120,6 +121,159 @@ async def _job_weekly_review() -> None:
         _last_runs["weekly_review"] = {"at": datetime.utcnow().isoformat()}
     except Exception as e:  # noqa: BLE001
         log.exception("scheduler: weekly review failed: %s", e)
+
+
+async def _job_auto_trade_reconcile() -> None:
+    """Reconcile orders and evaluate Strategy 4 exits while exposure exists."""
+    try:
+        from .alpaca import AlpacaPaperClient
+        from .auto_trade_outbox import deliver_pending
+        from .pair_execution import list_pairs, monitor_pair, reconcile_all
+
+        def reconcile_and_monitor() -> dict[str, int]:
+            broker = AlpacaPaperClient()
+            reconciled = reconcile_all(broker)
+            monitored = 0
+            if broker.get_clock().is_open:
+                for pair in list_pairs():
+                    if pair["state"] == "OPEN":
+                        monitor_pair(pair["pair_trade_id"], broker)
+                        monitored += 1
+            return {"reconciled": len(reconciled), "monitored": monitored}
+
+        result = await asyncio.to_thread(reconcile_and_monitor)
+        delivered = await deliver_pending()
+        _last_runs["auto_trade_reconcile"] = {
+            "at": datetime.utcnow().isoformat(), **result, **delivered,
+        }
+    except Exception as exc:  # credentials and broker payloads stay out of logs
+        from .auto_trade_outbox import enqueue_system_alert
+        enqueue_system_alert("reconciliation_outage", "Alpaca reconciliation failed; automatic entries remain guarded.", datetime.utcnow().strftime("%Y%m%d%H"))
+        log.warning("scheduler: auto-trade reconciliation failed: %s", type(exc).__name__)
+
+
+async def _job_auto_trade_daily_report() -> None:
+    from .alpaca import AlpacaPaperClient
+    from .auto_trade_outbox import deliver_pending
+    from .auto_trade_phase4 import claim_job, enqueue_daily_report, finish_job, report_slot
+    slot = report_slot()
+    if not claim_job("daily_report", slot):
+        return
+    try:
+        await asyncio.to_thread(enqueue_daily_report, AlpacaPaperClient())
+        await deliver_pending()
+        finish_job("daily_report", slot)
+        _last_runs["auto_trade_daily_report"] = {"at": datetime.utcnow().isoformat()}
+    except Exception as exc:
+        finish_job("daily_report", slot, exc)
+        from .auto_trade_outbox import enqueue_system_alert
+        enqueue_system_alert("daily_report_failure", "The 10:00 IST Alpaca account report failed.", slot)
+        log.warning("scheduler: auto-trade daily report failed: %s", type(exc).__name__)
+
+
+async def _job_auto_trade_premarket() -> None:
+    """Scan once in the configured premarket window for today's US session."""
+    from ..config import load_auto_trade_config
+    from .alpaca import AlpacaPaperClient
+    from .auto_trade_phase4 import claim_job, finish_job
+    from .strategy_v4_live import StrategyV4DryScanner
+    from .auto_trade_outbox import deliver_pending, enqueue_system_alert
+    config = load_auto_trade_config()
+    if not config.enabled or not config.ready:
+        return
+    try:
+        broker = AlpacaPaperClient(config)
+        clock = await asyncio.to_thread(broker.get_clock)
+        observed = datetime.fromisoformat(clock.timestamp.replace("Z", "+00:00"))
+        opening = datetime.fromisoformat(clock.next_open.replace("Z", "+00:00"))
+        minutes = (opening - observed).total_seconds() / 60
+        if clock.is_open or observed.date() != opening.date() or not 0 < minutes <= config.premarket_minutes:
+            return
+        slot = opening.date().isoformat()
+        if not claim_job("premarket_scan", slot, lease_seconds=1800):
+            return
+        try:
+            result = await asyncio.to_thread(StrategyV4DryScanner(broker=broker).run)
+            finish_job("premarket_scan", slot)
+            _last_runs["auto_trade_premarket"] = {"at": datetime.utcnow().isoformat(),
+                                                   "run_id": result.get("run_id")}
+        except Exception as exc:
+            finish_job("premarket_scan", slot, exc)
+            enqueue_system_alert("scan_failure", "Strategy 4 premarket scan failed; entries were not submitted.", slot)
+            await deliver_pending()
+            log.warning("scheduler: auto-trade premarket scan failed: %s", type(exc).__name__)
+    except Exception as exc:
+        log.warning("scheduler: auto-trade premarket check failed: %s", type(exc).__name__)
+
+
+async def _job_auto_trade_entries() -> None:
+    """Submit qualified drafts during a narrow regular-session window only."""
+    from ..config import load_auto_trade_config
+    from .alpaca import AlpacaPaperClient
+    from .auto_trade_phase4 import claim_job, finish_job
+    from .pair_execution import get_control, list_pairs, submit_pair_entry
+    from .auto_trade_outbox import deliver_pending
+    config = load_auto_trade_config()
+    if not config.enabled or not config.ready:
+        return
+    control = get_control()
+    if not control["armed"] or control["kill_switch"]:
+        return
+    broker = AlpacaPaperClient(config)
+    clock = await asyncio.to_thread(broker.get_clock)
+    observed = datetime.fromisoformat(clock.timestamp.replace("Z", "+00:00"))
+    market_now = observed.astimezone(ZoneInfo("America/New_York"))
+    if not clock.is_open or market_now.weekday() >= 5 or (market_now.hour, market_now.minute) < (9, 30) \
+            or (market_now.hour, market_now.minute) >= (9, 45):
+        return
+    for pair in list_pairs():
+        if pair["state"] != "DRAFT" or pair["session_date"] != market_now.date().isoformat():
+            continue
+        slot = pair["pair_trade_id"]
+        if not claim_job("entry", slot, lease_seconds=900):
+            continue
+        try:
+            await asyncio.to_thread(submit_pair_entry, slot, broker)
+            finish_job("entry", slot)
+        except Exception as exc:
+            finish_job("entry", slot, exc)
+            log.warning("scheduler: auto-trade entry failed: %s", type(exc).__name__)
+    await deliver_pending()
+
+
+async def _job_auto_trade_calendar() -> None:
+    from .alpaca import AlpacaPaperClient
+    from .auto_trade_phase4 import claim_job, finish_job
+    slot = datetime.now(ZoneInfo("America/New_York")).date().isoformat()
+    if not claim_job("calendar_refresh", slot):
+        return
+    try:
+        broker = AlpacaPaperClient()
+        await asyncio.to_thread(broker.get_calendar, slot, slot)
+        finish_job("calendar_refresh", slot)
+        _last_runs["auto_trade_calendar"] = {"at": datetime.utcnow().isoformat()}
+    except Exception as exc:
+        finish_job("calendar_refresh", slot, exc)
+        log.warning("scheduler: Alpaca calendar refresh failed: %s", type(exc).__name__)
+
+
+async def _job_auto_trade_end_session() -> None:
+    from .alpaca import AlpacaPaperClient
+    from .auto_trade_outbox import deliver_pending
+    from .auto_trade_phase4 import claim_job, finish_job
+    from .pair_execution import reconcile_all
+    slot = datetime.now(ZoneInfo("America/New_York")).date().isoformat()
+    if not claim_job("end_session", slot, lease_seconds=1800):
+        return
+    try:
+        result = await asyncio.to_thread(reconcile_all, AlpacaPaperClient())
+        await deliver_pending()
+        finish_job("end_session", slot)
+        _last_runs["auto_trade_end_session"] = {"at": datetime.utcnow().isoformat(),
+                                                  "reconciled": len(result)}
+    except Exception as exc:
+        finish_job("end_session", slot, exc)
+        log.warning("scheduler: end-session reconciliation failed: %s", type(exc).__name__)
 
 
 # ---- Options module jobs (fully additive — failures never touch the rest) -- #
@@ -313,6 +467,55 @@ def start_scheduler(force: bool = False) -> None:
         id="evening_cycle",
         name="Evening cycle (watchlist + quant)",
         replace_existing=True,
+    )
+    from ..config import load_auto_trade_config
+    auto_trade_interval = load_auto_trade_config().monitor_minutes
+    sched.add_job(
+        _job_auto_trade_reconcile,
+        IntervalTrigger(minutes=auto_trade_interval, timezone=tz),
+        id="auto_trade_reconcile",
+        name="Auto Trade: reconcile orders and Strategy 4 exits",
+        replace_existing=True,
+        coalesce=True,
+        max_instances=1,
+        misfire_grace_time=60,
+    )
+    sched.add_job(
+        _job_auto_trade_premarket,
+        CronTrigger(hour=7, minute=30, day_of_week="mon-fri",
+                    timezone=ZoneInfo("America/New_York")),
+        id="auto_trade_premarket",
+        name="Auto Trade: Strategy 4 scan two hours before open",
+        replace_existing=True, coalesce=True, max_instances=1,
+        misfire_grace_time=60,
+    )
+    sched.add_job(
+        _job_auto_trade_daily_report,
+        CronTrigger(hour=10, minute=0, timezone=ZoneInfo("Asia/Kolkata")),
+        id="auto_trade_daily_report",
+        name="Auto Trade: 10:00 IST Alpaca account report",
+        replace_existing=True, coalesce=True, max_instances=1,
+        misfire_grace_time=120,
+    )
+    sched.add_job(
+        _job_auto_trade_entries,
+        IntervalTrigger(minutes=1, timezone=tz),
+        id="auto_trade_entries",
+        name="Auto Trade: guarded Strategy 4 entries",
+        replace_existing=True, coalesce=True, max_instances=1,
+        misfire_grace_time=30,
+    )
+    sched.add_job(
+        _job_auto_trade_calendar,
+        CronTrigger(hour=7, minute=0, day_of_week="mon-fri", timezone=ZoneInfo("America/New_York")),
+        id="auto_trade_calendar", name="Auto Trade: market calendar refresh",
+        replace_existing=True, coalesce=True, max_instances=1, misfire_grace_time=300,
+    )
+    sched.add_job(
+        _job_auto_trade_end_session,
+        CronTrigger(hour=16, minute=15, day_of_week="mon-fri", timezone=ZoneInfo("America/New_York")),
+        id="auto_trade_end_session", name="Auto Trade: end-session reconciliation",
+        replace_existing=True, coalesce=True, max_instances=1, misfire_grace_time=300,
     )
     # Weekly Performance Review — Friday after the evening cycle
     sched.add_job(

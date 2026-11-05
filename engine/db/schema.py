@@ -200,10 +200,242 @@ CREATE TABLE IF NOT EXISTS portfolio_equity_history (
     open_positions INTEGER NOT NULL,
     updated_at     TEXT NOT NULL
 );
+
+-- ===== Strategy 4 Alpaca auto-trade foundation (Phase 1) =====
+
+CREATE TABLE IF NOT EXISTS telegram_authorized_chats (
+    chat_id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    username TEXT,
+    first_name TEXT,
+    authorized_at TEXT NOT NULL,
+    revoked_at TEXT,
+    active INTEGER NOT NULL DEFAULT 1
+);
+
+CREATE INDEX IF NOT EXISTS idx_tg_authorized_active
+    ON telegram_authorized_chats(active, authorized_at);
+
+CREATE TABLE IF NOT EXISTS telegram_auth_sessions (
+    chat_id TEXT PRIMARY KEY,
+    awaiting_passcode INTEGER NOT NULL DEFAULT 0,
+    locked_until TEXT,
+    updated_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS telegram_auth_attempts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    chat_id TEXT NOT NULL,
+    user_id TEXT,
+    attempted_at TEXT NOT NULL,
+    success INTEGER NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_tg_auth_attempts_chat_time
+    ON telegram_auth_attempts(chat_id, attempted_at DESC);
+
+CREATE TABLE IF NOT EXISTS telegram_bot_state (
+    singleton_id INTEGER PRIMARY KEY CHECK (singleton_id = 1),
+    last_update_id INTEGER NOT NULL DEFAULT 0,
+    updated_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS auto_trade_runs (
+    run_id TEXT PRIMARY KEY,
+    run_type TEXT NOT NULL,
+    session_date TEXT,
+    status TEXT NOT NULL,
+    started_at TEXT NOT NULL,
+    finished_at TEXT,
+    config_hash TEXT,
+    summary_json TEXT,
+    error_code TEXT,
+    error_message TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_auto_trade_runs_started
+    ON auto_trade_runs(started_at DESC);
+
+CREATE TABLE IF NOT EXISTS strategy_v4_signal_snapshots (
+    signal_id TEXT PRIMARY KEY,
+    run_id TEXT,
+    session_date TEXT NOT NULL,
+    ticker_a TEXT NOT NULL,
+    ticker_b TEXT NOT NULL,
+    decision TEXT NOT NULL,
+    rejection_reason TEXT,
+    data_cutoff_at TEXT NOT NULL,
+    config_version TEXT NOT NULL,
+    config_hash TEXT NOT NULL,
+    payload_json TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    FOREIGN KEY (run_id) REFERENCES auto_trade_runs(run_id) ON DELETE SET NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_v4_signals_session
+    ON strategy_v4_signal_snapshots(session_date, decision);
+
+CREATE TABLE IF NOT EXISTS pair_trade_intents (
+    pair_trade_id TEXT PRIMARY KEY,
+    signal_id TEXT,
+    session_date TEXT NOT NULL,
+    ticker_a TEXT NOT NULL,
+    ticker_b TEXT NOT NULL,
+    state TEXT NOT NULL,
+    target_z REAL,
+    stop_z REAL,
+    max_holding_date TEXT,
+    idempotency_key TEXT NOT NULL UNIQUE,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    closed_at TEXT,
+    error_code TEXT,
+    error_message TEXT,
+    exit_reason TEXT,
+    current_z REAL,
+    unrealized_pnl REAL,
+    realized_pnl REAL,
+    reconciled_at TEXT,
+    FOREIGN KEY (signal_id) REFERENCES strategy_v4_signal_snapshots(signal_id) ON DELETE SET NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_pair_trade_state
+    ON pair_trade_intents(state, session_date);
+
+CREATE TABLE IF NOT EXISTS pair_trade_legs (
+    leg_id TEXT PRIMARY KEY,
+    pair_trade_id TEXT NOT NULL,
+    symbol TEXT NOT NULL,
+    side TEXT NOT NULL,
+    target_qty REAL NOT NULL,
+    filled_qty REAL NOT NULL DEFAULT 0,
+    avg_fill_price REAL,
+    state TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    UNIQUE(pair_trade_id, symbol),
+    FOREIGN KEY (pair_trade_id) REFERENCES pair_trade_intents(pair_trade_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS broker_orders (
+    broker_order_id TEXT PRIMARY KEY,
+    client_order_id TEXT NOT NULL UNIQUE,
+    pair_trade_id TEXT,
+    leg_id TEXT,
+    symbol TEXT NOT NULL,
+    side TEXT NOT NULL,
+    order_type TEXT NOT NULL,
+    time_in_force TEXT NOT NULL,
+    status TEXT NOT NULL,
+    qty REAL,
+    filled_qty REAL,
+    filled_avg_price REAL,
+    submitted_at TEXT,
+    updated_at TEXT NOT NULL,
+    raw_json TEXT NOT NULL,
+    FOREIGN KEY (pair_trade_id) REFERENCES pair_trade_intents(pair_trade_id) ON DELETE SET NULL,
+    FOREIGN KEY (leg_id) REFERENCES pair_trade_legs(leg_id) ON DELETE SET NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_broker_orders_pair
+    ON broker_orders(pair_trade_id, status);
+
+CREATE TABLE IF NOT EXISTS broker_order_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    broker_order_id TEXT,
+    event_type TEXT NOT NULL,
+    event_at TEXT NOT NULL,
+    payload_json TEXT NOT NULL,
+    dedupe_key TEXT NOT NULL UNIQUE,
+    FOREIGN KEY (broker_order_id) REFERENCES broker_orders(broker_order_id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS notification_outbox (
+    notification_id TEXT PRIMARY KEY,
+    idempotency_key TEXT NOT NULL UNIQUE,
+    kind TEXT NOT NULL,
+    pair_trade_id TEXT,
+    payload_text TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending',
+    attempts INTEGER NOT NULL DEFAULT 0,
+    next_attempt_at TEXT,
+    created_at TEXT NOT NULL,
+    sent_at TEXT,
+    last_error TEXT,
+    FOREIGN KEY (pair_trade_id) REFERENCES pair_trade_intents(pair_trade_id) ON DELETE SET NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_notification_outbox_status
+    ON notification_outbox(status, next_attempt_at);
+
+CREATE TABLE IF NOT EXISTS auto_trade_control (
+    singleton_id INTEGER PRIMARY KEY CHECK (singleton_id = 1),
+    armed INTEGER NOT NULL DEFAULT 0,
+    kill_switch INTEGER NOT NULL DEFAULT 0,
+    updated_at TEXT NOT NULL,
+    updated_by TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS auto_trade_control_audit (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    action TEXT NOT NULL,
+    actor TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    details_json TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS auto_trade_job_runs (
+    name TEXT NOT NULL,
+    slot TEXT NOT NULL,
+    status TEXT NOT NULL,
+    started_at TEXT NOT NULL,
+    lease_until TEXT NOT NULL,
+    finished_at TEXT,
+    error_type TEXT,
+    PRIMARY KEY(name, slot)
+);
+
+CREATE INDEX IF NOT EXISTS idx_auto_trade_job_runs_started
+    ON auto_trade_job_runs(started_at DESC);
+
+CREATE TABLE IF NOT EXISTS automation_locks (
+    lock_name TEXT PRIMARY KEY,
+    owner_id TEXT NOT NULL,
+    acquired_at TEXT NOT NULL,
+    expires_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS automation_heartbeats (
+    component TEXT PRIMARY KEY,
+    instance_id TEXT NOT NULL,
+    status TEXT NOT NULL,
+    heartbeat_at TEXT NOT NULL,
+    details_json TEXT
+);
+
+CREATE TABLE IF NOT EXISTS alpaca_account_snapshots (
+    snapshot_id TEXT PRIMARY KEY,
+    captured_at TEXT NOT NULL,
+    equity REAL NOT NULL,
+    cash REAL NOT NULL,
+    buying_power REAL NOT NULL,
+    portfolio_value REAL NOT NULL,
+    long_market_value REAL,
+    short_market_value REAL,
+    payload_json TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_alpaca_snapshots_captured
+    ON alpaca_account_snapshots(captured_at DESC);
 """
 
 # Idempotent column migrations for tables that predate a feature.
 _MIGRATIONS = [
+    ("pair_trade_intents", "exit_reason", "TEXT"),
+    ("pair_trade_intents", "current_z", "REAL"),
+    ("pair_trade_intents", "unrealized_pnl", "REAL"),
+    ("pair_trade_intents", "realized_pnl", "REAL"),
+    ("pair_trade_intents", "reconciled_at", "TEXT"),
     ("virtual_positions", "prev_close", "REAL"),
     ("virtual_positions", "day_change_pct", "REAL"),
     # Options support: instrument_type 'stock'|'option'; option-specific fields.

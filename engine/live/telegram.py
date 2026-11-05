@@ -1,8 +1,8 @@
-"""Outbound Telegram client.
+"""Telegram transport for outbound alerts and inbound authorization replies.
 
-We don't run an interactive bot — just POST to sendMessage when the system
-has something to tell the client. Token + chat_id come from .env. If either
-is missing, sending becomes a no-op (returns False, logs an info line).
+General outbound alerts are broadcast only to chats authorized by the passcode
+flow. The legacy TELEGRAM_CHAT_ID is used only when passcode onboarding is not
+configured, preserving older deployments without bypassing the new allow-list.
 
 Every attempt is logged to the telegram_log SQLite table so the UI can show
 a delivery history.
@@ -15,13 +15,19 @@ from typing import Optional
 
 import httpx
 
-from ..config import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
+from ..config import (
+    TELEGRAM_AUTH_PASSCODE,
+    TELEGRAM_BOT_TOKEN,
+    TELEGRAM_CHAT_ID,
+    TELEGRAM_ENABLED,
+)
 from ..db.schema import get_connection
 from .schemas import MorningBriefing, PMDecision
 
 log = logging.getLogger(__name__)
 
 TELEGRAM_API = "https://api.telegram.org/bot{token}/sendMessage"
+TELEGRAM_METHOD_API = "https://api.telegram.org/bot{token}/{method}"
 MAX_MESSAGE_LEN = 4000  # Telegram limit is 4096, leave headroom
 
 # Message kinds that belong to the OPTIONS side of the platform. When a
@@ -46,11 +52,12 @@ class TelegramClient:
         chat_id: Optional[str] = None,
     ) -> None:
         self.token = token if token is not None else TELEGRAM_BOT_TOKEN
+        self._explicit_chat = chat_id is not None
         self.chat_id = chat_id if chat_id is not None else TELEGRAM_CHAT_ID
 
     @property
     def enabled(self) -> bool:
-        return bool(self.token and self.chat_id)
+        return bool(TELEGRAM_ENABLED and self.token)
 
     async def send_message(
         self,
@@ -65,29 +72,70 @@ class TelegramClient:
         code should not be coupled to delivery reliability.
         """
         truncated = text[:MAX_MESSAGE_LEN]
+        targets = self.resolve_targets(kind)
 
-        # Route options-family messages to their own group when configured.
-        # Resolved per send (not per client) so a settings change from the UI
-        # takes effect on the very next message, no restart needed.
-        target_chat = self.chat_id
+        if not (self.enabled and targets):
+            self._log(kind, symbol, truncated, success=False,
+                       error="not_configured")
+            log.info("telegram: skipping — disabled, token missing, or no authorized chat")
+            return False
+
+        results = [
+            await self._send_one(target, truncated, parse_mode=parse_mode)
+            for target in dict.fromkeys(targets)
+        ]
+        success = any(results)
+        self._log(
+            kind,
+            symbol,
+            truncated,
+            success=success,
+            error=None if success else "send failed for all authorized chats",
+        )
+        return success
+
+    def resolve_targets(self, kind: str = "manual") -> list[str]:
+        """Resolve recipients without exposing credentials or bypassing auth.
+
+        Once passcode onboarding is configured, every normal broadcast uses the
+        authorization table. Legacy fixed chat IDs remain a fallback only for
+        older deployments that have no onboarding passcode.
+        """
+        if TELEGRAM_AUTH_PASSCODE:
+            try:
+                from .telegram_auth import list_authorized_chats
+                return list(dict.fromkeys(row.chat_id for row in list_authorized_chats()))
+            except Exception as e:  # noqa: BLE001
+                log.warning("telegram: authorized-chat lookup failed: %s", e)
+                return []
+
+        if self._explicit_chat and self.chat_id:
+            return [self.chat_id]
         if _is_options_kind(kind):
             try:
                 from . import settings as live_settings
                 options_chat = live_settings.get_options_telegram_chat_id()
                 if options_chat:
-                    target_chat = options_chat
-            except Exception as e:  # noqa: BLE001 — routing must never block a send
-                log.warning("telegram: options-chat lookup failed, using "
-                            "main chat: %s", e)
+                    return [options_chat]
+            except Exception as e:  # noqa: BLE001
+                log.warning("telegram: options-chat lookup failed: %s", e)
+        return [TELEGRAM_CHAT_ID] if TELEGRAM_CHAT_ID else []
 
-        if not (self.token and target_chat):
-            self._log(kind, symbol, truncated, success=False,
-                       error="not_configured")
-            log.info("telegram: skipping — token/chat_id not set")
+    async def send_direct(
+        self, chat_id: str, text: str, parse_mode: Optional[str] = None,
+    ) -> bool:
+        """Reply to a specific chat during authorization; never broadcasts."""
+        if not (self.enabled and chat_id):
             return False
+        return await self._send_one(str(chat_id), text[:MAX_MESSAGE_LEN], parse_mode)
+
+    async def _send_one(
+        self, target_chat: str, text: str, parse_mode: Optional[str] = None,
+    ) -> bool:
+        """Low-level send with bounded retry. Does not write message content logs."""
 
         url = TELEGRAM_API.format(token=self.token)
-        payload: dict = {"chat_id": target_chat, "text": truncated}
+        payload: dict = {"chat_id": target_chat, "text": text}
         if parse_mode:
             payload["parse_mode"] = parse_mode
 
@@ -101,7 +149,6 @@ class TelegramClient:
                 async with httpx.AsyncClient(timeout=20.0) as client:
                     r = await client.post(url, json=payload)
                 if r.status_code == 200 and r.json().get("ok") is True:
-                    self._log(kind, symbol, truncated, success=True, error=None)
                     return True
                 # Non-OK response — capture body, decide whether to retry
                 last_err = f"HTTP {r.status_code}: {r.text[:200]}"
@@ -122,10 +169,44 @@ class TelegramClient:
                 last_err = f"{type(e).__name__}: {e}"[:200] or "unknown_error"
                 await asyncio.sleep(0.5 + attempt)
 
-        self._log(kind, symbol, truncated, success=False,
-                   error=last_err or "send failed after retries")
         log.warning("telegram send failed after retries: %s", last_err)
         return False
+
+    async def get_me(self) -> dict:
+        """Return Telegram bot identity. Token is never included."""
+        if not self.enabled:
+            raise RuntimeError("Telegram is not configured")
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            response = await client.get(
+                TELEGRAM_METHOD_API.format(token=self.token, method="getMe"))
+        data = response.json()
+        if response.status_code != 200 or not data.get("ok"):
+            raise RuntimeError("Telegram bot identity check failed")
+        result = data.get("result")
+        if not isinstance(result, dict):
+            raise RuntimeError("Telegram returned an invalid bot identity")
+        return result
+
+    async def get_updates(
+        self, *, offset: int, timeout: int = 25,
+    ) -> list[dict]:
+        """Long-poll Telegram updates; caller persists the processed offset."""
+        if not self.enabled:
+            return []
+        async with httpx.AsyncClient(timeout=timeout + 10.0) as client:
+            response = await client.get(
+                TELEGRAM_METHOD_API.format(token=self.token, method="getUpdates"),
+                params={
+                    "offset": offset,
+                    "timeout": timeout,
+                    "allowed_updates": '["message"]',
+                },
+            )
+        data = response.json()
+        if response.status_code != 200 or not data.get("ok"):
+            raise RuntimeError("Telegram update polling failed")
+        result = data.get("result", [])
+        return result if isinstance(result, list) else []
 
     # ------------------------------------------------------------------ #
     # Convenience builders

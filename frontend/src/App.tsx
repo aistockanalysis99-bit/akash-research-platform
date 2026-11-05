@@ -39,6 +39,7 @@ import StrategyV2Page from "./pages/StrategyV2Page";
 import StrategyV3Page from "./pages/StrategyV3Page";
 import StrategyV4Page from "./pages/StrategyV4Page";
 import StrategyComparePage from "./pages/StrategyComparePage";
+import AutoTradePage from "./pages/AutoTradePage";
 
 export default function App() {
   return (
@@ -61,6 +62,7 @@ export default function App() {
         <Route path="/pair-trading/setup/:tickerA/:tickerB" element={<SetupDetailPage />} />
         <Route path="/pairs" element={<PairsPage />} />
         <Route path="/pair-trading" element={<PairsPage />} />
+        <Route path="/auto-trade" element={<AutoTradePage />} />
         {/* AI Analysis section */}
         <Route path="/analyze" element={<AnalyzePage />} />
         <Route path="/decisions" element={<DecisionsPage />} />

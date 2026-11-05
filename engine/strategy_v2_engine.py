@@ -48,6 +48,7 @@ import pandas as pd
 from statsmodels.tsa.stattools import adfuller
 
 from engine.config import DATA_CACHE_DIR, PROJECT_ROOT
+from engine.earnings_calendar import EarningsCalendar
 from engine.logging_setup import get_logger
 
 logger = get_logger("strategy_v2_engine")
@@ -56,7 +57,6 @@ CONFIG_V2_ROOT = PROJECT_ROOT / "pair_strategy_v2_config.json"
 CONFIG_V2_DATA = PROJECT_ROOT / "data" / "pair_strategy_v2_config.json"
 PARQUET_PATH_DEFAULT = DATA_CACHE_DIR / "universe_5y_daily.parquet"
 META_PATH_DEFAULT = DATA_CACHE_DIR / "universe_meta.json"
-RESEARCH_DIR_DEFAULT = DATA_CACHE_DIR / "research"
 
 
 def load_strategy_v2_config(config_path: Optional[Union[Path, str]] = None) -> Dict[str, Any]:
@@ -118,106 +118,6 @@ def calculate_rolling_hurst(s_vals: np.ndarray, max_lag: int = 15) -> float:
     tau = [x if x > 0 else 1e-8 for x in tau]
     poly = np.polyfit(np.log(lags), np.log(tau), 1)
     return float(poly[0])
-
-
-class EarningsCalendar:
-    """Ingests and indexes corporate earnings announcement dates for blackout filtering."""
-
-    def __init__(
-        self,
-        research_dir: Optional[Union[Path, str]] = None,
-        custom_earnings: Optional[Dict[str, Union[List[str], Set[str]]]] = None,
-    ) -> None:
-        self.research_dir = Path(research_dir or RESEARCH_DIR_DEFAULT)
-        self.earnings_by_ticker: Dict[str, Set[str]] = {}
-
-        if custom_earnings:
-            for sym, d_list in custom_earnings.items():
-                clean_sym = sym.strip().upper().replace(".", "-")
-                self.earnings_by_ticker[clean_sym] = {
-                    pd.to_datetime(d).strftime("%Y-%m-%d") for d in d_list
-                }
-        else:
-            self._load_from_cache()
-
-    def _load_from_cache(self) -> None:
-        """Scan data_cache/research/{ticker}/earnings_*.json and index dates."""
-        if not self.research_dir.exists():
-            return
-
-        for sym_dir in self.research_dir.iterdir():
-            if not sym_dir.is_dir():
-                continue
-            sym = sym_dir.name.strip().upper().replace(".", "-")
-            for f in sym_dir.glob("earnings_*.json"):
-                try:
-                    with open(f, "r", encoding="utf-8") as fp:
-                        payload = json.load(fp)
-                    dates_set: Set[str] = set()
-                    for row in payload.get("data", []):
-                        raw_date = row.get("date")
-                        if raw_date:
-                            clean_date = raw_date[:10]
-                            dates_set.add(clean_date)
-                    if dates_set:
-                        if sym not in self.earnings_by_ticker:
-                            self.earnings_by_ticker[sym] = set()
-                        self.earnings_by_ticker[sym].update(dates_set)
-                except Exception as e:
-                    logger.debug(f"Could not load earnings for {sym}: {e}")
-
-    def is_in_blackout(
-        self,
-        ticker_a: str,
-        ticker_b: str,
-        target_date: Union[str, pd.Timestamp, date],
-        blackout_days: int = 5,
-        trading_calendar: Optional[List[pd.Timestamp]] = None,
-    ) -> Tuple[bool, Optional[str]]:
-        """Check if either ticker in the pair reports earnings within ±blackout_days trading days.
-        
-        Returns (is_blackout, reason).
-        """
-        ta = ticker_a.strip().upper().replace(".", "-")
-        tb = ticker_b.strip().upper().replace(".", "-")
-        t_ts = pd.to_datetime(target_date).normalize()
-
-        # Build window of check dates
-        if trading_calendar:
-            # Binary search target_date in trading_calendar
-            norm_cal = [ts.normalize() for ts in trading_calendar]
-            try:
-                pos = norm_cal.index(t_ts)
-            except ValueError:
-                # If target_date not explicitly in calendar, find insertion index
-                pos = int(np.searchsorted([ts.value for ts in norm_cal], t_ts.value))
-            start_pos = max(0, pos - blackout_days)
-            end_pos = min(len(norm_cal), pos + blackout_days + 1)
-            window_dates = {ts.strftime("%Y-%m-%d") for ts in norm_cal[start_pos:end_pos]}
-        else:
-            # Fallback to business days window: ±(blackout_days + 2) calendar days
-            b_days = pd.bdate_range(t_ts - pd.Timedelta(days=blackout_days * 2), t_ts + pd.Timedelta(days=blackout_days * 2))
-            # Slice closest ±blackout_days around target_date
-            pos = int(np.searchsorted([ts.value for ts in b_days], t_ts.value))
-            start_pos = max(0, pos - blackout_days)
-            end_pos = min(len(b_days), pos + blackout_days + 1)
-            window_dates = {ts.strftime("%Y-%m-%d") for ts in b_days[start_pos:end_pos]}
-
-        # Check ticker A
-        dates_a = self.earnings_by_ticker.get(ta, set())
-        overlap_a = dates_a.intersection(window_dates)
-        if overlap_a:
-            first_hit = sorted(list(overlap_a))[0]
-            return True, f"Earnings Blackout: {ta} reports on {first_hit} (within ±{blackout_days} trading days of {t_ts.strftime('%Y-%m-%d')})"
-
-        # Check ticker B
-        dates_b = self.earnings_by_ticker.get(tb, set())
-        overlap_b = dates_b.intersection(window_dates)
-        if overlap_b:
-            first_hit = sorted(list(overlap_b))[0]
-            return True, f"Earnings Blackout: {tb} reports on {first_hit} (within ±{blackout_days} trading days of {t_ts.strftime('%Y-%m-%d')})"
-
-        return False, None
 
 
 @dataclass
