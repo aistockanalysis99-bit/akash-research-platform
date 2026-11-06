@@ -92,7 +92,7 @@ Telegram messages will show both legs' actual fills, sides, quantities, and indi
 The following placeholders will be added to the **LOCAL** `.env` during Phase 1. Values remain user-supplied:
 
 ```dotenv
-TELEGRAM_BOT_TOKEN=
+TELEGRAM_TOKEN=  # (TELEGRAM_BOT_TOKEN also supported)
 TELEGRAM_ENABLED=True
 TELEGRAM_AUTH_PASSCODE=1234
 

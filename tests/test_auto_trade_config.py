@@ -15,6 +15,7 @@ def _env(**overrides: str) -> dict[str, str]:
         "ALPACA_SECRET_KEY": "",
         "ALPACA_BASE_URL": "https://paper-api.alpaca.markets",
         "TELEGRAM_ENABLED": "False",
+        "TELEGRAM_TOKEN": "",
         "TELEGRAM_BOT_TOKEN": "",
         "TELEGRAM_AUTH_PASSCODE": "",
     }
@@ -67,4 +68,18 @@ def test_invalid_numbers_fail_closed_without_import_crash() -> None:
     cfg = load_auto_trade_config(_env(AUTO_TRADE_MONITOR_MINUTES="abc"))
     assert not cfg.ready
     assert "AUTO_TRADE_MONITOR_MINUTES must be an integer" in cfg.validation_errors()
+
+
+def test_telegram_token_env_var_supported() -> None:
+    token = "999:render-telegram-token"
+    passcode = "pass123"
+    cfg = load_auto_trade_config(_env(
+        TELEGRAM_ENABLED="True",
+        TELEGRAM_TOKEN=token,
+        TELEGRAM_AUTH_PASSCODE=passcode,
+    ))
+    assert cfg.telegram_bot_token == token
+    assert cfg.telegram_token == token
+    assert cfg.ready
+
 

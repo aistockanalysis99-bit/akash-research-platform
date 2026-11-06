@@ -24,7 +24,7 @@ def auth_service(tmp_path, monkeypatch):
         "AUTO_TRADE_PAPER_ONLY": "True",
         "ALPACA_BASE_URL": "https://paper-api.alpaca.markets",
         "TELEGRAM_ENABLED": "True",
-        "TELEGRAM_BOT_TOKEN": "bot-token-secret",
+        "TELEGRAM_TOKEN": "bot-token-secret",
         "TELEGRAM_AUTH_PASSCODE": "1234",
     })
     return TelegramAuthService(config)

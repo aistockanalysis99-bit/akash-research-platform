@@ -340,7 +340,7 @@ Edit `.env` and provide your credentials:
 ```env
 FMP_API_KEY=your_fmp_api_key_here
 ANTHROPIC_API_KEY=your_claude_api_key_here     # Optional for AI research
-TELEGRAM_BOT_TOKEN=your_telegram_bot_token    # Optional for alerts
+TELEGRAM_TOKEN=your_telegram_bot_token    # Optional for alerts
 TELEGRAM_CHAT_ID=your_chat_id                 # Optional for alerts
 JWT_SECRET=your_secure_random_jwt_secret
 ```

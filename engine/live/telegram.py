@@ -20,6 +20,7 @@ from ..config import (
     TELEGRAM_BOT_TOKEN,
     TELEGRAM_CHAT_ID,
     TELEGRAM_ENABLED,
+    TELEGRAM_TOKEN,
 )
 from ..db.schema import get_connection
 from .schemas import MorningBriefing, PMDecision
@@ -51,7 +52,7 @@ class TelegramClient:
         token: Optional[str] = None,
         chat_id: Optional[str] = None,
     ) -> None:
-        self.token = token if token is not None else TELEGRAM_BOT_TOKEN
+        self.token = token if token is not None else (TELEGRAM_TOKEN or TELEGRAM_BOT_TOKEN)
         self._explicit_chat = chat_id is not None
         self.chat_id = chat_id if chat_id is not None else TELEGRAM_CHAT_ID
 

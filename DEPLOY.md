@@ -31,7 +31,7 @@ or runtime data get pushed.** Verify with `git status` before committing.
 2. In the service's **Environment** tab, set the secret values (these are
    `sync:false` in the blueprint, so they're entered by hand):
    `FMP_API_KEY`, `UW_API_KEY`, `GOOGLE_API_KEY`, `ANTHROPIC_API_KEY`,
-   `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`.
+   `TELEGRAM_TOKEN (or TELEGRAM_BOT_TOKEN)`, `TELEGRAM_CHAT_ID`.
 3. Deploy. Health check is `GET /health`. Note the URL,
    e.g. `https://akash-backend.onrender.com`.
 

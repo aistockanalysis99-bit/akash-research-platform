@@ -428,7 +428,7 @@ def _render_telegram(container: ui.column) -> None:
     with container:
         with ui.card().classes("w-full"):
             ui.label(
-                "Set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID in .env. "
+                "Set TELEGRAM_TOKEN and TELEGRAM_CHAT_ID in .env. "
                 "PM verdicts (APPROVE/RESIZE) and morning briefings auto-send."
             ).classes("text-xs text-gray-400")
 

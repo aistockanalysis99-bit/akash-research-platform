@@ -70,7 +70,9 @@ VIRTUAL_TRAIL_PCT: float = float(os.getenv("VIRTUAL_TRAIL_PCT", "0.10"))
 VIRTUAL_MAX_GROSS_PCT: float = float(os.getenv("VIRTUAL_MAX_GROSS_PCT", "1.0"))
 
 # Phase 4 — Telegram + Scheduler
-TELEGRAM_BOT_TOKEN: str = os.getenv("TELEGRAM_BOT_TOKEN", "")
+# Supports TELEGRAM_TOKEN (Render standard) and TELEGRAM_BOT_TOKEN (legacy)
+TELEGRAM_TOKEN: str = os.getenv("TELEGRAM_TOKEN") or os.getenv("TELEGRAM_BOT_TOKEN", "")
+TELEGRAM_BOT_TOKEN: str = TELEGRAM_TOKEN
 TELEGRAM_CHAT_ID: str = os.getenv("TELEGRAM_CHAT_ID", "")
 TELEGRAM_ENABLED: bool = os.getenv("TELEGRAM_ENABLED", "false").lower() in ("1", "true", "yes", "on")
 TELEGRAM_AUTH_PASSCODE: str = os.getenv("TELEGRAM_AUTH_PASSCODE", "")
@@ -199,10 +201,15 @@ class AutoTradeConfig:
         if self.enabled and not self.alpaca_secret_key:
             errors.append("armed automation requires ALPACA_SECRET_KEY")
         if self.telegram_enabled and not self.telegram_bot_token:
-            errors.append("enabled Telegram requires TELEGRAM_BOT_TOKEN")
+            errors.append("enabled Telegram requires TELEGRAM_TOKEN (or TELEGRAM_BOT_TOKEN)")
         if self.telegram_enabled and not self.telegram_auth_passcode:
             errors.append("enabled Telegram requires TELEGRAM_AUTH_PASSCODE")
         return list(dict.fromkeys(errors))
+
+    @property
+    def telegram_token(self) -> str:
+        """Alias for telegram_bot_token matching the TELEGRAM_TOKEN standard."""
+        return self.telegram_bot_token
 
     @property
     def ready(self) -> bool:
@@ -273,7 +280,7 @@ def load_auto_trade_config(environ: Mapping[str, str] | None = None) -> AutoTrad
         alpaca_base_url=env.get("ALPACA_BASE_URL", "https://paper-api.alpaca.markets").strip().rstrip("/"),
         alpaca_data_url=env.get("ALPACA_DATA_URL", "https://data.alpaca.markets").strip().rstrip("/"),
         telegram_enabled=_env_bool(env, "TELEGRAM_ENABLED", False),
-        telegram_bot_token=env.get("TELEGRAM_BOT_TOKEN", "").strip(),
+        telegram_bot_token=(env.get("TELEGRAM_TOKEN") or env.get("TELEGRAM_BOT_TOKEN", "")).strip(),
         telegram_auth_passcode=env.get("TELEGRAM_AUTH_PASSCODE", "").strip(),
         premarket_minutes=integer("AUTO_TRADE_PREMARKET_MINUTES", 90),
         monitor_minutes=integer("AUTO_TRADE_MONITOR_MINUTES", 10),
