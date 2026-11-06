@@ -139,6 +139,25 @@ def get_run_bundle(run_id: str) -> dict[str, Any] | None:
         for row in signals:
             item = dict(row)
             item["payload"] = json.loads(item.pop("payload_json"))
+            payload = item["payload"]
+            # Older persisted scans predate detailed rejection explanations.
+            # Enrich responses without rewriting historical trading decisions.
+            if item.get("decision") == "REJECTED" and not payload.get("rejection_details"):
+                from .strategy_v4_live import _rejection_details
+                from ..strategy_v4_engine import StrategyV4Config
+
+                if item.get("rejection_reason") == "GAUNTLET_FAILED":
+                    payload["failed_checks"] = [
+                        check for check in payload.get("failed_checks", [])
+                        if check != "z_score_divergence"
+                    ]
+                if payload.get("r_squared") is None and payload.get("correlation") is not None:
+                    payload["r_squared"] = float(payload["correlation"]) ** 2
+                payload["rejection_details"] = _rejection_details(
+                    str(item.get("rejection_reason") or "UNKNOWN"),
+                    payload,
+                    StrategyV4Config.load(),
+                )
             parsed_signals.append(item)
         result = dict(run)
         result["summary"] = json.loads(result.pop("summary_json")) if result.get("summary_json") else None

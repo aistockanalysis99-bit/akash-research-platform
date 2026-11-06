@@ -275,6 +275,24 @@ def test_dry_scan_parity_idempotency_and_no_orders(
     assert first["summary"]["trade_submission_available"] is False
     assert not hasattr(broker, "submit_order")
     assert "DRY RUN ONLY" in format_dry_scan_telegram(first)
+    # Legacy online scans must gain explanations without a new provider fetch.
+    conn = schema.get_connection()
+    try:
+        conn.execute(
+            "UPDATE strategy_v4_signal_snapshots SET decision='REJECTED', "
+            "rejection_reason='GAUNTLET_FAILED', payload_json=? WHERE signal_id=?",
+            (__import__("json").dumps({
+                "correlation": 0.59,
+                "failed_checks": ["correlation", "r_squared", "z_score_divergence"],
+            }), first["signals"][0]["signal_id"]),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+    legacy = repo.get_run_bundle(first["run_id"])["signals"][0]["payload"]
+    assert legacy["failed_checks"] == ["correlation", "r_squared"]
+    assert len(legacy["rejection_details"]) == 2
+    assert legacy["rejection_details"][1]["actual"] == "0.348"
 
 
 def test_run_identity_covers_full_history_and_risk_config(
