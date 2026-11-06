@@ -146,7 +146,7 @@ def validate_target_date(date_str: str, engine: PointInTimeEngine) -> pd.Timesta
     if ts < trading_dates[0]:
         raise HTTPException(
             400,
-            f"Date {date_str} is earlier than earliest available date: {trading_dates[0].strftime('%Y-%m-%d')}."
+            f"Date {date_str} is out of bounds (earlier than earliest available date: {trading_dates[0].strftime('%Y-%m-%d')})."
         )
     if ts > trading_dates[-1]:
         return trading_dates[-1]
@@ -879,7 +879,7 @@ def get_backtest_1y(
         run_1y_walkforward_backtest,
     )
 
-    if period:
+    if isinstance(period, str) and period.strip():
         p_up = period.strip().upper()
         if p_up == "1Y":
             s_clean = "2025-10-26"
@@ -969,6 +969,7 @@ def get_backtest_1y(
 
 @router.post("/backtest-1y/recalculate")
 def recalculate_backtest_1y(
+    period: Optional[str] = Query(None),
     start_date: Optional[str] = Query(None),
     end_date: Optional[str] = Query(None),
     entry_z: Optional[float] = Query(None),
@@ -977,6 +978,7 @@ def recalculate_backtest_1y(
 ) -> Response:
     """Explicit POST endpoint to force recalculation of the walkforward backtest with settings."""
     return get_backtest_1y(
+        period=period,
         refresh=True,
         start_date=start_date,
         end_date=end_date,
