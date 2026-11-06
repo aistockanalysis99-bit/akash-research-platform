@@ -97,11 +97,28 @@ def test_status_before_authorization_is_redacted(auth_service) -> None:
     assert "1234" not in response.text
 
 
-def test_group_chat_cannot_authorize(auth_service) -> None:
-    result = auth_service.process_update(update(1, "/start", chat_type="group"))
-    assert result.code == "rejected_non_private"
-    assert not is_authorized("10")
-    assert "private chat" in result.text
+def test_group_chat_can_authorize(auth_service) -> None:
+    # 1. /start in group prompts for passcode
+    result = auth_service.process_update(update(1, "/start", chat_id=-10012345, chat_type="group"))
+    assert result.code == "awaiting_passcode"
+    assert "group" in result.text.lower()
+    assert not is_authorized("-10012345")
+
+    # 2. Member provides passcode in group -> authorizes group
+    auth_result = auth_service.process_update(update(2, "1234", chat_id=-10012345, chat_type="group"))
+    assert auth_result.code == "authorized"
+    assert is_authorized("-10012345")
+
+    # 3. Normal chatter in group does not spam or error
+    chatter = auth_service.process_update(update(3, "Hey guys check this trade", chat_id=-10012345, chat_type="group"))
+    assert chatter.code == "ignored_group_message"
+
+
+def test_group_chat_direct_auth_command(auth_service) -> None:
+    # Member in supergroup can also do /auth 1234 in one shot
+    result = auth_service.process_update(update(10, "/auth 1234", chat_id=-10099999, chat_type="supergroup"))
+    assert result.code == "authorized"
+    assert is_authorized("-10099999")
 
 
 def test_broadcast_targets_are_only_authorized_chats(auth_service) -> None:

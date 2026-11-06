@@ -160,35 +160,46 @@ class TelegramAuthService:
         if not chat_id or not user_id:
             set_last_update_id(update_id)
             return TelegramAuthResponse("ignored_invalid_identity")
-        if chat.get("type") != "private":
-            set_last_update_id(update_id)
-            return TelegramAuthResponse(
-                "rejected_non_private", chat_id,
-                "Authorization is available only in a private chat with this bot.")
+
+        chat_type = chat.get("type", "private")
+        is_group = chat_type in ("group", "supergroup", "channel")
+        target_name = "this group" if is_group else "this chat"
 
         normalized = text.strip()
-        command = normalized.split(maxsplit=1)[0].split("@", 1)[0].lower()
-        if command == "/start":
-            if is_authorized(chat_id):
-                result = "already_authorized"
-                reply = "This chat is already authorized. Use /status to check bot health."
+        parts = normalized.split(maxsplit=1)
+        command = parts[0].split("@", 1)[0].lower()
+        arg = parts[1].strip() if len(parts) > 1 else ""
+
+        if command in ("/auth", "/login", "/passcode"):
+            if arg:
+                result, reply = self._check_passcode(chat_id, user_id, user, arg)
             else:
                 begin_authorization(chat_id)
                 result = "awaiting_passcode"
-                reply = "Enter the authorization passcode to enable alerts for this private chat."
+                reply = f"Enter the authorization passcode to enable alerts for {target_name}."
+        elif command == "/start":
+            if arg:
+                result, reply = self._check_passcode(chat_id, user_id, user, arg)
+            elif is_authorized(chat_id):
+                result = "already_authorized"
+                reply = f"{target_name.capitalize()} is already authorized. Use /status to check bot health."
+            else:
+                begin_authorization(chat_id)
+                result = "awaiting_passcode"
+                reply = f"Enter the authorization passcode to enable alerts for {target_name} (or send /auth <passcode>)."
         elif command == "/stop":
             revoke_chat(chat_id)
             result = "revoked"
-            reply = "Authorization removed. This chat will no longer receive alerts."
+            reply = f"Authorization removed. {target_name.capitalize()} will no longer receive alerts."
         elif command == "/status":
             if not is_authorized(chat_id):
                 result = "status_unauthorized"
-                reply = "This chat is not authorized. Send /start to begin."
+                reply = f"{target_name.capitalize()} is not authorized. Send /start to begin."
             else:
                 snapshot = self.config.public_snapshot()
                 alpaca = snapshot["alpaca"]
                 reply = (
-                    "Authorized. Paper automation is "
+                    f"Authorized. Paper automation is "
                     f"{'armed' if snapshot['enabled'] else 'disarmed'}. "
                     "Alpaca credentials configured: "
                     f"{bool(alpaca['api_key_configured'] and alpaca['secret_key_configured'])}. "
@@ -198,12 +209,25 @@ class TelegramAuthService:
         elif self._awaiting(chat_id):
             result, reply = self._check_passcode(
                 chat_id, user_id, user, normalized)
+        elif self._is_passcode_match(normalized):
+            result, reply = self._check_passcode(
+                chat_id, user_id, user, normalized)
+        elif is_group:
+            # Avoid spamming group chats with errors on normal chatter
+            set_last_update_id(update_id)
+            return TelegramAuthResponse("ignored_group_message", chat_id)
         else:
             result = "not_awaiting"
-            reply = "Send /start to authorize this private chat."
+            reply = f"Send /start to authorize {target_name}."
 
         set_last_update_id(update_id)
         return TelegramAuthResponse(result, chat_id, reply)
+
+    def _is_passcode_match(self, candidate: str) -> bool:
+        expected = self.config.telegram_auth_passcode
+        return bool(expected and candidate and hmac.compare_digest(
+            candidate.encode("utf-8"), expected.encode("utf-8")
+        ))
 
     def _check_passcode(
         self,
@@ -223,7 +247,9 @@ class TelegramAuthService:
         self._record_attempt(chat_id, user_id, success)
         if success:
             self._authorize(chat_id, user_id, user)
-            return "authorized", "Authorization successful. This chat will now receive bot alerts."
+            is_group = str(chat_id).startswith("-")
+            desc = "This group" if is_group else "This chat"
+            return "authorized", f"Authorization successful. {desc} will now receive bot alerts."
 
         failures = self._recent_failures(chat_id)
         if failures >= self.MAX_FAILURES:

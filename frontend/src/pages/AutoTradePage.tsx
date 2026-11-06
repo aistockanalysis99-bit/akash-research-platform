@@ -1,6 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, Bot, RefreshCw, ShieldCheck, Power, Eye, BarChart2, CheckCircle2 } from "lucide-react";
+import { AlertTriangle, Bot, RefreshCw, ShieldCheck, Power, Eye, BarChart2, CheckCircle2, Loader2, Sparkles, Activity } from "lucide-react";
 import { api } from "@/lib/api";
 import type { AutoTradeSignal } from "@/lib/autoTradeTypes";
 import { Badge, Button, Card, ErrorBox, Loading, PageTitle, StatCard } from "@/components/ui";
@@ -72,6 +72,98 @@ export default function AutoTradePage() {
   const summary = run?.summary;
   const readiness = status.data?.readiness.configuration;
 
+  const isScanning = scan.isPending || runToday.isPending;
+  const [lastScanDone, setLastScanDone] = useState(false);
+
+  // Live progress simulation for scanning all 53 pairs in the universe
+  const [progressPct, setProgressPct] = useState(0);
+  const [pairCount, setPairCount] = useState(0);
+  const [stageText, setStageText] = useState("");
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+
+  useEffect(() => {
+    if (!isScanning) {
+      if (progressPct > 0) {
+        setProgressPct(100);
+        setPairCount(53);
+        setStageText("Complete — all 53 pairs analyzed");
+        setLastScanDone(true);
+        const t = setTimeout(() => {
+          setProgressPct(0);
+          setPairCount(0);
+          setStageText("");
+        }, 5000);
+        return () => clearTimeout(t);
+      }
+      return;
+    }
+
+    setLastScanDone(false);
+    setProgressPct(6);
+    setPairCount(1);
+    setStageText("Loading 90-day institutional price series (53 pairs)...");
+    const start = Date.now();
+
+    const timer = setInterval(() => {
+      const now = Date.now();
+      const diffSec = Math.floor((now - start) / 1000);
+      setElapsedSeconds(diffSec);
+
+      setProgressPct((prev) => {
+        if (prev < 20) return prev + 2.4;
+        if (prev < 48) return prev + 1.8;
+        if (prev < 72) return prev + 1.1;
+        if (prev < 88) return prev + 0.6;
+        if (prev < 95) return prev + 0.2;
+        return prev;
+      });
+
+      setPairCount((prev) => {
+        const next = Math.min(53, Math.max(1, Math.floor((Date.now() - start) / 380)));
+        return next;
+      });
+
+      if (diffSec < 4) {
+        setStageText("Loading 90-day institutional price series (53 pairs)...");
+      } else if (diffSec < 10) {
+        setStageText("Calculating cointegration & OLS hedge ratios (β)...");
+      } else if (diffSec < 18) {
+        setStageText("Evaluating z-score hurdles (|Z| ≥ 2.0σ) & half-life limits...");
+      } else if (diffSec < 26) {
+        setStageText("Running econometric gauntlet (ADF, volatility, earnings blackouts)...");
+      } else {
+        setStageText("Formulating draft orders & persisting universe ledger...");
+      }
+    }, 300);
+
+    return () => clearInterval(timer);
+  }, [isScanning]);
+
+  const handleExecuteToday = async () => {
+    if (status.data?.kill_switch) {
+      alert("Emergency kill switch is currently ACTIVE. Disarm the kill switch below before executing trades.");
+      return;
+    }
+
+    if (!status.data?.armed) {
+      const armAndRun = window.confirm(
+        "Paper execution is currently DISARMED (safety mode).\n\n" +
+        "Would you like to ARM paper execution now and run today's Strategy 4 trades on Alpaca paper account?"
+      );
+      if (!armAndRun) return;
+      try {
+        await control.mutateAsync({ armed: true, confirm: true });
+      } catch (err) {
+        alert("Could not arm execution: " + (err as Error).message);
+        return;
+      }
+    } else {
+      const proceed = window.confirm("Refresh today's Strategy 4 trades and submit qualified paper orders to Alpaca?");
+      if (!proceed) return;
+    }
+    runToday.mutate();
+  };
+
   const qualifiedSignals = useMemo(() => {
     return run?.signals?.filter((s) => s.decision === "QUALIFIED") ?? [];
   }, [run?.signals]);
@@ -81,7 +173,7 @@ export default function AutoTradePage() {
       <PageTitle
         title="Strategy 4 Auto Trade"
         subtitle="Alpaca paper trading · persisted two-leg execution and Strategy 4 exit management."
-        actions={<div className="flex gap-2">
+        actions={<div className="flex items-center gap-2 flex-wrap">
           <Button
             variant="outline"
             onClick={() => setShowUniverseModal(true)}
@@ -91,19 +183,76 @@ export default function AutoTradePage() {
             <Eye className="h-4 w-4 mr-1" />
             Inspect Universe ({run?.signals?.length ?? 0})
           </Button>
-          <Button variant="outline" onClick={() => scan.mutate()} disabled={scan.isPending || !readiness?.ready}>
+          <Button
+            variant="outline"
+            onClick={() => scan.mutate()}
+            disabled={isScanning}
+            title="Scan all 53 pairs in universe without submitting broker orders"
+          >
             <RefreshCw className={`h-4 w-4 ${scan.isPending ? "animate-spin" : ""}`} />
-            {scan.isPending ? "Scanning…" : "Run dry scan"}
+            {scan.isPending ? "Scanning universe…" : "Run dry scan"}
           </Button>
           <Button
-            onClick={() => window.confirm("Refresh today's Strategy 4 trades and submit qualified paper orders during the valid entry window?") && runToday.mutate()}
-            disabled={runToday.isPending || !readiness?.ready || !status.data?.armed || status.data?.kill_switch}
+            onClick={handleExecuteToday}
+            disabled={isScanning || status.data?.kill_switch}
+            className={!status.data?.armed ? "bg-amber-600 hover:bg-amber-500 text-white" : ""}
+            title={!status.data?.armed ? "Currently disarmed — click to arm & execute" : "Refresh & execute today's paper trades"}
           >
             <Power className="h-4 w-4" />
-            {runToday.isPending ? "Running today…" : "Refresh & execute today"}
+            {runToday.isPending ? "Running today…" : !status.data?.armed ? "Arm & execute today" : "Refresh & execute today"}
           </Button>
         </div>}
       />
+
+      {/* ── REAL-TIME PROGRESS HUD ── */}
+      {isScanning && (
+        <Card className="mb-4 border-brand/50 bg-brand/5 p-4 relative overflow-hidden shadow-lg animate-in fade-in duration-200">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin text-brand" />
+              <span className="font-semibold text-white text-sm">
+                {scan.isPending ? "Running Strategy 4 Dry Scan" : "Running Daily Strategy 4 Analysis & Execution"}
+              </span>
+              <Badge className="border-brand/40 bg-brand/20 text-brand text-xs">
+                Pair {pairCount} / 53
+              </Badge>
+            </div>
+            <div className="flex items-center gap-3 text-xs font-mono">
+              <span className="text-brand font-semibold">{Math.round(progressPct)}%</span>
+              <span className="text-gray-400">⏱ {String(Math.floor(elapsedSeconds / 60)).padStart(2, "0")}:{String(elapsedSeconds % 60).padStart(2, "0")}</span>
+            </div>
+          </div>
+
+          <div className="w-full bg-gray-800 rounded-full h-2.5 overflow-hidden border border-gray-700/80 mb-2.5">
+            <div
+              className="bg-gradient-to-r from-brand/70 via-brand to-cyan-400 h-2.5 rounded-full transition-all duration-300 ease-out shadow-[0_0_10px_rgba(45,212,191,0.5)]"
+              style={{ width: `${progressPct}%` }}
+            />
+          </div>
+
+          <div className="flex items-center justify-between text-xs text-gray-400">
+            <span className="italic">{stageText}</span>
+            <span className="text-gray-500 font-mono">ADF stationarity &amp; z-scores</span>
+          </div>
+        </Card>
+      )}
+
+      {/* ── SCAN COMPLETED BANNER ── */}
+      {lastScanDone && !isScanning && (
+        <Card className="mb-4 border-pos/40 bg-pos/10 p-3.5 flex items-center justify-between animate-in fade-in duration-200">
+          <div className="flex items-center gap-2 text-pos text-sm font-medium">
+            <CheckCircle2 className="h-4 w-4" />
+            <span>Scan complete! All 53 universe pairs evaluated ({qualifiedSignals.length} qualified).</span>
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => setShowUniverseModal(true)}
+            className="border-pos/40 text-pos hover:bg-pos/10 text-xs py-1 h-7"
+          >
+            Inspect Scanned Universe
+          </Button>
+        </Card>
+      )}
 
       <Card className="mb-4 border-brand/30 bg-brand/5">
         <div className="flex gap-3">

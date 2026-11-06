@@ -90,22 +90,43 @@ export default function AnalyzePage() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            const s = symbol.trim().toUpperCase();
-            if (s) analyze.mutate(s);
+            const s = (symbol.trim() || "NVDA").toUpperCase();
+            if (!symbol.trim()) setSymbol("NVDA");
+            analyze.mutate(s);
           }}
-          className="flex items-center gap-3"
+          className="space-y-3"
         >
-          <input
-            value={symbol}
-            onChange={(e) => setSymbol(e.target.value)}
-            placeholder="Ticker e.g. NVDA"
-            className="bg-bg-soft border border-line rounded-lg px-4 py-2 text-sm w-48 font-mono uppercase focus:border-brand/50 outline-none"
-          />
-          <Button type="submit" disabled={analyze.isPending || !symbol.trim()}>
-            {analyze.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
-            Run analysis
-          </Button>
-          {analyze.error && <span className="text-sm text-neg">{(analyze.error as Error).message}</span>}
+          <div className="flex items-center gap-3">
+            <input
+              value={symbol}
+              onChange={(e) => setSymbol(e.target.value)}
+              placeholder="Ticker e.g. NVDA"
+              className="bg-bg-soft border border-line rounded-lg px-4 py-2 text-sm w-48 font-mono uppercase focus:border-brand/50 outline-none"
+            />
+            <Button type="submit" disabled={analyze.isPending}>
+              {analyze.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
+              Run analysis
+            </Button>
+            {analyze.error && <span className="text-sm text-neg">{(analyze.error as Error).message}</span>}
+          </div>
+
+          <div className="flex items-center gap-2 text-xs text-gray-400">
+            <span>Quick pick:</span>
+            {["NVDA", "AAPL", "MSFT", "TSLA", "GOOGL", "META", "AMZN"].map((sym) => (
+              <button
+                key={sym}
+                type="button"
+                onClick={() => setSymbol(sym)}
+                className={`px-2 py-0.5 rounded border text-[11px] font-mono transition-colors ${
+                  symbol.toUpperCase() === sym
+                    ? "bg-brand/20 border-brand text-brand"
+                    : "bg-surface-2 border-line hover:border-gray-500 text-gray-300"
+                }`}
+              >
+                {sym}
+              </button>
+            ))}
+          </div>
         </form>
       </Card>
 
