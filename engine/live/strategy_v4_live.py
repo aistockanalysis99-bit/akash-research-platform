@@ -109,6 +109,103 @@ def _chart_snapshot(
     }
 
 
+def _rejection_details(
+    reason: str,
+    payload: Mapping[str, Any],
+    config: StrategyV4Config,
+) -> list[dict[str, str]]:
+    """Explain every rejection with measured and required values."""
+    actuals: dict[str, tuple[str, str, str]] = {
+        "adf_stationarity": (
+            f"{float(payload.get('adf_tstat', 0)):.3f}", "≤ -2.800",
+            "The spread did not demonstrate strong enough mean-reverting stationarity.",
+        ),
+        "cointegration_pvalue": (
+            f"{float(payload.get('adf_pvalue', 1)):.4f}", "≤ 0.0500",
+            "The probability of a non-stationary relationship is above the allowed level.",
+        ),
+        "correlation": (
+            f"{float(payload.get('correlation', 0)):.3f}", "≥ 0.850",
+            "The two stocks are not moving together closely enough for this pair model.",
+        ),
+        "r_squared": (
+            f"{float(payload.get('r_squared', 0)):.3f}", "≥ 0.350",
+            "The hedge regression explains too little of the relationship between the stocks.",
+        ),
+        "half_life_reversion": (
+            f"{float(payload.get('half_life_days', 0)):.1f} days", "2.0–35.0 days",
+            "The estimated reversion speed is outside the strategy's usable holding range.",
+        ),
+        "zero_crossings": (
+            str(int(payload.get('zero_crossings', 0))), "≥ 6",
+            "The spread has not crossed its mean often enough to prove repeatable reversion.",
+        ),
+        "spread_tightness": (
+            f"{float(payload.get('spread_vol_pct', 0)):.2f}%", "≤ 7.00%",
+            "The spread is too volatile for a stable paired position.",
+        ),
+    }
+    details: list[dict[str, str]] = []
+    if reason == "GAUNTLET_FAILED":
+        for check in payload.get("failed_checks", []):
+            actual, required, explanation = actuals.get(
+                str(check), ("Failed", "Must pass", "This econometric requirement was not met."))
+            details.append({"rule": str(check), "actual": actual,
+                            "required": required, "explanation": explanation})
+        return details
+
+    z_abs = abs(float(payload.get("z_score", 0)))
+    rules: dict[str, tuple[str, str, str]] = {
+        "ENTRY_Z_BELOW_HURDLE": (
+            f"|Z| = {z_abs:.2f}σ", f"≥ {config.z_score_entry_hurdle:.2f}σ",
+            "The price spread has not diverged far enough to create a Strategy 4 entry.",
+        ),
+        "ENTRY_Z_ABOVE_MAX": (
+            f"|Z| = {z_abs:.2f}σ", f"< {config.z_score_entry_max:.2f}σ",
+            "The divergence is beyond the safe entry cap and may indicate a structural break.",
+        ),
+        "MOMENTUM_NOT_FLATTENING": (
+            f"ΔZ = {float(payload.get('momentum_slope', 0)):.3f}σ",
+            f"≤ {config.max_entry_momentum_slope:.3f}σ or reversing",
+            "The spread is still moving away from its mean, so the falling-knife guard blocked entry.",
+        ),
+        "SPREAD_VOLATILITY_CAP": (
+            f"{float(payload.get('spread_vol_pct', 0)):.2f}%",
+            f"≤ {config.max_allowed_spread_vol_pct:.2f}%",
+            "Spread volatility is above the Strategy 4 safety cap.",
+        ),
+        "VIX_PANIC_FREEZE": (
+            f"{float(payload.get('market_vol_pct', 0)):.2f}",
+            f"≤ {config.vix_panic_threshold:.2f}",
+            "The macro-volatility overlay freezes new entries in a panic regime.",
+        ),
+        "EARNINGS_BLACKOUT": (
+            str(payload.get("earnings_blackout_reason") or "Earnings window"),
+            "Outside the configured earnings blackout",
+            "Company earnings can break the historical pair relationship, so entry is blocked.",
+        ),
+        "PREVIOUS_Z_UNAVAILABLE": (
+            "Previous Z unavailable", "Two consecutive valid Z observations",
+            "Strategy 4 could not confirm that divergence momentum is flattening or reversing.",
+        ),
+        "PAIR_DATA_UNAVAILABLE": (
+            "Insufficient aligned bars", f"≥ {config.lookback_days} valid daily bars",
+            "The pair cannot be evaluated reliably without a complete aligned price history.",
+        ),
+        "BROKER_MARKET_DATA_UNAVAILABLE": (
+            "Broker data request failed", "Fresh Alpaca asset and quote data",
+            "Execution eligibility could not be verified, so the trade failed closed.",
+        ),
+    }
+    actual, required, explanation = rules.get(
+        reason,
+        (reason.replace("_", " ").title(), "All execution and risk checks must pass",
+         "A Strategy 4 execution or portfolio safety rule prevented this trade."),
+    )
+    return [{"rule": reason, "actual": actual, "required": required,
+             "explanation": explanation}]
+
+
 def load_elite_pairs(path: Path | None = None) -> list[dict[str, Any]]:
     source = path or PROJECT_ROOT / "elite_curated_pairs.json"
     payload = json.loads(source.read_text(encoding="utf-8"))
@@ -379,7 +476,7 @@ class StrategyV4DryScanner:
             "risk": risk_fingerprint,
             "market_vol_pct": round(resolved_market_vol_pct, 8),
             "current_drawdown_pct": round(float(current_drawdown_pct), 8),
-            "snapshot_contract": 2,
+            "snapshot_contract": 3,
         })[:24]
         claimed, status = repo.claim_run(
             run_id,
@@ -502,8 +599,11 @@ class StrategyV4DryScanner:
                     "composite_score": setup.composite_score,
                     "rank": rank_by_pair.get(pair_name),
                     "correlation": setup.correlation,
+                    "r_squared": setup.r_squared,
                     "adf_pvalue": setup.adf_pvalue,
                     "adf_tstat": setup.adf_tstat,
+                    "zero_crossings": setup.zero_crossings,
+                    "checks": setup.checks,
                     "momentum_slope": entry.momentum_slope,
                     "drawdown_dampened": entry.is_dampened,
                     "earnings_blackout": blackout,
@@ -557,6 +657,9 @@ class StrategyV4DryScanner:
                 payload.update(execution)
 
             decision = "QUALIFIED" if reason is None else "REJECTED"
+            if reason is not None:
+                payload["rejection_details"] = _rejection_details(
+                    reason, payload, self.strategy_config)
             signal_id = "sig-" + canonical_hash({
                 "run_id": run_id,
                 "pair": pair_name,

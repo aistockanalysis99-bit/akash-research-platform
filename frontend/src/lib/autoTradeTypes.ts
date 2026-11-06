@@ -38,6 +38,15 @@ export interface AutoTradeSignal {
     max_holding_date?: string;
     proposed_legs?: AutoTradeLeg[];
     failed_checks?: string[];
+    rejection_details?: Array<{
+      rule: string;
+      actual: string;
+      required: string;
+      explanation: string;
+    }>;
+    r_squared?: number;
+    zero_crossings?: number;
+    checks?: Record<string, boolean>;
     chart_snapshot?: import("./simulatorTypes").PairChartResponse & { source?: string };
   };
 }

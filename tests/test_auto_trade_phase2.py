@@ -19,6 +19,7 @@ from engine.live.strategy_v4_live import (
     StrategyV4DryScanner,
     _current_drawdown_pct,
     _previous_z,
+    _rejection_details,
     format_dry_scan_telegram,
     resolve_market_session,
     validate_market_frame,
@@ -210,6 +211,28 @@ def test_current_drawdown_uses_valid_portfolio_peak() -> None:
     assert _current_drawdown_pct({"equity": []}, 100_000) == 0.0
 
 
+def test_rejection_details_show_measured_values_and_strategy_thresholds() -> None:
+    details = _rejection_details(
+        "GAUNTLET_FAILED",
+        {
+            "failed_checks": ["correlation", "r_squared"],
+            "correlation": 0.61,
+            "r_squared": 0.2025,
+        },
+        StrategyV4Config(),
+    )
+    assert details == [
+        {
+            "rule": "correlation", "actual": "0.610", "required": "≥ 0.850",
+            "explanation": "The two stocks are not moving together closely enough for this pair model.",
+        },
+        {
+            "rule": "r_squared", "actual": "0.203", "required": "≥ 0.350",
+            "explanation": "The hedge regression explains too little of the relationship between the stocks.",
+        },
+    ]
+
+
 def test_dry_scan_parity_idempotency_and_no_orders(
     phase2_db, fixed_setup,
 ) -> None:
@@ -245,6 +268,7 @@ def test_dry_scan_parity_idempotency_and_no_orders(
     assert chart["current_date"] == "2026-11-04"
     assert len(chart["historical_bars"]) == scanner.strategy_config.lookback_days
     assert chart["historical_bars"][-1]["date"] == "2026-11-04"
+    assert first["signals"][0]["payload"].get("rejection_details") is None
     assert first["run_id"] == second["run_id"]
     assert first["signals"][0]["signal_id"] == second["signals"][0]["signal_id"]
     assert second["idempotent_replay"] is True

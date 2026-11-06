@@ -520,6 +520,39 @@ export function UniverseInspectionModal({
                   </div>
                 </div>
 
+                {selectedPair.decision === "REJECTED" && selP?.rejection_details && selP.rejection_details.length > 0 && (
+                  <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <ShieldAlert className="h-4 w-4 text-amber-400" />
+                      <h4 className="text-sm font-semibold text-white">Why Strategy 4 did not select this trade</h4>
+                    </div>
+                    <div className="space-y-2">
+                      {selP.rejection_details.map((item) => (
+                        <div key={item.rule} className="rounded-md border border-line/60 bg-slate-950/50 p-3 text-xs">
+                          <div className="grid gap-2 sm:grid-cols-[1.1fr_0.8fr_0.8fr]">
+                            <div>
+                              <div className="text-[10px] uppercase tracking-wider text-gray-500">Rule</div>
+                              <div className="font-semibold text-amber-300">{item.rule.replace(/_/g, " ")}</div>
+                            </div>
+                            <div>
+                              <div className="text-[10px] uppercase tracking-wider text-gray-500">Measured</div>
+                              <div className="font-mono text-rose-300">{item.actual}</div>
+                            </div>
+                            <div>
+                              <div className="text-[10px] uppercase tracking-wider text-gray-500">Strategy requires</div>
+                              <div className="font-mono text-emerald-300">{item.required}</div>
+                            </div>
+                          </div>
+                          <p className="mt-2 text-gray-400 leading-relaxed">{item.explanation}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="mt-3 text-[11px] text-gray-500">
+                      The pair remains rejected until every listed requirement passes on the same scan window.
+                    </p>
+                  </div>
+                )}
+
                 {/* Scorecard Grid */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
                   <div className="rounded border border-line/60 bg-bg-soft p-2.5">
