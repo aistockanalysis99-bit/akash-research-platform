@@ -271,6 +271,7 @@ export function UniverseInspectionModal({
   const cutoffDate = summary?.data_cutoff_date || "2026-11-04";
   const tickerA = selectedPair?.ticker_a;
   const tickerB = selectedPair?.ticker_b;
+  const scanChart = selectedPair?.payload.chart_snapshot;
 
   const chartQuery = useQuery({
     queryKey: ["pair-chart-inspect", tickerA, tickerB, cutoffDate],
@@ -283,7 +284,7 @@ export function UniverseInspectionModal({
         lookback_days: 90,
       });
     },
-    enabled: isOpen && !!tickerA && !!tickerB,
+    enabled: isOpen && !!tickerA && !!tickerB && !scanChart,
     staleTime: 60000,
     retry: 1,
   });
@@ -317,6 +318,7 @@ export function UniverseInspectionModal({
   const normalCount = signals.filter((s) => s.payload.z_score != null && Math.abs(s.payload.z_score) < 1.5).length;
 
   const selP = selectedPair?.payload;
+  const chartData = scanChart ?? chartQuery.data;
   const reasonFmt = selectedPair ? formatReason(selectedPair.rejection_reason, selP?.z_score, selP?.failed_checks) : null;
 
   return (
@@ -548,16 +550,16 @@ export function UniverseInspectionModal({
 
                 {/* Interactive Visual Inspection: Dual Price Chart & Z-Score Trajectory */}
                 <div>
-                  {chartQuery.isLoading && <Loading label="Fetching 90-day price series and spread trajectory…" />}
-                  {chartQuery.isError && (
+                  {chartQuery.isLoading && !scanChart && <Loading label="Fetching 90-day price series and spread trajectory…" />}
+                  {chartQuery.isError && !scanChart && (
                     <div className="rounded-lg border border-line/60 bg-bg-soft/40 p-4 text-xs text-gray-400">
                       Historical bar data unavailable for this ticker pair.
                     </div>
                   )}
-                  {chartQuery.data && (
+                  {chartData && (
                     <>
-                      <MiniDualPriceChart chart={chartQuery.data} />
-                      <MiniZScoreChart chart={chartQuery.data} />
+                      <MiniDualPriceChart chart={chartData} />
+                      <MiniZScoreChart chart={chartData} />
                     </>
                   )}
                 </div>

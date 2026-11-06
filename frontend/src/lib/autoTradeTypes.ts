@@ -38,6 +38,7 @@ export interface AutoTradeSignal {
     max_holding_date?: string;
     proposed_legs?: AutoTradeLeg[];
     failed_checks?: string[];
+    chart_snapshot?: import("./simulatorTypes").PairChartResponse & { source?: string };
   };
 }
 

@@ -72,6 +72,43 @@ def strategy_config_hash(config: StrategyV4Config) -> str:
     return canonical_hash(asdict(config))
 
 
+def _chart_snapshot(
+    frame: pd.DataFrame,
+    setup: PointInTimeSetup,
+    cutoff: date,
+    lookback_days: int,
+) -> dict[str, Any]:
+    """Persist the exact bars and spread model used for the scan decision."""
+    prices = frame["Adj Close"][[setup.ticker_a, setup.ticker_b]].dropna().tail(lookback_days)
+    bars: list[dict[str, Any]] = []
+    for stamp, row in prices.iterrows():
+        price_a = float(row[setup.ticker_a])
+        price_b = float(row[setup.ticker_b])
+        spread = price_a - setup.hedge_ratio * price_b
+        z_score = (
+            (spread - setup.spread_mean) / setup.spread_std
+            if setup.spread_std > 1e-12 else 0.0
+        )
+        bars.append({
+            "date": pd.Timestamp(stamp).date().isoformat(),
+            "price_a": round(price_a, 4),
+            "price_b": round(price_b, 4),
+            "spread": round(spread, 6),
+            "z_score": round(float(z_score), 6),
+        })
+    return {
+        "ticker_a": setup.ticker_a,
+        "ticker_b": setup.ticker_b,
+        "current_date": cutoff.isoformat(),
+        "reveal": False,
+        "setup": setup.to_dict(),
+        "historical_bars": bars,
+        "forward_bars": None,
+        "forward_outcome": None,
+        "source": "strategy_v4_scan_snapshot",
+    }
+
+
 def load_elite_pairs(path: Path | None = None) -> list[dict[str, Any]]:
     source = path or PROJECT_ROOT / "elite_curated_pairs.json"
     payload = json.loads(source.read_text(encoding="utf-8"))
@@ -342,6 +379,7 @@ class StrategyV4DryScanner:
             "risk": risk_fingerprint,
             "market_vol_pct": round(resolved_market_vol_pct, 8),
             "current_drawdown_pct": round(float(current_drawdown_pct), 8),
+            "snapshot_contract": 2,
         })[:24]
         claimed, status = repo.claim_run(
             run_id,
@@ -470,6 +508,10 @@ class StrategyV4DryScanner:
                     "drawdown_dampened": entry.is_dampened,
                     "earnings_blackout": blackout,
                     "earnings_blackout_reason": blackout_reason,
+                    "chart_snapshot": _chart_snapshot(
+                        frame, setup, context.data_cutoff_date,
+                        self.strategy_config.lookback_days,
+                    ),
                 })
                 # Check econometric gauntlet (excluding rolling Z which is handled by evaluate_strategy_v4_entry)
                 econ_failed = [
@@ -478,7 +520,7 @@ class StrategyV4DryScanner:
                 ]
                 if econ_failed:
                     reason = "GAUNTLET_FAILED"
-                    payload["failed_checks"] = sorted(k for k, passed in setup.checks.items() if not passed)
+                    payload["failed_checks"] = sorted(econ_failed)
                 elif not entry.accepted:
                     reason = entry.reason
                     if hasattr(setup, "checks") and setup.checks:

@@ -239,6 +239,12 @@ def test_dry_scan_parity_idempotency_and_no_orders(
     assert direct.accepted
     assert first["summary"]["qualified_pairs"] == 1
     assert first["signals"][0]["payload"]["sizing_multiplier"] == round(direct.sizing_multiplier, 6)
+    chart = first["signals"][0]["payload"]["chart_snapshot"]
+    assert chart["source"] == "strategy_v4_scan_snapshot"
+    assert chart["ticker_a"] == "AAA" and chart["ticker_b"] == "BBB"
+    assert chart["current_date"] == "2026-11-04"
+    assert len(chart["historical_bars"]) == scanner.strategy_config.lookback_days
+    assert chart["historical_bars"][-1]["date"] == "2026-11-04"
     assert first["run_id"] == second["run_id"]
     assert first["signals"][0]["signal_id"] == second["signals"][0]["signal_id"]
     assert second["idempotent_replay"] is True
