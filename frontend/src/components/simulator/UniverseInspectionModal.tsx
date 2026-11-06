@@ -277,12 +277,7 @@ export function UniverseInspectionModal({
     queryKey: ["pair-chart-inspect", tickerA, tickerB, cutoffDate],
     queryFn: () => {
       if (!tickerA || !tickerB) return Promise.reject("No pair selected");
-      return api.simulator.pairChart({
-        ticker_a: tickerA,
-        ticker_b: tickerB,
-        current_date: cutoffDate,
-        lookback_days: 90,
-      });
+      return api.autoTradePairChart(tickerA, tickerB, cutoffDate);
     },
     enabled: isOpen && !!tickerA && !!tickerB && !scanChart,
     staleTime: 60000,

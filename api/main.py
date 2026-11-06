@@ -289,6 +289,41 @@ def auto_trade_broker_snapshot(
         raise HTTPException(503, "Alpaca paper account is unavailable") from exc
 
 
+@app.get("/auto-trade/pair-chart")
+def auto_trade_pair_chart(
+    ticker_a: str,
+    ticker_b: str,
+    cutoff: str,
+    actor: str = Depends(require_auto_trade_admin),
+) -> dict[str, Any]:
+    """Load only the requested pair from Alpaca; avoid the full simulator cache."""
+    from engine.live.strategy_v4_live import (
+        MarketSessionContext, _frame_from_alpaca, _chart_snapshot,
+    )
+    from engine.simulator_engine import PointInTimeEngine
+    try:
+        target = datetime.strptime(cutoff, "%Y-%m-%d").date()
+        broker = AlpacaPaperClient(timeout=8, max_attempts=1)
+        ta, tb = broker._symbol(ticker_a), broker._symbol(ticker_b)
+        if ta == tb:
+            raise ValueError("Select two different symbols")
+        now = datetime.now(timezone.utc)
+        if target >= now.date():
+            raise ValueError("Chart cutoff must be a completed prior day")
+        context = MarketSessionContext(now, target, target, now, now, False)
+        frame = _frame_from_alpaca(broker, (ta, tb), context, 90)
+        engine = PointInTimeEngine(df=frame, pairs=[{"ticker_a": ta, "ticker_b": tb}])
+        setup = engine.calculate_pair_pit(ta, tb, target, lookback_days=90)
+        if setup is None:
+            raise ValueError("Insufficient aligned daily bars for this pair")
+        return _chart_snapshot(frame, setup, target, 90)
+    except (ValueError, DryScanError) as exc:
+        raise HTTPException(422, str(exc)) from exc
+    except Exception as exc:
+        log.warning("Alpaca pair chart failed: %s", type(exc).__name__)
+        raise HTTPException(503, "Alpaca pair history request failed (" + type(exc).__name__ + "). Check server Alpaca credentials, data access, and connectivity.") from exc
+
+
 @app.post("/auto-trade/telegram/test")
 @app.post("/api/auto-trade/telegram/test")
 async def auto_trade_telegram_test(
