@@ -585,8 +585,16 @@ export function UniverseInspectionModal({
                 <div>
                   {chartQuery.isLoading && !scanChart && <Loading label="Fetching 90-day price series and spread trajectory…" />}
                   {chartQuery.isError && !scanChart && (
-                    <div className="rounded-lg border border-line/60 bg-bg-soft/40 p-4 text-xs text-gray-400">
-                      Historical bar data unavailable for this ticker pair.
+                    <div className="rounded-lg border border-amber-500/30 bg-bg-soft/40 p-4 text-xs text-gray-400 space-y-2">
+                      <div className="font-semibold text-amber-300">Historical chart could not load</div>
+                      <p>This saved scan does not contain a chart snapshot. The historical-data API was requested for {tickerA}/{tickerB} through {cutoffDate}, but it failed.</p>
+                      <div className="rounded bg-slate-950 p-2 font-mono text-rose-300 whitespace-pre-wrap break-words">
+                        {chartQuery.error instanceof Error ? chartQuery.error.message : String(chartQuery.error)}
+                      </div>
+                      <p>The online server may have a missing price cache, insufficient ticker history, or a provider/network error. The response above identifies the actual failure. Run a fresh dry scan to save chart bars with the trade decision, or retry the historical request.</p>
+                      <Button variant="outline" onClick={() => chartQuery.refetch()} disabled={chartQuery.isFetching}>
+                        {chartQuery.isFetching ? "Retrying…" : "Retry chart"}
+                      </Button>
                     </div>
                   )}
                   {chartData && (
