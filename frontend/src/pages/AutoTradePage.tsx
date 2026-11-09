@@ -68,7 +68,7 @@ export default function AutoTradePage() {
   const telegramTest = useMutation({ mutationFn: api.autoTradeTelegramTest });
   const runToday = useMutation({ mutationFn: api.autoTradeRunToday, onSuccess: refresh });
   const [showUniverseModal, setShowUniverseModal] = useState(false);
-  const run = scan.data ?? status.data?.latest_run;
+  const run = scan.data ?? runToday.data?.scan ?? status.data?.latest_run;
   const summary = run?.summary;
   const readiness = status.data?.readiness.configuration;
 
@@ -398,7 +398,7 @@ export default function AutoTradePage() {
             )}
           </Card>
 
-          {run?.signals && (
+          {run?.signals ? (
             <Card className="mb-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
@@ -443,6 +443,23 @@ export default function AutoTradePage() {
                   </Button>
                 </div>
               )}
+            </Card>
+          ) : (
+            <Card className="mb-4 border-line/60 p-5 text-center">
+              <Bot className="h-6 w-6 text-brand mx-auto mb-2 opacity-80" />
+              <div className="font-semibold text-white text-base">Universe Not Scanned Yet Today</div>
+              <p className="text-xs text-gray-400 max-w-md mx-auto mt-1">
+                Run a dry scan to evaluate all 53 pairs in the S&amp;P 500 universe for statistical divergence and z-score entry signals.
+              </p>
+              <Button
+                variant="outline"
+                onClick={() => scan.mutate()}
+                disabled={isScanning}
+                className="mt-3 text-xs border-brand/50 text-brand hover:bg-brand/10"
+              >
+                <RefreshCw className="h-3.5 w-3.5 mr-1" />
+                Run dry scan now
+              </Button>
             </Card>
           )}
 

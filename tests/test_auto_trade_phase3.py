@@ -283,7 +283,7 @@ def test_outbox_claims_and_sends_once(db):
             coroutine.send(None)
         return done.value.value
     first = run_immediate(deliver_pending(sender)); second = run_immediate(deliver_pending(sender))
-    assert first["sent"] == 1 and second["claimed"] == 0 and len(sender.messages) == 1
+    assert first["sent"] == 2 and second["claimed"] == 0 and len(sender.messages) == 2
 
 
 def test_disarmed_blocks_entries_but_open_pair_can_exit(db):

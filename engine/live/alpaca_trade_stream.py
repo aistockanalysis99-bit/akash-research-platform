@@ -65,6 +65,30 @@ async def consume_trade_updates(
                             data = message.get("data")
                             if isinstance(data, Mapping):
                                 ingest_trade_update(data)
+                                event = str(data.get("event", "")).lower()
+                                if event in ("fill", "partial_fill", "canceled", "rejected"):
+                                    order_obj = data.get("order")
+                                    if isinstance(order_obj, Mapping):
+                                        cid = str(order_obj.get("client_order_id", ""))
+                                        if cid:
+                                            try:
+                                                from ..db.schema import get_connection
+                                                from .alpaca import AlpacaPaperClient
+                                                from .auto_trade_outbox import deliver_pending
+                                                from .pair_execution import reconcile_pair
+                                                conn = get_connection()
+                                                row = conn.execute(
+                                                    "SELECT pair_trade_id FROM broker_orders WHERE client_order_id=?",
+                                                    (cid,),
+                                                ).fetchone()
+                                                conn.close()
+                                                if row:
+                                                    pair_id = str(row["pair_trade_id"])
+                                                    broker_client = AlpacaPaperClient(cfg)
+                                                    await asyncio.to_thread(reconcile_pair, pair_id, broker_client)
+                                                    await deliver_pending()
+                                            except Exception as exc:
+                                                log.warning("Stream post-event reconciliation error: %s", exc)
         except asyncio.CancelledError:
             raise
         except Exception as exc:  # credentials and payloads are never logged

@@ -468,17 +468,15 @@ def start_scheduler(force: bool = False) -> None:
         name="Evening cycle (watchlist + quant)",
         replace_existing=True,
     )
-    from ..config import load_auto_trade_config
-    auto_trade_interval = load_auto_trade_config().monitor_minutes
     sched.add_job(
         _job_auto_trade_reconcile,
-        IntervalTrigger(minutes=auto_trade_interval, timezone=tz),
+        IntervalTrigger(minutes=1, timezone=tz),
         id="auto_trade_reconcile",
         name="Auto Trade: reconcile orders and Strategy 4 exits",
         replace_existing=True,
         coalesce=True,
         max_instances=1,
-        misfire_grace_time=60,
+        misfire_grace_time=30,
     )
     sched.add_job(
         _job_auto_trade_premarket,

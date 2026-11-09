@@ -78,7 +78,7 @@ export const api = {
     get<PairChartResponse>(`/auto-trade/pair-chart?${new URLSearchParams({ ticker_a: tickerA, ticker_b: tickerB, cutoff })}`),
   autoTradeBroker: () => get<import("./autoTradeTypes").AutoTradeBrokerSnapshot>("/auto-trade/broker"),
   autoTradeTelegramTest: () => post<{ claimed: number; sent: number; failed: number }>("/auto-trade/telegram/test"),
-  autoTradeRunToday: () => post<{ stage: string; session_date: string; qualified_pairs: number; submitted_pairs: number; message: string }>("/auto-trade/run-today", { confirm: true }),
+  autoTradeRunToday: () => post<{ stage: string; session_date: string; qualified_pairs: number; submitted_pairs: number; message: string; scan?: AutoTradeRun }>("/auto-trade/run-today", { confirm: true }),
   autoTradeDryScan: () => post<AutoTradeRun>("/auto-trade/dry-scan"),
   autoTradeDryRun: (runId: string) =>
     get<AutoTradeRun>(`/auto-trade/dry-runs/${encodeURIComponent(runId)}`),

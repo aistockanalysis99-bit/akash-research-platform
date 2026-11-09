@@ -139,6 +139,7 @@ def run_today_workflow(broker: AlpacaPaperClient) -> dict:
             "qualified_pairs": int(summary.get("qualified_pairs") or 0),
             "submitted_pairs": 0,
             "message": "Today's Strategy 4 decisions are finalized; qualified pairs will enter during the guarded market-open window.",
+            "scan": scan,
         }
     if (market_now.hour, market_now.minute) < (9, 30) or (market_now.hour, market_now.minute) >= (9, 45):
         raise ValueError("Manual entry is allowed only from 09:30 through 09:44 New York time")

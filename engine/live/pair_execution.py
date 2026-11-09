@@ -303,6 +303,9 @@ def submit_pair_entry(pair_trade_id: str, broker: ExecutionBroker) -> dict[str, 
             _submit_once(broker, pair_trade_id, leg, "entry", "buy" if leg["side"] == "BUY" else "sell", int(leg["target_qty"]))
         if (get_pair(pair_trade_id) or {}) .get("state") == "SUBMITTING":
             transition_pair(pair_trade_id, "ORDERS_OPEN")
+            refreshed = get_pair(pair_trade_id)
+            if refreshed:
+                _enqueue("order_submitted", pair_trade_id, _order_submitted_message(refreshed))
     except Exception as exc:
         current = get_pair(pair_trade_id)
         if current and current["state"] == "SUBMITTING":
@@ -417,6 +420,23 @@ def _recover_error_state(pair_id: str) -> None:
     transition_pair(pair_id, "SUBMITTING")
 
 
+def _order_submitted_message(pair: Mapping[str, Any]) -> str:
+    _, signal = _signal_snapshot(str(pair["pair_trade_id"]))
+    legs = pair.get("legs", [])
+    entry_z = float(signal.get("z_score") or 0)
+    lines = [
+        f"Strategy 4 Order Placed: {pair['ticker_a']}/{pair['ticker_b']}",
+        *[
+            f"• {leg['side']} {leg['symbol']} x{int(float(leg.get('target_qty', 0)))}"
+            for leg in legs
+        ],
+        f"Signal Z: {entry_z:+.3f} | Target Z: ±{float(pair['target_z']):.2f} | Stop Z: ±{float(pair['stop_z']):.2f}",
+        f"Mode: Alpaca Paper Trading | Session: {pair['session_date']}",
+        "Status: Orders submitted to Alpaca (ORDERS_OPEN). Awaiting fill confirmation.",
+    ]
+    return "\n".join(lines)
+
+
 def _entry_fill_message(pair: Mapping[str, Any]) -> str:
     _, signal = _signal_snapshot(str(pair["pair_trade_id"]))
     fills = {leg["symbol"]: float(leg["avg_fill_price"]) for leg in pair["legs"]}
@@ -436,14 +456,14 @@ def _entry_fill_message(pair: Mapping[str, Any]) -> str:
         stop_prices = (stop_spread + beta * pb, (pa - stop_spread) / beta)
     capital = sum(float(leg["filled_qty"]) * float(leg["avg_fill_price"]) for leg in pair["legs"])
     lines = [
-        f"Strategy 4 entry filled: {pair['ticker_a']}/{pair['ticker_b']}",
+        f"Strategy 4 Order Bought / Filled: {pair['ticker_a']}/{pair['ticker_b']}",
         *[
-            f"{leg['side']} {leg['symbol']} x{int(leg['filled_qty'])} @ {float(leg['avg_fill_price']):.4f}"
+            f"• {leg['side']} {leg['symbol']} x{int(float(leg['filled_qty']))} @ ${float(leg['avg_fill_price']):.4f}"
             for leg in pair["legs"]
         ],
-        f"Signal Z {entry_z:.3f} | fill Z {fill_z:.3f}" if fill_z is not None else f"Signal Z {entry_z:.3f}",
-        f"Target Z ±{float(pair['target_z']):.3f} | stop Z ±{float(pair['stop_z']):.3f}",
-        f"Capital used {capital:.2f} | max holding date {pair['max_holding_date']}",
+        f"Signal Z: {entry_z:+.3f} | Fill Z: {fill_z:+.3f}" if fill_z is not None else f"Signal Z: {entry_z:+.3f}",
+        f"Target Z: ±{float(pair['target_z']):.3f} | Stop Z: ±{float(pair['stop_z']):.3f}",
+        f"Capital deployed: ${capital:.2f} | Max hold until: {pair['max_holding_date']}",
     ]
     if target_prices and stop_prices:
         lines.append(
